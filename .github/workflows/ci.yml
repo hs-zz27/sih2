@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          # Must be >= 3.12: rasterio 1.5.1 publishes no wheels below it, so
+          # a 3.11 runner cannot resolve the pinned dependency set.
+          python-version: "3.12"
+
+      - name: Install dependencies
+        # The dev extra carries pytest and httpx; httpx is required by
+        # fastapi.testclient, so installing pytest alone makes tests/test_api.py
+        # fail at import.
+        #
+        # The `train` extra is deliberately NOT installed: this runner is the
+        # no-torch environment every learned tool must degrade to, and
+        # scripts/ci_no_torch_sim.py reproduces it locally.
+        run: pip install -e ".[dev]"
+
+      - name: Run capability matrix validation
+        run: satquery matrix --validate
+
+      - name: Run tests
+        run: pytest tests/
+
+  # The illegal-plan guarantee is the project's strongest claim and it is
+  # measured, not asserted: 200 adversarial queries against 3 input
+  # configurations. It runs in seconds on stubs and it is the one number a
+  # refactor of the router could break silently.
+  adversarial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - name: Illegal-plan rate must be 0 / 600
+        run: python evaluation/adversarial.py
+
+  # Advisories appear without anyone touching this repository, so a red build
+  # here would mean "the world changed", not "this change is wrong". It
+  # reports and does not gate; `pip-audit` was run by hand at the freeze and
+  # this is what makes it continuous.
+  dependency-audit:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]" pip-audit
+        # `--skip-editable` skips `satquery` itself: it is installed editable
+        # by the line above, it is not published to PyPI, and so it can never
+        # be audited.
+        #
+        # `--strict` cannot stay alongside it. Strict mode fails on any
+        # dependency that was not audited, and a *skipped* one counts - see
+        # pip_audit/_cli.py, `if spec.is_skipped(): if args.strict: _fatal()`.
+        # The two flags together just swap the error from "not found on PyPI"
+        # to "distribution marked as editable". Both are the project's own
+        # name, neither is an advisory.
+        #
+        # Dropping it costs nothing this job was doing. pip-audit still exits
+        # non-zero when it finds a real vulnerability, which is what the job
+        # is for; strict mode only added failing on unauditable packages, and
+        # the sole unauditable package here is this repository.
+      - run: pip-audit --skip-editable
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # `npm ci` rather than `npm install`: it fails when the lockfile and
+      # package.json disagree, which is the check worth having in CI.
+      - run: npm ci
+
+      # `next build` runs the TypeScript compiler, so a type error fails the
+      # build. The explicit typecheck is kept anyway because it names the
+      # error more clearly than a build failure does, and it is seconds.
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Production build
+        run: npm run build
+
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Both images failed to build for an entire phase - `python:3.11-slim`
+      # against a rasterio pin that has no wheels below 3.12 - and nothing in
+      # CI would have noticed. They are built, not pushed.
+      - name: Build the API image
+        run: docker build -f docker/api.Dockerfile -t satquery-api:ci .
+
+      - name: Build the web image
+        run: docker build -f frontend/Dockerfile -t satquery-web:ci frontend
