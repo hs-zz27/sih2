@@ -16,6 +16,11 @@
  * process actually reports - free VRAM on the active CUDA device, or "CPU"
  * when there is none - rather than a decorative status light that is green
  * whether or not anything is running.
+ *
+ * The models chip reads `/readiness`: how many learned tools serve a trained
+ * model rather than a placeholder. Without checkpoints every answer reads
+ * "[STUB - no model loaded]", and nothing on screen said so until a query was
+ * run - a demo could be recorded in that state without anyone noticing.
  */
 
 import Link from 'next/link';
@@ -39,6 +44,13 @@ type Device = {
   vram_total_bytes: number | null;
 };
 
+type Readiness = {
+  learned_live: number;
+  learned_total: number;
+  stubs: string[];
+  demo_ready: boolean;
+};
+
 function gib(bytes: number | null): string | null {
   if (bytes == null) return null;
   return `${(bytes / 1024 ** 3).toFixed(1)} GB`;
@@ -47,6 +59,7 @@ function gib(bytes: number | null): string | null {
 export default function Nav() {
   const pathname = usePathname();
   const [device, setDevice] = useState<Device | null>(null);
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
   const navRef = useRef<HTMLElement>(null);
 
   /**
@@ -80,6 +93,12 @@ export default function Nav() {
         if (!cancelled) setDevice(d);
       })
       // A missing device reading is not worth an error state in the header.
+      .catch(() => undefined);
+    fetch(`${API}/readiness`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => {
+        if (!cancelled) setReadiness(d);
+      })
       .catch(() => undefined);
     return () => {
       cancelled = true;
@@ -124,12 +143,30 @@ export default function Nav() {
           );
         })}
       </ul>
-      {chip && (
+      {(chip || readiness) && (
         <div className="right">
-          <span className="device" title={device?.name ?? undefined}>
-            <span className={`dot${device?.device === 'cpu' ? ' idle' : ''}`} />
-            {chip}
-          </span>
+          {readiness && (
+            <Link
+              href="/models"
+              className={`device models-chip${readiness.demo_ready ? '' : ' stubbed'}`}
+              title={
+                readiness.demo_ready
+                  ? 'Every learned tool is serving a trained model'
+                  : `Placeholder answers from: ${readiness.stubs.join(', ')}`
+              }
+            >
+              <span className={`dot${readiness.demo_ready ? '' : ' warn'}`} />
+              {readiness.demo_ready
+                ? `MODELS ${readiness.learned_live}/${readiness.learned_total} LIVE`
+                : `MODELS ${readiness.learned_live}/${readiness.learned_total} · STUBS`}
+            </Link>
+          )}
+          {chip && (
+            <span className="device" title={device?.name ?? undefined}>
+              <span className={`dot${device?.device === 'cpu' ? ' idle' : ''}`} />
+              {chip}
+            </span>
+          )}
         </div>
       )}
     </nav>

@@ -795,6 +795,18 @@ def get_model_registry():
     return model_registry()
 
 
+@app.get("/readiness")
+def get_readiness():
+    """Which tools serve a real model and which a placeholder, with reasons.
+
+    The UI shows this as a chip in the header so a demo is never recorded on
+    stubs by accident; `scripts/demo_preflight.py` gates on `demo_ready`.
+    """
+    from satquery.readiness import tool_readiness
+
+    return tool_readiness()
+
+
 @app.get("/benchmarks")
 def get_benchmarks():
     """Benchmark page data (task 3.12): every Phase 3 measurement."""

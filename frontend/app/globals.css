@@ -245,6 +245,15 @@
   .device .dot.idle {
     background: var(--dim);
   }
+  .device .dot.warn {
+    background: var(--amber);
+  }
+  .models-chip {
+    text-decoration: none;
+  }
+  .models-chip.stubbed {
+    color: var(--amber);
+  }
 
   /* ---------------- controls ---------------- */
   .btn {
