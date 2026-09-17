@@ -1,0 +1,464 @@
+{
+  "label": "baseline: query bank as imported, before revision",
+  "classifier": "tfidf_logreg_v1",
+  "gate": {
+    "top1": 0.35,
+    "margin": 0.1
+  },
+  "query_bank": {
+    "n": 3600,
+    "sha256_16": "d55d8b563b0b48d4"
+  },
+  "scikit_learn": "1.8.0",
+  "holdouts": {
+    "sealed": {
+      "n": 63,
+      "raw_accuracy": 0.7937,
+      "raw_ci95": [
+        0.6783,
+        0.8752
+      ],
+      "system_accuracy": 0.8095,
+      "system_ci95": [
+        0.6959,
+        0.8875
+      ],
+      "gated_to_config_default": 1,
+      "per_task": {
+        "CLARIFY_OR_ABSTAIN": {
+          "n": 7,
+          "raw": 0.7143,
+          "system": 0.7143
+        },
+        "SINGLE_CAPTION": {
+          "n": 7,
+          "raw": 0.5714,
+          "system": 0.5714
+        },
+        "SINGLE_GROUND": {
+          "n": 7,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_LANDCOVER": {
+          "n": 7,
+          "raw": 0.5714,
+          "system": 0.5714
+        },
+        "SINGLE_VQA": {
+          "n": 7,
+          "raw": 0.8571,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_DESC": {
+          "n": 7,
+          "raw": 0.8571,
+          "system": 0.8571
+        },
+        "TEMPORAL_CHANGE_MAP": {
+          "n": 7,
+          "raw": 0.8571,
+          "system": 0.8571
+        },
+        "TEMPORAL_CHANGE_VQA": {
+          "n": 7,
+          "raw": 0.7143,
+          "system": 0.7143
+        },
+        "XMODAL_JOINT_EXTRACT": {
+          "n": 7,
+          "raw": 1.0,
+          "system": 1.0
+        }
+      },
+      "misroutes": [
+        {
+          "query": "any sign of a helipad on the hospital roof",
+          "config": "SINGLE",
+          "gold": "SINGLE_VQA",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.419453,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.740754,
+          "gated_to_default": false
+        },
+        {
+          "query": "describe the scene for my field report",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "TEMPORAL_CHANGE_DESC",
+          "raw_top1": 0.531913,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.551127,
+          "gated_to_default": false
+        },
+        {
+          "query": "give me a one paragraph overview of the area",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.740489,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.86292,
+          "gated_to_default": false
+        },
+        {
+          "query": "narrate what's visible in this photo",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.723143,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.82514,
+          "gated_to_default": false
+        },
+        {
+          "query": "what is the percentage split between cropland, forest and built-up",
+          "config": "SINGLE",
+          "gold": "SINGLE_LANDCOVER",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.45032,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.87647,
+          "gated_to_default": false
+        },
+        {
+          "query": "give me an lulc breakdown",
+          "config": "SINGLE",
+          "gold": "SINGLE_LANDCOVER",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.37201,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.481165,
+          "gated_to_default": true
+        },
+        {
+          "query": "label each region as water, vegetation, soil or urban",
+          "config": "SINGLE",
+          "gold": "SINGLE_LANDCOVER",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.337062,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.563451,
+          "gated_to_default": false
+        },
+        {
+          "query": "what's different in the second image compared to the first",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_DESC",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.554395,
+          "system": "TEMPORAL_CHANGE_VQA",
+          "constrained_top1": 0.568879,
+          "gated_to_default": false
+        },
+        {
+          "query": "has the lake grown or shrunk",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "SINGLE_GROUND",
+          "raw_top1": 0.657101,
+          "system": "SINGLE_GROUND",
+          "constrained_top1": 0.669581,
+          "gated_to_default": false
+        },
+        {
+          "query": "was the road widened between the dates",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "TEMPORAL_CHANGE_DESC",
+          "raw_top1": 0.60143,
+          "system": "TEMPORAL_CHANGE_DESC",
+          "constrained_top1": 0.609097,
+          "gated_to_default": false
+        },
+        {
+          "query": "mark all areas of change as polygons",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_MAP",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.545693,
+          "system": "TEMPORAL_CHANGE_VQA",
+          "constrained_top1": 0.548817,
+          "gated_to_default": false
+        },
+        {
+          "query": "what's the weather in delhi tomorrow",
+          "config": "SINGLE",
+          "gold": "CLARIFY_OR_ABSTAIN",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.275256,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.557291,
+          "gated_to_default": false
+        },
+        {
+          "query": "tell me something",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "CLARIFY_OR_ABSTAIN",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.7205,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.725703,
+          "gated_to_default": false
+        }
+      ]
+    },
+    "clean": {
+      "n": 29,
+      "raw_accuracy": 0.6897,
+      "raw_ci95": [
+        0.5077,
+        0.8272
+      ],
+      "system_accuracy": 0.7931,
+      "system_ci95": [
+        0.6161,
+        0.9015
+      ],
+      "gated_to_config_default": 2,
+      "per_task": {
+        "CLARIFY_OR_ABSTAIN": {
+          "n": 4,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_CAPTION": {
+          "n": 3,
+          "raw": 0.0,
+          "system": 0.0
+        },
+        "SINGLE_GROUND": {
+          "n": 3,
+          "raw": 0.6667,
+          "system": 1.0
+        },
+        "SINGLE_LANDCOVER": {
+          "n": 3,
+          "raw": 0.6667,
+          "system": 0.6667
+        },
+        "SINGLE_VQA": {
+          "n": 4,
+          "raw": 0.5,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_DESC": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_MAP": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_VQA": {
+          "n": 3,
+          "raw": 0.6667,
+          "system": 0.6667
+        },
+        "XMODAL_JOINT_EXTRACT": {
+          "n": 3,
+          "raw": 0.6667,
+          "system": 0.6667
+        }
+      },
+      "misroutes": [
+        {
+          "query": "is that a power station in the corner",
+          "config": "SINGLE",
+          "gold": "SINGLE_VQA",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.599888,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.515907,
+          "gated_to_default": false
+        },
+        {
+          "query": "tally up the silos",
+          "config": "SINGLE",
+          "gold": "SINGLE_VQA",
+          "raw": "TEMPORAL_CHANGE_DESC",
+          "raw_top1": 0.232341,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.34139,
+          "gated_to_default": true
+        },
+        {
+          "query": "just tell me what im looking at",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.635702,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.758928,
+          "gated_to_default": false
+        },
+        {
+          "query": "put this scene into words",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "TEMPORAL_CHANGE_DESC",
+          "raw_top1": 0.383365,
+          "system": "SINGLE_GROUND",
+          "constrained_top1": 0.397076,
+          "gated_to_default": false
+        },
+        {
+          "query": "a short blurb about this frame please",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "CLARIFY_OR_ABSTAIN",
+          "raw_top1": 0.351102,
+          "system": "CLARIFY_OR_ABSTAIN",
+          "constrained_top1": 0.38368,
+          "gated_to_default": false
+        },
+        {
+          "query": "which corner has the airstrip",
+          "config": "SINGLE",
+          "gold": "SINGLE_GROUND",
+          "raw": "TEMPORAL_CHANGE_DESC",
+          "raw_top1": 0.671625,
+          "system": "SINGLE_GROUND",
+          "constrained_top1": 0.859943,
+          "gated_to_default": false
+        },
+        {
+          "query": "bucket every pixel into a cover type",
+          "config": "SINGLE",
+          "gold": "SINGLE_LANDCOVER",
+          "raw": "SINGLE_GROUND",
+          "raw_top1": 0.337299,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.449717,
+          "gated_to_default": true
+        },
+        {
+          "query": "what extra detail does the backscatter give over the photo",
+          "config": "CROSSMODAL_PAIR",
+          "gold": "XMODAL_JOINT_EXTRACT",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.385909,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.535892,
+          "gated_to_default": false
+        },
+        {
+          "query": "were any orchards cleared between the passes",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "TEMPORAL_CHANGE_DESC",
+          "raw_top1": 0.927235,
+          "system": "TEMPORAL_CHANGE_DESC",
+          "constrained_top1": 0.930898,
+          "gated_to_default": false
+        }
+      ]
+    },
+    "tuned": {
+      "n": 27,
+      "raw_accuracy": 0.8519,
+      "raw_ci95": [
+        0.6752,
+        0.9408
+      ],
+      "system_accuracy": 0.8519,
+      "system_ci95": [
+        0.6752,
+        0.9408
+      ],
+      "gated_to_config_default": 0,
+      "per_task": {
+        "CLARIFY_OR_ABSTAIN": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_CAPTION": {
+          "n": 3,
+          "raw": 0.3333,
+          "system": 0.3333
+        },
+        "SINGLE_GROUND": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_LANDCOVER": {
+          "n": 3,
+          "raw": 0.6667,
+          "system": 0.6667
+        },
+        "SINGLE_VQA": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_DESC": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_MAP": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_VQA": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "XMODAL_JOINT_EXTRACT": {
+          "n": 3,
+          "raw": 0.6667,
+          "system": 0.6667
+        }
+      },
+      "misroutes": [
+        {
+          "query": "give me a rundown of this picture",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.966879,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.982413,
+          "gated_to_default": false
+        },
+        {
+          "query": "in a sentence or two, whats going on in this shot",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.655982,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.733021,
+          "gated_to_default": false
+        },
+        {
+          "query": "what share of each terrain category is here",
+          "config": "SINGLE",
+          "gold": "SINGLE_LANDCOVER",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.790526,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.839727,
+          "gated_to_default": false
+        },
+        {
+          "query": "does the microwave sensor see anything the camera missed",
+          "config": "CROSSMODAL_PAIR",
+          "gold": "XMODAL_JOINT_EXTRACT",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.802317,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.86453,
+          "gated_to_default": false
+        }
+      ]
+    }
+  }
+}

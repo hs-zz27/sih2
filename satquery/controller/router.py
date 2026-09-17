@@ -215,17 +215,27 @@ class Router:
         the matrix also declares it legal for this configuration **and** the
         manifest satisfies the input requirements the matrix declares for it.
         """
-        by_config = CONFIG_TO_LEGAL_TASKS.get(manifest.config, [])
+        return [
+            task
+            for task in self.config_legal_tasks(manifest.config)
+            if not self.unmet_requirements(task, manifest)
+        ]
+
+    def config_legal_tasks(self, config: str) -> list[str]:
+        """Tasks the configuration and the matrix permit, before per-input checks.
+
+        The half of `legal_tasks` that depends only on the configuration name,
+        so routing can be evaluated on (query, configuration) pairs with the
+        router's own legality rules rather than a copy of them.
+        """
         out = []
-        for task in by_config:
+        for task in CONFIG_TO_LEGAL_TASKS.get(config, []):
             cfg = self.matrix.tasks.get(task)
             if cfg is None:
                 continue
             required = cfg.requires.config
             allowed = [required] if isinstance(required, str) else list(required)
-            if manifest.config not in allowed and "any" not in allowed:
-                continue
-            if self.unmet_requirements(task, manifest):
+            if config not in allowed and "any" not in allowed:
                 continue
             out.append(task)
         return out
@@ -284,6 +294,52 @@ class Router:
         """
         return self.decide(query, manifest).plan
 
+    def select_task(
+        self, query: str, legal: list[str], config: str
+    ) -> tuple[TaskID, IntentPrediction, str | None]:
+        """The routing decision for valid inputs: (task, prediction, excluded).
+
+        Separated from `decide` so routing accuracy can be measured through
+        this exact code path (`evaluation/routing_eval.py`) without building
+        raster manifests - a copy of the logic in the evaluator would drift
+        from the router the first time either changed.
+        """
+        config_excluded: str | None = None
+        # Also classify WITHOUT the legality restriction. If the
+        # unconstrained best task is one the input configuration excludes,
+        # the user asked for something these images cannot support, and
+        # the answer should say so rather than quietly returning a
+        # different task's output. Config gating guarantees the plan is
+        # legal; it does not guarantee the user understands why they got
+        # a land-cover map when they asked about change.
+        unconstrained = self.classifier.predict(query)
+        if unconstrained.is_confident and unconstrained.task not in legal:
+            config_excluded = unconstrained.task
+
+        prediction = self.classifier.predict(query, candidates=legal)
+        # A low-confidence pick is normally discarded in favour of the
+        # configuration default, because a weak guess at *which* capability
+        # to use still beats refusing. CLARIFY_OR_ABSTAIN is the one class
+        # where that reasoning inverts: the fallback ANSWERS, so overriding
+        # a weak abstain pick converts "I could not understand this" into a
+        # confident-looking answer to a query with no content in it.
+        #
+        # An empty query, "   " and "hmm" carry no features at all, so they
+        # land on the class prior - CLARIFY_OR_ABSTAIN top-1 at 0.353 with a
+        # 0.042 margin, below the generic confidence bar. Whether they
+        # abstained was therefore decided by where a linear model's prior
+        # happened to sit, and it moved every time the template bank
+        # changed size. Honouring the abstain pick regardless of its
+        # confidence takes that off the knife edge in the safe direction.
+        task: TaskID
+        if prediction.is_confident or prediction.task == "CLARIFY_OR_ABSTAIN":
+            task = prediction.task
+        else:
+            task = CONFIG_DEFAULT_TASK.get(config, "SINGLE_VQA")
+            if task not in legal:
+                task = "CLARIFY_OR_ABSTAIN"
+        return task, prediction, config_excluded
+
     def decide(self, query: str, manifest: InputManifest) -> RouteDecision:
         """Plan plus everything the executor needs to explain it.
 
@@ -307,38 +363,9 @@ class Router:
             # an answer defensible, so abstain and say why.
             task: TaskID = "CLARIFY_OR_ABSTAIN"
         else:
-            # Also classify WITHOUT the legality restriction. If the
-            # unconstrained best task is one the input configuration excludes,
-            # the user asked for something these images cannot support, and
-            # the answer should say so rather than quietly returning a
-            # different task's output. Config gating guarantees the plan is
-            # legal; it does not guarantee the user understands why they got
-            # a land-cover map when they asked about change.
-            unconstrained = self.classifier.predict(query)
-            if unconstrained.is_confident and unconstrained.task not in legal:
-                config_excluded = unconstrained.task
-
-            prediction = self.classifier.predict(query, candidates=legal)
-            # A low-confidence pick is normally discarded in favour of the
-            # configuration default, because a weak guess at *which* capability
-            # to use still beats refusing. CLARIFY_OR_ABSTAIN is the one class
-            # where that reasoning inverts: the fallback ANSWERS, so overriding
-            # a weak abstain pick converts "I could not understand this" into a
-            # confident-looking answer to a query with no content in it.
-            #
-            # An empty query, "   " and "hmm" carry no features at all, so they
-            # land on the class prior - CLARIFY_OR_ABSTAIN top-1 at 0.353 with a
-            # 0.042 margin, below the generic confidence bar. Whether they
-            # abstained was therefore decided by where a linear model's prior
-            # happened to sit, and it moved every time the template bank
-            # changed size. Honouring the abstain pick regardless of its
-            # confidence takes that off the knife edge in the safe direction.
-            if prediction.is_confident or prediction.task == "CLARIFY_OR_ABSTAIN":
-                task = prediction.task
-            else:
-                task = CONFIG_DEFAULT_TASK.get(manifest.config, "SINGLE_VQA")
-                if task not in legal:
-                    task = "CLARIFY_OR_ABSTAIN"
+            task, prediction, config_excluded = self.select_task(
+                query, legal, manifest.config
+            )
 
         if task not in legal:
             task = "CLARIFY_OR_ABSTAIN"
