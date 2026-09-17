@@ -26,7 +26,7 @@ demo:
 
 # The full demo on a machine with no GPU (16 GB RAM), natively: API + UI.
 demo-cpu:
-	bash scripts/run_demo_cpu.sh
+	python scripts/run_demo_cpu.py
 
 # Which checkpoints are present, and where to get the missing ones.
 demo-assets:

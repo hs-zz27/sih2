@@ -80,15 +80,21 @@ def status(root: Path = ROOT) -> list[dict]:
     return out
 
 
-def env_lines(root: Path = ROOT) -> list[str]:
-    """`export` lines. Missing paths are exported too, so each stub's reason
-    reads "checkpoint not found: <path>" instead of "... is not set"."""
-    lines = [f"export {k}={shlex.quote(v)}" for k, v in FIXED_ENV.items()]
-    lines += [f"export {a.env}={shlex.quote(str(root / a.path))}" for a in ASSETS]
+def env_dict(root: Path = ROOT) -> dict[str, str]:
+    """Environment for a native demo run. Missing paths are set too, so each
+    stub's reason reads "checkpoint not found: <path>" instead of "... is not
+    set"."""
+    env = dict(FIXED_ENV)
+    env.update({a.env: str(root / a.path) for a in ASSETS})
     nli = root / "models" / "nli_deberta_mnli"
     if nli.exists():
-        lines.append(f"export SATQUERY_NLI={shlex.quote(str(nli))}")
-    return lines
+        env["SATQUERY_NLI"] = str(nli)
+    return env
+
+
+def env_lines(root: Path = ROOT) -> list[str]:
+    """The same environment as POSIX `export` lines."""
+    return [f"export {k}={shlex.quote(v)}" for k, v in env_dict(root).items()]
 
 
 def main() -> int:

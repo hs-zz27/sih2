@@ -51,7 +51,7 @@ dev = [
 # the runner.
 report = ["reportlab==5.0.1"]
 
-# Running the learned tools on a machine WITHOUT a GPU (scripts/run_demo_cpu.sh).
+# Running the learned tools on a machine WITHOUT a GPU (scripts/run_demo_cpu.py).
 # No bitsandbytes: its 4-bit kernels are CUDA-only, and rs_vqa_v1 loads
 # unquantised on the CPU instead. Lower bounds, like `train`; transformers
 # 4.49 is the first release with Qwen2.5-VL. On Linux, install torch from the

@@ -5,7 +5,7 @@
 # Lite sheds every learned tool (budget 0) so a CPU box answers from the index
 # engine alone. This profile keeps them: a 16 GB machine can hold the VQA
 # model unquantised in bfloat16 (~7.5 GB) plus the small heads, and the only
-# cost is latency. Start it with scripts/run_demo_cpu.sh (or make demo-cpu).
+# cost is latency. Start it with python scripts/run_demo_cpu.py (or make demo-cpu).
 description: >
   No GPU, 16 GB RAM. Every learned tool with a checkpoint runs on the CPU;
   answers are slower, not degraded.
