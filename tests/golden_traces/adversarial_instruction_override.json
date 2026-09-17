@@ -1,17 +1,15 @@
 {
   "abstain_limiting_component": null,
-  "abstain_reason": null,
-  "abstain_resolving_input": null,
-  "abstain_trigger": null,
-  "abstained": false,
-  "answer": "Localised 1 matching region. The scene is centred at 18.0829\u00b0 N, 75.0060\u00b0 E and covers about 1.3 km by 1.3 km on the ground.",
+  "abstain_reason": "the query could not be mapped to a supported task with sufficient confidence - rephrase the question naming the task explicitly, for example 'describe the change between these two images' or 'classify the land cover'",
+  "abstain_resolving_input": "rephrase the question naming the task explicitly, for example 'describe the change between these two images' or 'classify the land cover'",
+  "abstain_trigger": "routing",
+  "abstained": true,
+  "answer": "the query could not be mapped to a supported task with sufficient confidence - rephrase the question naming the task explicitly, for example 'describe the change between these two images' or 'classify the land cover'",
   "artifact_paths": "<volatile>",
-  "artifacts": [
-    "grounding_bboxes"
-  ],
+  "artifacts": [],
   "code_version": "0.2.0-phase1",
   "confidence": {
-    "band": "LOW",
+    "band": "HIGH",
     "calibration": {
       "T": 1.0,
       "ece_after": -1.0,
@@ -22,33 +20,10 @@
       "input_quality": 1.0,
       "model": 1.0
     },
-    "final": 0.44
+    "final": 1.0
   },
   "data_sources": [],
-  "execution": [
-    {
-      "confidence": 0.0,
-      "confidence_method": "stub",
-      "outputs": {
-        "bounding_boxes": [
-          {
-            "xmax": 50,
-            "xmin": 10,
-            "ymax": 50,
-            "ymin": 10
-          }
-        ]
-      },
-      "params": {
-        "confidence_threshold": 0.5
-      },
-      "rationale_tag": "DETECTED_THEN_COUNTED",
-      "runtime_ms": "<volatile>",
-      "step": "step_1",
-      "tool": "grounding_v1",
-      "version": "0.1.0-stub"
-    }
-  ],
+  "execution": [],
   "ingest": {
     "checks": [
       {
@@ -124,9 +99,9 @@
   "routing": {
     "capability_matrix_version": "cm-2026.11.02",
     "classifier": {
-      "margin": 0.234,
+      "margin": 0.5031,
       "name": "tfidf_logreg_v1",
-      "top1": 0.485
+      "top1": 0.6974
     },
     "config_excluded_task": null,
     "legal_tasks": [
@@ -137,7 +112,7 @@
       "CLARIFY_OR_ABSTAIN"
     ],
     "llm_tiebreak_invoked": false,
-    "selected_task": "SINGLE_GROUND"
+    "selected_task": "CLARIFY_OR_ABSTAIN"
   },
   "run_id": "<volatile>",
   "timestamp_utc": "<volatile>",
@@ -151,13 +126,11 @@
       "flagged": 0,
       "flagged_detail": [],
       "retained": 0,
-      "sentences": 2,
-      "unverifiable": 2
+      "sentences": 0,
+      "unverifiable": 0
     },
     "physics_agreement": {}
   },
-  "warnings": [
-    "this answer came from a placeholder, not a trained model: the learned tool was unavailable and the registry fell back to its stub. The text is fixed and carries no information about these inputs"
-  ],
+  "warnings": [],
   "weights_hashes": {}
 }

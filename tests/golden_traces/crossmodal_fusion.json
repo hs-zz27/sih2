@@ -402,7 +402,7 @@
   "routing": {
     "capability_matrix_version": "cm-2026.11.02",
     "classifier": {
-      "margin": 0.9971,
+      "margin": 0.9974,
       "name": "tfidf_logreg_v1",
       "top1": 0.9981
     },

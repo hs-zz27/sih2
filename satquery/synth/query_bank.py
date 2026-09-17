@@ -66,6 +66,13 @@ CHANGE_VERBS = [
     "filled in", "paved over",
 ]
 
+# Places for out-of-scope requests. Only used in _OUT_OF_SCOPE: a request about
+# a place is not a request about the imagery of it.
+PLACES = [
+    "Delhi", "Mumbai", "Bengaluru", "Chennai", "Kolkata", "Hyderabad",
+    "Ahmedabad", "Jaipur", "this city", "my town",
+]
+
 CHANGE_NOUNS = [
     "urban growth", "deforestation", "new construction", "water extent",
     "vegetation loss", "flooding", "land clearing", "built-up expansion",
@@ -447,6 +454,58 @@ _CLARIFY = [
     "Sort it out.",
 ]
 
+# Requests outside what any tool can answer from imagery (added 2026-09-17).
+#
+# The abstain class held only content-free filler, so a well-formed request
+# about something else entirely - a forecast, a price, the news - had no
+# neighbour there and was routed to the nearest image task, usually
+# SINGLE_VQA, which then answered it. The adversarial suite's out_of_scope
+# category measured this: 0 of 75 plans abstained.
+#
+# Written from topic categories, not from any evaluation query, and with no
+# remote-sensing vocabulary, so the features that pull a query here are the
+# off-topic ones ("forecast", "price", "score", "python").
+#
+# Deliberately absent: generic writing and chit-chat shapes ("write an essay",
+# "summarise this", "tell me a joke", "how are you", "explain how X works").
+# Measured on the clean holdout, they pulled "just tell me what im looking
+# at" and "in prose, how do the two dates differ" into abstention - the
+# same verbs a caption or change-description request uses.
+_OUT_OF_SCOPE = [
+    # forecasts and live data
+    "What will the weather be in {place} tomorrow?",
+    "Give me the rain forecast for {place} this week.",
+    "How hot will it get in {place} next weekend?",
+    "What is the temperature in {place} right now?",
+    "What is the share price of Reliance today?",
+    "What is the dollar to rupee rate?",
+    "How much does gold cost today?",
+    "What is the latest news from {place}?",
+    "Who won the cricket match yesterday?",
+    "What is the live score?",
+    # general knowledge
+    "Who is the Prime Minister of India?",
+    "What is the capital of Australia?",
+    "When did India become independent?",
+    "Who founded ISRO?",
+    # travel and local services
+    "Directions from {place} to the airport, please.",
+    "When is the next train to {place}?",
+    "Find me a good restaurant in {place}.",
+    "Book a hotel in {place} for two nights.",
+    # writing, code and maths
+    "Write a Python script that sorts a list.",
+    "Translate this sentence into Hindi.",
+    "Solve two x plus five equals eleven.",
+    # assistant chores
+    "Send an email to my manager.",
+    "Set a reminder for 6 pm.",
+    "Play some music.",
+    # chit-chat about the assistant itself
+    "What is your name?",
+    "Who made you?",
+]
+
 # Real CDVQA question phrasings, for the routing gap measured on 2026-08-30.
 #
 # The synthetic templates above were written by us, and the router trained on
@@ -640,7 +699,7 @@ TEMPLATES: dict[TaskID, list[str]] = {
     "TEMPORAL_CHANGE_DESC": _CHANGE_DESC,
     "TEMPORAL_CHANGE_VQA": _CHANGE_VQA + _CDVQA_TRAINED_TEMPLATES,
     "TEMPORAL_CHANGE_MAP": _CHANGE_MAP,
-    "CLARIFY_OR_ABSTAIN": _CLARIFY,
+    "CLARIFY_OR_ABSTAIN": _CLARIFY + _OUT_OF_SCOPE,
 }
 
 # Prefixes and suffixes that add natural variation without changing intent.
@@ -672,6 +731,7 @@ def _fill(template: str, rng: random.Random) -> str:
         .replace("{sar}", rng.choice(SAR_TERMS))
         .replace("{optical}", rng.choice(OPTICAL_TERMS))
         .replace("{verb}", rng.choice(CHANGE_VERBS))
+        .replace("{place}", rng.choice(PLACES))
     )
 
 

@@ -191,9 +191,9 @@
   "routing": {
     "capability_matrix_version": "cm-2026.11.02",
     "classifier": {
-      "margin": 0.9687,
+      "margin": 0.9644,
       "name": "tfidf_logreg_v1",
-      "top1": 0.9773
+      "top1": 0.9737
     },
     "config_excluded_task": null,
     "legal_tasks": [

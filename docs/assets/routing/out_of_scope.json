@@ -1,0 +1,344 @@
+{
+  "label": "out-of-scope revision 2026-09-17: _OUT_OF_SCOPE templates in CLARIFY_OR_ABSTAIN. NOTE: the sealed 'weather in delhi' item was known before this revision",
+  "classifier": "tfidf_logreg_v1",
+  "gate": {
+    "top1": 0.35,
+    "margin": 0.1
+  },
+  "query_bank": {
+    "n": 3600,
+    "sha256_16": "9638c1c568da0a15"
+  },
+  "scikit_learn": "1.8.0",
+  "holdouts": {
+    "sealed": {
+      "n": 63,
+      "raw_accuracy": 0.8571,
+      "raw_ci95": [
+        0.7503,
+        0.923
+      ],
+      "system_accuracy": 0.8571,
+      "system_ci95": [
+        0.7503,
+        0.923
+      ],
+      "gated_to_config_default": 4,
+      "per_task": {
+        "CLARIFY_OR_ABSTAIN": {
+          "n": 7,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_CAPTION": {
+          "n": 7,
+          "raw": 0.7143,
+          "system": 0.7143
+        },
+        "SINGLE_GROUND": {
+          "n": 7,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_LANDCOVER": {
+          "n": 7,
+          "raw": 0.7143,
+          "system": 0.7143
+        },
+        "SINGLE_VQA": {
+          "n": 7,
+          "raw": 0.8571,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_DESC": {
+          "n": 7,
+          "raw": 0.8571,
+          "system": 0.8571
+        },
+        "TEMPORAL_CHANGE_MAP": {
+          "n": 7,
+          "raw": 0.8571,
+          "system": 0.8571
+        },
+        "TEMPORAL_CHANGE_VQA": {
+          "n": 7,
+          "raw": 0.7143,
+          "system": 0.5714
+        },
+        "XMODAL_JOINT_EXTRACT": {
+          "n": 7,
+          "raw": 1.0,
+          "system": 1.0
+        }
+      },
+      "misroutes": [
+        {
+          "query": "any sign of a helipad on the hospital roof",
+          "config": "SINGLE",
+          "gold": "SINGLE_VQA",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.338921,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.558899,
+          "gated_to_default": false
+        },
+        {
+          "query": "give me a one paragraph overview of the area",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.632372,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.760083,
+          "gated_to_default": false
+        },
+        {
+          "query": "narrate what's visible in this photo",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.525826,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.604364,
+          "gated_to_default": false
+        },
+        {
+          "query": "what is the percentage split between cropland, forest and built-up",
+          "config": "SINGLE",
+          "gold": "SINGLE_LANDCOVER",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.374266,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.768911,
+          "gated_to_default": false
+        },
+        {
+          "query": "label each region as water, vegetation, soil or urban",
+          "config": "SINGLE",
+          "gold": "SINGLE_LANDCOVER",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.255905,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.405742,
+          "gated_to_default": true
+        },
+        {
+          "query": "what's different in the second image compared to the first",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_DESC",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.42792,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.444169,
+          "gated_to_default": true
+        },
+        {
+          "query": "how many new buildings came up",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.443726,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.453478,
+          "gated_to_default": true
+        },
+        {
+          "query": "has the lake grown or shrunk",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "SINGLE_GROUND",
+          "raw_top1": 0.844744,
+          "system": "SINGLE_GROUND",
+          "constrained_top1": 0.854823,
+          "gated_to_default": false
+        },
+        {
+          "query": "was the road widened between the dates",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.422641,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.429275,
+          "gated_to_default": true
+        },
+        {
+          "query": "mark all areas of change as polygons",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_MAP",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.558153,
+          "system": "TEMPORAL_CHANGE_VQA",
+          "constrained_top1": 0.560434,
+          "gated_to_default": false
+        }
+      ]
+    },
+    "clean": {
+      "n": 29,
+      "raw_accuracy": 0.9655,
+      "raw_ci95": [
+        0.8282,
+        0.9939
+      ],
+      "system_accuracy": 0.9655,
+      "system_ci95": [
+        0.8282,
+        0.9939
+      ],
+      "gated_to_config_default": 0,
+      "per_task": {
+        "CLARIFY_OR_ABSTAIN": {
+          "n": 4,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_CAPTION": {
+          "n": 3,
+          "raw": 0.6667,
+          "system": 0.6667
+        },
+        "SINGLE_GROUND": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_LANDCOVER": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_VQA": {
+          "n": 4,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_DESC": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_MAP": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_VQA": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "XMODAL_JOINT_EXTRACT": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        }
+      },
+      "misroutes": [
+        {
+          "query": "just tell me what im looking at",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "CLARIFY_OR_ABSTAIN",
+          "raw_top1": 0.446706,
+          "system": "CLARIFY_OR_ABSTAIN",
+          "constrained_top1": 0.506119,
+          "gated_to_default": false
+        }
+      ]
+    },
+    "tuned": {
+      "n": 27,
+      "raw_accuracy": 0.8889,
+      "raw_ci95": [
+        0.7194,
+        0.9615
+      ],
+      "system_accuracy": 0.8889,
+      "system_ci95": [
+        0.7194,
+        0.9615
+      ],
+      "gated_to_config_default": 0,
+      "per_task": {
+        "CLARIFY_OR_ABSTAIN": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_CAPTION": {
+          "n": 3,
+          "raw": 0.3333,
+          "system": 0.3333
+        },
+        "SINGLE_GROUND": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_LANDCOVER": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_VQA": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_DESC": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_MAP": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_VQA": {
+          "n": 3,
+          "raw": 0.6667,
+          "system": 0.6667
+        },
+        "XMODAL_JOINT_EXTRACT": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        }
+      },
+      "misroutes": [
+        {
+          "query": "give me a rundown of this picture",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.928989,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.947534,
+          "gated_to_default": false
+        },
+        {
+          "query": "in a sentence or two, whats going on in this shot",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.622802,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.674868,
+          "gated_to_default": false
+        },
+        {
+          "query": "put a number on the forest loss",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.465803,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.501733,
+          "gated_to_default": false
+        }
+      ]
+    }
+  }
+}
