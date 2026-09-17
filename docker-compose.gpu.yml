@@ -1,0 +1,52 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: gpu-image
+    volumes:
+      - ./checkpoints:/app/checkpoints
+    environment:
+      - SATQUERY_PROFILE=full
+      - SATQUERY_VQA_BASE=/app/models/qwen25_vl_3b
+      - SATQUERY_VQA_ADAPTER=/app/checkpoints/v2/track_b_vqa/adapter_final
+      # Every learned tool is opt-in: satquery/tools/stubs.py REGISTRY calls
+      # each tool's is_available() at import and falls back to a stub when its
+      # variable is unset. Only the VQA adapter was named here, so a GPU
+      # deployment with all the weights on disk still answered every non-VQA
+      # task from a stub. Paths are the ones docs/model-cards.md records for
+      # each checkpoint; ./checkpoints is mounted by the volume above.
+      - SATQUERY_CAPTION=/app/checkpoints/v2/caption_pre
+      - SATQUERY_LANDCOVER=/app/checkpoints/v2/track_a
+      - SATQUERY_GROUNDING=/app/checkpoints/v2/grounding_pre
+      - SATQUERY_CHANGE_MASK=/app/checkpoints/v2/change_mask
+            # STAYS ON v1. The v2 captioner scores 0.1641 BLEU-4 on the changed
+      # half against v1's 0.3063 - a regression the aggregate (0.5746 vs
+      # 0.5686) hid, because v2 got better at 'there is no difference' and
+      # worse at describing change. docs/model-cards.md, Phase 5 cards.
+      - SATQUERY_CHANGE_CAPTION=/app/checkpoints/change_caption
+      # A file, not a directory - this one is a single .pt.
+      - SATQUERY_CHANGE_VQA=/app/checkpoints/v2/change_vqa/best.pt
+      - SATQUERY_FUSION=/app/checkpoints/v2/optsar_fusion
+      # Registries fitted to the Phase 5 heads (2026-09-12). The v1 transforms
+      # were fitted to v1 score distributions and do not carry over.
+      - SATQUERY_CALIBRATION=/app/configs/calibration.v2.json
+      - SATQUERY_THRESHOLDS=/app/configs/thresholds.v2.yaml
+
+    # The base file reserves `count: ${GPU_COUNT:-0}`, so composing it with
+    # this override still handed the container ZERO GPUs unless GPU_COUNT
+    # happened to be exported. The full profile then loaded a 4-bit
+    # bitsandbytes VLM with no CUDA device behind it, which is the one
+    # configuration guaranteed not to work. A file whose entire purpose is
+    # "run this on the GPU" should not depend on an unset variable.
+    deploy:
+      resources:
+        reservations:
+          # `!override`, not a plain list: compose MERGES sequences across
+          # files, so without it the base's `count: ${GPU_COUNT:-0}` entry
+          # survives alongside this one and the container is handed a
+          # zero-GPU reservation as well as a real one.
+          devices: !override
+            - driver: nvidia
+              count: ${GPU_COUNT:-1}
+              capabilities: [gpu]

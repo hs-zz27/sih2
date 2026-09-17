@@ -1,0 +1,30 @@
+# Revert to the v1 checkpoints - an OVERLAY on the default, which is v2.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.v1.yml up api
+#
+# The default was switched to the Phase 5 checkpoints on 2026-09-12, once
+# both preconditions held: calibration and thresholds refitted to the v2
+# heads (configs/*.v2.*), and the demo bundle at 9/9 with every v2 tool
+# loaded - including the clouded-scene abstention, which now happens for the
+# actual reason. This file exists so that decision can be undone with one
+# flag rather than an edit, and so the v1 numbers can still be reproduced
+# against the deployed pipeline.
+#
+# SATQUERY_CALIBRATION and SATQUERY_THRESHOLDS are cleared so the runtime
+# falls back to configs/calibration.json and configs/thresholds.yaml - the
+# registries fitted to THESE heads. Pointing v1 heads at v2 registries would
+# be the exact mismatch the refit exists to prevent.
+
+services:
+  api:
+    environment:
+      - SATQUERY_VQA_ADAPTER=/app/checkpoints/track_b_v2/adapter_final
+      - SATQUERY_CAPTION=/app/checkpoints/caption
+      - SATQUERY_LANDCOVER=/app/checkpoints/track_a_full_base
+      - SATQUERY_GROUNDING=/app/checkpoints/grounding
+      - SATQUERY_CHANGE_MASK=/app/checkpoints/change_mask
+      - SATQUERY_CHANGE_CAPTION=/app/checkpoints/change_caption
+      - SATQUERY_CHANGE_VQA=/app/checkpoints/change_vqa/best.pt
+      - SATQUERY_FUSION=/app/checkpoints/optsar_fusion
+      - SATQUERY_CALIBRATION=
+      - SATQUERY_THRESHOLDS=

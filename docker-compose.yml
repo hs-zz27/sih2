@@ -1,0 +1,116 @@
+# Two services, not three.
+#
+# There was a `worker` service building the whole Python stack to run
+# `satquery.controller.worker`, whose entire body printed "worker started
+# (stub - no task queue wired up yet)" and exited. Nothing enqueued to it,
+# no broker was defined, and `depends_on: api` made it look like part of the
+# request path. A container that exits immediately is not a degraded worker;
+# it is a service that does not exist, advertised as one.
+#
+# The system does not need it. Queries are interactive request/response:
+# `/runs` answers synchronously and `/runs/stream` answers on a thread while
+# streaming SSE from the same process, which is what the frontend uses. The
+# longest measured beat is ~56 s on a full Cartosat scene and the client is
+# watching it stream. docs/01 section "Jobs and streaming" said the same
+# thing from the start - in-process is sufficient at demo scale, add Redis
+# and RQ only if multiple workers are genuinely needed - so removing the stub
+# implements the design rather than departing from it.
+#
+# See docs/adr/002-no-async-worker.md for what would change that.
+
+services:
+  api:
+    image: satquery_ai-api:latest
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: gpu-image
+    ports:
+      - "8000:8000"
+    volumes:
+      # Source is mounted for development so an edit does not need a rebuild.
+      # A deployment should drop these three and use the image's own copy.
+      - ./satquery:/app/satquery
+      - ./configs:/app/configs
+      # Weights and datasets are volumes by design: .dockerignore excludes
+      # them from the build context, so baking them in is not possible and
+      # not wanted - the image stays small and the data stays current.
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./checkpoints:/app/checkpoints
+    environment:
+      - HF_HUB_OFFLINE=1
+      - TRANSFORMERS_OFFLINE=1
+      # satquery/controller/profiles.py reads SATQUERY_PROFILE.
+      # This said PROFILE, so choosing lite through compose did nothing.
+      - SATQUERY_PROFILE=${SATQUERY_PROFILE:-full}
+      # Which browser origins may call the API. Defaults inside the app are
+      # localhost only; a deployment sets this to its real origin. Never "*".
+      - SATQUERY_CORS_ORIGINS=${SATQUERY_CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      - SATQUERY_VQA_BASE=/app/models/qwen25_vl_3b
+      - SATQUERY_VQA_ADAPTER=/app/checkpoints/v2/track_b_vqa/adapter_final
+      - SATQUERY_CAPTION=/app/checkpoints/v2/caption_pre
+      - SATQUERY_LANDCOVER=/app/checkpoints/v2/track_a
+      - SATQUERY_GROUNDING=/app/checkpoints/v2/grounding_pre
+      - SATQUERY_CHANGE_MASK=/app/checkpoints/v2/change_mask
+            # STAYS ON v1. The v2 captioner scores 0.1641 BLEU-4 on the changed
+      # half against v1's 0.3063 - a regression the aggregate (0.5746 vs
+      # 0.5686) hid, because v2 got better at 'there is no difference' and
+      # worse at describing change. docs/model-cards.md, Phase 5 cards.
+      - SATQUERY_CHANGE_CAPTION=/app/checkpoints/change_caption
+      - SATQUERY_CHANGE_VQA=/app/checkpoints/v2/change_vqa/best.pt
+      - SATQUERY_FUSION=/app/checkpoints/v2/optsar_fusion
+      # Registries fitted to the Phase 5 heads (2026-09-12). The v1 transforms
+      # were fitted to v1 score distributions and do not carry over.
+      - SATQUERY_CALIBRATION=/app/configs/calibration.v2.json
+      - SATQUERY_THRESHOLDS=/app/configs/thresholds.v2.yaml
+    healthcheck:
+      # /health is the liveness endpoint the API already exposes. Without a
+      # healthcheck `depends_on` only waits for the container to start, not
+      # for the application to be able to answer, so the web container could
+      # come up pointing at a socket nothing was listening on yet.
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      # Generous: the first request builds the controller and fits the intent
+      # classifier, and a cold GPU stack takes longer still. A short window
+      # would report a healthy service as unhealthy during its own startup.
+      start_period: 90s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${GPU_COUNT:-1}
+              capabilities: [gpu]
+
+  web:
+    image: satquery_ai-web:latest
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+      args:
+        # Next.js inlines NEXT_PUBLIC_* at BUILD time, not at run time, so
+        # setting it only under `environment` below would have no effect on
+        # the compiled bundle: the browser would call whatever origin was
+        # baked in. It is passed here as a build argument for that reason.
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    # No source bind mount and no anonymous node_modules volume: this runs
+    # the production build (`next build` then `next start`), and mounting the
+    # host tree over /app would replace the built output with source.
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy

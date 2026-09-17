@@ -1,0 +1,52 @@
+# CPU fallback. Compose with the base file:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.cpu.yml up
+#
+# The base file builds `gpu-image` and reserves a GPU by default, which is
+# right for the machine the system is developed and demonstrated on and wrong
+# for anything else. A venue laptop, a judge's machine or a CI runner with no
+# NVIDIA runtime cannot start the base file at all - the failure is at
+# container start, not at query time, so nothing about it is graceful.
+#
+# This override restores the configuration the base file carried before the
+# GPU wiring landed: the CPU image, the lite profile, and no GPU reservation.
+services:
+  api:
+    # A separate tag, not the base file's `satquery_ai-api:latest`. Both files
+    # build the same Dockerfile to different targets, so sharing one tag means
+    # a CPU build silently replaces the GPU image under it - and the next
+    # `up` without a rebuild starts the CPU stack while reporting the name the
+    # GPU deployment expects.
+    image: satquery_ai-api:cpu
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+      target: cpu-image
+
+    environment:
+      # satquery/controller/profiles.py reads SATQUERY_PROFILE. `lite` is the
+      # profile that does not expect a 4-bit VLM behind it.
+      - SATQUERY_PROFILE=${SATQUERY_PROFILE:-lite}
+
+    # The SATQUERY_* weight paths from the base file are deliberately left in
+    # place rather than blanked. Every tool's is_available() checks its import
+    # dependencies inside a try, so on the CPU image each one returns
+    # (False, "torch is not installed") and satquery/tools/stubs.py REGISTRY
+    # falls back to a stub - the designed opt-in path, with a truthful reason
+    # attached. Blanking the variables would produce "... is not set", which
+    # is a less accurate account of why the tool is unavailable.
+
+    deploy:
+      resources:
+        reservations:
+          # `!reset`, not `!override` with `count: ${GPU_COUNT:-0}`.
+          #
+          # Both remove the base file's one-GPU reservation - compose MERGES
+          # sequences across files, so a plain list would leave the container
+          # holding two reservations. The difference is what survives into the
+          # rendered config: `count: 0` is dropped from the output entirely,
+          # leaving `driver: nvidia` with `capabilities: [gpu]` and no count,
+          # and the compose spec does not define that as "no GPU". Resetting
+          # the key removes the reservation instead of writing a zero into it,
+          # which is checkable with `docker compose config`.
+          devices: !reset null
