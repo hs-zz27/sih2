@@ -314,3 +314,25 @@ class TestOverlayRendering:
         response = client.get("/runs/run_ndvitest/overlay/ndvi")
         assert response.status_code == 200
         assert response.headers["X-Overlay-Rendering"] == "continuous"
+
+
+class TestEvidencePack:
+    """The QGIS evidence bundle is reachable over the API, not only in tests."""
+
+    def test_completed_run_downloads_a_zip_with_trace_and_manifest(self, client, msi_6band):
+        import io
+        import zipfile
+
+        run = client.post(
+            "/runs", data={"query": "Classify the land cover."}, files=[upload(msi_6band)]
+        ).json()
+        run_id = run["run_id"]
+        r = client.get(f"/runs/{run_id}/evidence.zip")
+        assert r.status_code == 200
+        assert r.headers["content-type"] == "application/zip"
+        names = zipfile.ZipFile(io.BytesIO(r.content)).namelist()
+        assert "trace.json" in names and "evidence.json" in names
+        assert any(n.startswith("rasters/") and n.endswith(".tif") for n in names), names
+
+    def test_unknown_run_is_404(self, client):
+        assert client.get("/runs/nope/evidence.zip").status_code == 404

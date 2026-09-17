@@ -841,6 +841,47 @@ def get_run_report(run_id: str):
     )
 
 
+@app.get("/runs/{run_id}/evidence.zip")
+def get_run_evidence(run_id: str):
+    """The run's evidence pack: trace, index COGs, GeoJSON, sha256 manifest.
+
+    `satquery.report.evidence_pack.export` built this bundle - the GeoJSON and
+    Cloud-Optimised GeoTIFFs an analyst opens in QGIS - but nothing served it:
+    the only caller was its test, so the capability existed and no user could
+    reach it. The PDF report had an endpoint; the evidence did not.
+    """
+    from fastapi.responses import FileResponse
+
+    from satquery.report.evidence_pack import export
+
+    record = get_store().get(run_id)
+    if record is None or not record.get("trace"):
+        raise HTTPException(404, f"no completed run {run_id}")
+
+    trace = Trace.model_validate(
+        record["trace"] if isinstance(record["trace"], dict)
+        else json.loads(record["trace"])
+    )
+    out_dir = Path(tempfile.mkdtemp(prefix=f"satquery_evidence_{run_id}_"))
+    archive = export(trace, out_dir, artifact_dir=_artifact_root(trace))
+    return FileResponse(
+        archive, media_type="application/zip", filename=f"evidence_{run_id}.zip"
+    )
+
+
+def _artifact_root(trace: Trace) -> Path | None:
+    """The directory holding `<run_id>/*.tif`, read from the trace itself.
+
+    Rasters are written to `<output_dir>/<run_id>/`; the trace records their
+    full paths, so the root does not depend on the API's working directory.
+    """
+    for value in (trace.artifact_paths or {}).values():
+        path = Path(value)
+        if path.parent.name == trace.run_id:
+            return path.parent.parent
+    return None
+
+
 @app.get("/runs")
 def list_runs(limit: int = 50):
     return {"runs": get_store().list(limit=min(max(limit, 1), 500))}

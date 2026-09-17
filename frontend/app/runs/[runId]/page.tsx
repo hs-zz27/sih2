@@ -169,6 +169,16 @@ export default function RunPage() {
                 </svg>
               </a>
             </p>
+            <p style={{ marginTop: 'var(--s2)' }}>
+              <a className="permalink" href={`${API}/runs/${runId}/evidence.zip`}>
+                Download the evidence pack (GeoJSON + COG, opens in QGIS)
+                <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v12" />
+                  <path d="M8 11l4 4 4-4" />
+                  <path d="M4 19h16" />
+                </svg>
+              </a>
+            </p>
           </section>
 
           {/* Components stay visible even when abstained: they are the
