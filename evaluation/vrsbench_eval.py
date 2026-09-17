@@ -52,8 +52,6 @@ import argparse
 import collections
 import gc
 import json
-import math
-import random
 import re
 import sys
 import time
@@ -64,24 +62,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from evaluation.metrics.vqa import normalise_answer  # noqa: E402
 from evaluation.rsvqa_official_eval import BaseOnly, wilson  # noqa: E402
 from evaluation.track_b_eval import Adapter  # noqa: E402
-
-
-def train_global_constant(data: Path) -> str | None:
-    """Most common VQA answer in VRSBench_train.json. No test peeking."""
-    path = data / "VRSBench_train.json"
-    if not path.exists():
-        return None
-    counts: collections.Counter = collections.Counter()
-    for row in json.loads(path.read_text(encoding="utf-8")):
-        conv = row.get("conversations") or []
-        for i, turn in enumerate(conv):
-            if turn.get("from") != "human":
-                continue
-            if "[vqa]" not in (turn.get("value") or "").lower():
-                continue
-            if i + 1 < len(conv) and conv[i + 1].get("from") == "gpt":
-                counts[normalise_answer(conv[i + 1].get("value", ""))] += 1
-    return counts.most_common(1)[0][0] if counts else None
+from evaluation.vrsbench_common import (  # noqa: E402
+    load_rows,
+    per_type_majority,
+    stratified_sample,
+    train_global_constant,
+)
 
 
 def main() -> int:
@@ -97,36 +83,13 @@ def main() -> int:
     p.add_argument("--seed", type=int, default=20260904)
     args = p.parse_args()
 
-    rows = json.loads((args.data / "VRSBench_EVAL_vqa.json").read_text(encoding="utf-8"))
+    rows = load_rows(args.data, "vqa")
     if args.limit:
         rows = rows[: args.limit]
 
-    sampling = None
-    if args.sample and args.sample < len(rows):
-        # Proportional stratified draw: every question type keeps its share of the
-        # eval set, so per-type accuracy stays estimable and the overall figure is
-        # not shifted by dropping a type. Seeded, so the draw is reproducible.
-        by_t: dict[str, list[int]] = collections.defaultdict(list)
-        for i, r in enumerate(rows):
-            by_t[r["type"]].append(i)
-        rng = random.Random(args.seed)
-        keep: list[int] = []
-        for t, idx in sorted(by_t.items()):
-            k = max(1, round(len(idx) * args.sample / len(rows)))
-            keep.extend(rng.sample(idx, min(k, len(idx))))
-        keep.sort()
-        sampling = {
-            "stratified_subsample": True,
-            "n_drawn": len(keep),
-            "n_full_eval_set": len(rows),
-            "fraction": round(len(keep) / len(rows), 4),
-            "seed": args.seed,
-            "method": "proportional by question type, seeded",
-            "note": "REDUCED PRECISION relative to a full-set arm. Per-type CIs widen "
-                    "accordingly and are reported. The task, prompt, decode and metric "
-                    "are unchanged; only the number of questions differs.",
-        }
-        rows = [rows[i] for i in keep]
+    # Proportional stratified draw: every question type keeps its share of the
+    # eval set, so per-type accuracy stays estimable. Seeded, so reproducible.
+    rows, sampling = stratified_sample(rows, args.sample, args.seed)
 
     images = args.data / "Images_val"
     gold = [normalise_answer(r["ground_truth"]) for r in rows]
@@ -137,11 +100,8 @@ def main() -> int:
     tgc_hits = [tgc == g for g in gold] if tgc else None
 
     # optimistic ceiling on constants — fitted on the eval set itself
-    per_type_majority = {}
-    for t in types:
-        c = collections.Counter(gold[i] for i, r in enumerate(rows) if r["type"] == t)
-        per_type_majority[t] = c.most_common(1)[0][0]
-    ptc_hits = [per_type_majority[r["type"]] == g for r, g in zip(rows, gold)]
+    majority = per_type_majority(rows, gold)
+    ptc_hits = [majority[r["type"]] == g for r, g in zip(rows, gold)]
 
     print(f"[vrsbench] {len(rows)} questions over {len({r['image_id'] for r in rows})} images")
     print(f"[vrsbench] types: {dict(collections.Counter(r['type'] for r in rows).most_common())}")
@@ -165,7 +125,7 @@ def main() -> int:
                 "note": "honest floor; fitted on VRSBench_train.json, no test peeking",
             },
             "test_fitted_per_type_constant": {
-                "answers": per_type_majority,
+                "answers": majority,
                 "accuracy": sum(ptc_hits) / len(rows),
                 "note": "OPTIMISTIC UPPER BOUND — fitted on the evaluation set itself. "
                         "Not a fair baseline; a model failing to beat it has not learned the task.",
