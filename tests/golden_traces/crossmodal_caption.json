@@ -1,0 +1,438 @@
+{
+  "abstain_limiting_component": null,
+  "abstain_reason": null,
+  "abstain_resolving_input": null,
+  "abstain_trigger": null,
+  "abstained": false,
+  "answer": "[STUB - no model loaded] no caption - the captioning model is not loaded. Index thresholds indicate 18% vegetation (291,000 m2), 82% water (1.35 km2) and 82% built-up land (1.35 km2). These classes are measured independently and may overlap. The scene is centred at 18.0829\u00b0 N, 75.0060\u00b0 E and covers about 1.3 km by 1.3 km on the ground.",
+  "artifact_paths": "<volatile>",
+  "artifacts": [
+    "ndvi",
+    "ndwi",
+    "mndwi",
+    "ndbi",
+    "sigma0_vv",
+    "cov",
+    "vh_vv_ratio_db",
+    "landcover_map"
+  ],
+  "code_version": "0.2.0-phase1",
+  "confidence": {
+    "band": "LOW",
+    "calibration": {
+      "T": 1.0,
+      "ece_after": -1.0,
+      "method": "uncalibrated (score is not a calibratable probability)"
+    },
+    "components": {
+      "agreement": 0.9333,
+      "input_quality": 1.0,
+      "model": 1.0
+    },
+    "final": 0.44
+  },
+  "data_sources": [],
+  "execution": [
+    {
+      "confidence": 1.0,
+      "confidence_method": "deterministic",
+      "outputs": {
+        "glcm": {
+          "contrast": 5.2406,
+          "correlation": 0.9347,
+          "energy": 0.4067,
+          "homogeneity": 0.7353
+        },
+        "index_availability": {
+          "cov": true,
+          "glcm_texture": true,
+          "mndwi": true,
+          "ndbi": true,
+          "ndvi": true,
+          "ndwi": true,
+          "sigma0": true,
+          "vh_vv_ratio": true
+        },
+        "indices": {
+          "cov": {
+            "stats": {
+              "max": 2.4016,
+              "mean": 0.7668,
+              "min": 0.3941,
+              "p10": 0.6055,
+              "p50": 0.7213,
+              "p90": 0.9986,
+              "std": 0.1839,
+              "valid_fraction": 1.0
+            },
+            "window": 7
+          },
+          "mndwi": {
+            "fraction_above_threshold": 0.8222,
+            "stats": {
+              "max": -0.0865,
+              "mean": -0.0922,
+              "min": -0.0989,
+              "p10": -0.0976,
+              "p50": -0.0913,
+              "p90": -0.0899,
+              "std": 0.0027,
+              "valid_fraction": 1.0
+            },
+            "threshold": -0.0963,
+            "threshold_method": "otsu"
+          },
+          "ndbi": {
+            "fraction_above_threshold": 0.8223,
+            "stats": {
+              "max": -0.0317,
+              "mean": -0.1685,
+              "min": -0.3111,
+              "p10": -0.2935,
+              "p50": -0.1484,
+              "p90": -0.1194,
+              "std": 0.0604,
+              "valid_fraction": 1.0
+            },
+            "threshold": -0.2723,
+            "threshold_method": "otsu"
+          },
+          "ndvi": {
+            "fraction_above_threshold": 0.1779,
+            "stats": {
+              "max": 0.502,
+              "mean": 0.3984,
+              "min": 0.2918,
+              "p10": 0.3619,
+              "p50": 0.3838,
+              "p90": 0.4898,
+              "std": 0.0443,
+              "valid_fraction": 1.0
+            },
+            "threshold": 0.417,
+            "threshold_method": "otsu"
+          },
+          "ndwi": {
+            "fraction_above_threshold": 0.8222,
+            "stats": {
+              "max": -0.1204,
+              "mean": -0.2564,
+              "min": -0.3976,
+              "p10": -0.3803,
+              "p50": -0.2365,
+              "p90": -0.2076,
+              "std": 0.0599,
+              "valid_fraction": 1.0
+            },
+            "threshold": -0.3592,
+            "threshold_method": "otsu"
+          },
+          "sigma0_vv": {
+            "fraction_above_threshold": 0.0652,
+            "stats": {
+              "max": 19.3053,
+              "mean": -14.2477,
+              "min": -65.1637,
+              "p10": -25.0405,
+              "p50": -14.3323,
+              "p90": -3.1326,
+              "std": 8.7747,
+              "valid_fraction": 1.0
+            },
+            "threshold": 0.0,
+            "threshold_method": "fixed_prior"
+          },
+          "vh_vv_ratio_db": {
+            "fraction_above_threshold": 0.1566,
+            "stats": {
+              "max": -4.2089,
+              "mean": -6.6475,
+              "min": -10.7019,
+              "p10": -7.6081,
+              "p50": -6.888,
+              "p90": -4.4486,
+              "std": 1.0494,
+              "valid_fraction": 1.0
+            },
+            "threshold": -5.9717,
+            "threshold_method": "otsu"
+          }
+        },
+        "substitutions": [],
+        "thresholds": [
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "ndvi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 5.384,
+            "value": 0.417
+          },
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "ndwi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 5.5208,
+            "value": -0.3592
+          },
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "mndwi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 4.4077,
+            "value": -0.0963
+          },
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "ndbi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 5.5379,
+            "value": -0.2723
+          },
+          {
+            "bimodal": false,
+            "fallback_reason": "no_bimodal_split_found - scene appears to contain a single class",
+            "index": "sigma0_vv",
+            "method": "fixed_prior",
+            "n_pixels": 16384,
+            "separation": 1.1858,
+            "value": 0.0
+          },
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "vh_vv_ratio_db",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 4.8019,
+            "value": -5.9717
+          }
+        ]
+      },
+      "params": {},
+      "rationale_tag": "MASK_CONDITIONED_CAPTION",
+      "runtime_ms": "<volatile>",
+      "step": "step_1",
+      "tool": "index_engine_v1",
+      "version": "1.0.0"
+    },
+    {
+      "confidence": 0.0,
+      "confidence_method": "stub",
+      "outputs": {
+        "classes": [
+          "forest",
+          "water"
+        ]
+      },
+      "params": {},
+      "rationale_tag": "MASK_CONDITIONED_CAPTION",
+      "runtime_ms": "<volatile>",
+      "step": "step_2",
+      "tool": "landcover_v1",
+      "version": "0.1.0-stub"
+    },
+    {
+      "confidence": 0.0,
+      "confidence_method": "stub",
+      "outputs": {
+        "caption": "[STUB - no model loaded] no caption - the captioning model is not loaded"
+      },
+      "params": {},
+      "rationale_tag": "MASK_CONDITIONED_CAPTION",
+      "runtime_ms": "<volatile>",
+      "step": "step_3",
+      "tool": "caption_v1",
+      "version": "0.1.0-stub"
+    }
+  ],
+  "ingest": {
+    "checks": [
+      {
+        "message": "optical: CRS EPSG:32643",
+        "name": "crs_present",
+        "status": "PASS"
+      },
+      {
+        "message": "optical: 0.0% nodata",
+        "name": "nodata_fraction",
+        "status": "PASS"
+      },
+      {
+        "message": "optical: ~2% cloud",
+        "name": "cloud_cover",
+        "status": "PASS"
+      },
+      {
+        "message": "optical: 128x128",
+        "name": "min_dimension",
+        "status": "PASS"
+      },
+      {
+        "message": "sar: CRS EPSG:32643",
+        "name": "crs_present",
+        "status": "PASS"
+      },
+      {
+        "message": "sar: 0.0% nodata",
+        "name": "nodata_fraction",
+        "status": "PASS"
+      },
+      {
+        "message": "sar: 128x128",
+        "name": "min_dimension",
+        "status": "PASS"
+      },
+      {
+        "message": "both images in EPSG:32643",
+        "name": "crs_match",
+        "status": "PASS"
+      },
+      {
+        "message": "GSD ratio 1.00x",
+        "name": "gsd_ratio",
+        "status": "PASS"
+      },
+      {
+        "message": "footprint overlap 100%",
+        "name": "footprint_overlap",
+        "status": "PASS"
+      },
+      {
+        "message": "one optical and one SAR image present",
+        "name": "crossmodal_pairing",
+        "status": "PASS"
+      }
+    ],
+    "config": "CROSSMODAL_PAIR",
+    "images": [
+      {
+        "bands": [
+          "BLUE",
+          "GREEN",
+          "RED",
+          "NIR",
+          "SWIR1",
+          "SWIR2"
+        ],
+        "container_format": "GTiff",
+        "crs": "EPSG:32643",
+        "georeferenced": true,
+        "gsd_m": 10.0,
+        "lonlat_bounds": [
+          75.0,
+          18.0771,
+          75.0121,
+          18.0887
+        ],
+        "modality": "MSI",
+        "modality_reason": "optical_band_names_present",
+        "nodata_pct": 0.0,
+        "path": "<volatile>",
+        "polarisations": null,
+        "role": "optical",
+        "sensor_guess": "SENTINEL-2"
+      },
+      {
+        "bands": [
+          "VV",
+          "VH"
+        ],
+        "container_format": "GTiff",
+        "crs": "EPSG:32643",
+        "georeferenced": true,
+        "gsd_m": 10.0,
+        "lonlat_bounds": [
+          75.0,
+          18.0771,
+          75.0121,
+          18.0887
+        ],
+        "modality": "SAR",
+        "modality_reason": "sar_metadata_present_and_no_optical_band_names",
+        "nodata_pct": 0.0,
+        "path": "<volatile>",
+        "polarisations": [
+          "VV",
+          "VH"
+        ],
+        "role": "sar",
+        "sensor_guess": "EOS-04"
+      }
+    ],
+    "index_availability": {
+      "cov": true,
+      "glcm_texture": true,
+      "mndwi": true,
+      "ndbi": true,
+      "ndvi": true,
+      "ndwi": true,
+      "sigma0": true,
+      "vh_vv_ratio": true
+    },
+    "mode": "operational",
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieval_reason": null,
+      "retrieved_tiles": null
+    }
+  },
+  "query": "Describe this scene.",
+  "routing": {
+    "capability_matrix_version": "cm-2026.11.02",
+    "classifier": {
+      "margin": 0.8468,
+      "name": "tfidf_logreg_v1",
+      "top1": 0.9156
+    },
+    "config_excluded_task": null,
+    "legal_tasks": [
+      "XMODAL_JOINT_EXTRACT",
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "llm_tiebreak_invoked": false,
+    "selected_task": "SINGLE_CAPTION"
+  },
+  "run_id": "<volatile>",
+  "timestamp_utc": "<volatile>",
+  "verification": {
+    "built_up_path": "ndbi",
+    "complementarity": {},
+    "conflicts": [
+      "sigma0_vv: no bimodal split found, threshold is a fixed prior rather than data-derived"
+    ],
+    "entailment_gate": {
+      "action": "none",
+      "backend": "deterministic",
+      "flagged": 0,
+      "flagged_detail": [],
+      "retained": 1,
+      "sentences": 4,
+      "unverifiable": 3
+    },
+    "physics_agreement": {
+      "built_up:fraction": 1.0,
+      "mndwi": 1.0,
+      "ndbi": 1.0,
+      "ndvi": 1.0,
+      "ndwi": 1.0,
+      "sigma0_vv": 0.4,
+      "vegetation:fraction": 1.0,
+      "vh_vv_ratio_db": 1.0,
+      "water:fraction": 1.0
+    }
+  },
+  "weights_hashes": {}
+}

@@ -1,0 +1,188 @@
+{
+  "abstain_limiting_component": null,
+  "abstain_reason": null,
+  "abstain_resolving_input": null,
+  "abstain_trigger": null,
+  "abstained": false,
+  "answer": "[STUB - no model loaded] no caption - the captioning model is not loaded. No dominant land-cover class exceeded its detection threshold. The scene is centred at 18.0883\u00b0 N, 75.0004\u00b0 E and covers about 80 m by 80 m on the ground.",
+  "artifact_paths": "<volatile>",
+  "artifacts": [
+    "landcover_map"
+  ],
+  "code_version": "0.2.0-phase1",
+  "confidence": {
+    "band": "LOW",
+    "calibration": {
+      "T": 1.0,
+      "ece_after": -1.0,
+      "method": "uncalibrated (score is not a calibratable probability)"
+    },
+    "components": {
+      "agreement": 1.0,
+      "input_quality": 1.0,
+      "model": 1.0
+    },
+    "final": 0.44
+  },
+  "data_sources": [],
+  "execution": [
+    {
+      "confidence": 1.0,
+      "confidence_method": "deterministic",
+      "outputs": {
+        "glcm": {
+          "contrast": 5.0067,
+          "correlation": 0.9404,
+          "energy": 0.5637,
+          "homogeneity": 0.8249
+        },
+        "index_availability": {
+          "cov": false,
+          "glcm_texture": true,
+          "mndwi": false,
+          "ndbi": false,
+          "ndvi": false,
+          "ndwi": false,
+          "sigma0": false,
+          "vh_vv_ratio": false
+        },
+        "indices": {},
+        "substitutions": [],
+        "thresholds": []
+      },
+      "params": {},
+      "rationale_tag": "MASK_CONDITIONED_CAPTION",
+      "runtime_ms": "<volatile>",
+      "step": "step_1",
+      "tool": "index_engine_v1",
+      "version": "1.0.0"
+    },
+    {
+      "confidence": 0.0,
+      "confidence_method": "stub",
+      "outputs": {
+        "classes": [
+          "forest",
+          "water"
+        ]
+      },
+      "params": {},
+      "rationale_tag": "MASK_CONDITIONED_CAPTION",
+      "runtime_ms": "<volatile>",
+      "step": "step_2",
+      "tool": "landcover_v1",
+      "version": "0.1.0-stub"
+    },
+    {
+      "confidence": 0.0,
+      "confidence_method": "stub",
+      "outputs": {
+        "caption": "[STUB - no model loaded] no caption - the captioning model is not loaded"
+      },
+      "params": {},
+      "rationale_tag": "MASK_CONDITIONED_CAPTION",
+      "runtime_ms": "<volatile>",
+      "step": "step_3",
+      "tool": "caption_v1",
+      "version": "0.1.0-stub"
+    }
+  ],
+  "ingest": {
+    "checks": [
+      {
+        "message": "single: CRS EPSG:32643",
+        "name": "crs_present",
+        "status": "PASS"
+      },
+      {
+        "message": "single: 0.0% nodata",
+        "name": "nodata_fraction",
+        "status": "PASS"
+      },
+      {
+        "message": "single: 128x128",
+        "name": "min_dimension",
+        "status": "PASS"
+      }
+    ],
+    "config": "SINGLE",
+    "images": [
+      {
+        "bands": [
+          "PAN"
+        ],
+        "container_format": "GTiff",
+        "crs": "EPSG:32643",
+        "georeferenced": true,
+        "gsd_m": 0.65,
+        "lonlat_bounds": [
+          75.0,
+          18.088,
+          75.0008,
+          18.0887
+        ],
+        "modality": "PAN",
+        "modality_reason": "single_band_defaulted_to_panchromatic",
+        "nodata_pct": 0.0,
+        "path": "<volatile>",
+        "polarisations": null,
+        "role": "single",
+        "sensor_guess": "CARTOSAT-2S"
+      }
+    ],
+    "index_availability": {
+      "cov": false,
+      "glcm_texture": true,
+      "mndwi": false,
+      "ndbi": false,
+      "ndvi": false,
+      "ndwi": false,
+      "sigma0": false,
+      "vh_vv_ratio": false
+    },
+    "mode": "operational",
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieval_reason": null,
+      "retrieved_tiles": null
+    }
+  },
+  "query": "Describe this image.",
+  "routing": {
+    "capability_matrix_version": "cm-2026.11.02",
+    "classifier": {
+      "margin": 0.9736,
+      "name": "tfidf_logreg_v1",
+      "top1": 0.9862
+    },
+    "config_excluded_task": null,
+    "legal_tasks": [
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "llm_tiebreak_invoked": false,
+    "selected_task": "SINGLE_CAPTION"
+  },
+  "run_id": "<volatile>",
+  "timestamp_utc": "<volatile>",
+  "verification": {
+    "built_up_path": "not_computed",
+    "complementarity": {},
+    "conflicts": [],
+    "entailment_gate": {
+      "action": "none",
+      "backend": "deterministic",
+      "flagged": 0,
+      "flagged_detail": [],
+      "retained": 0,
+      "sentences": 3,
+      "unverifiable": 3
+    },
+    "physics_agreement": {}
+  },
+  "weights_hashes": {}
+}

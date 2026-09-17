@@ -1,0 +1,213 @@
+{
+  "abstain_limiting_component": null,
+  "abstain_reason": null,
+  "abstain_resolving_input": null,
+  "abstain_trigger": null,
+  "abstained": false,
+  "answer": "[STUB - no model loaded] no answer - the VQA model is not loaded",
+  "artifact_paths": "<volatile>",
+  "artifacts": [],
+  "code_version": "0.2.0-phase1",
+  "confidence": {
+    "band": "LOW",
+    "calibration": {
+      "T": 1.0,
+      "ece_after": -1.0,
+      "method": "uncalibrated (score is not a calibratable probability)"
+    },
+    "components": {
+      "agreement": 1.0,
+      "input_quality": 1.0,
+      "model": 1.0
+    },
+    "final": 0.44
+  },
+  "data_sources": [],
+  "execution": [
+    {
+      "confidence": 0.0,
+      "confidence_method": "stub",
+      "outputs": {
+        "answer": "[STUB - no model loaded] no answer - the VQA model is not loaded"
+      },
+      "params": {
+        "answer_mode": "template"
+      },
+      "rationale_tag": "VQA_INFERENCE",
+      "runtime_ms": "<volatile>",
+      "step": "step_1",
+      "tool": "rs_vqa_v1",
+      "version": "0.1.0-stub"
+    }
+  ],
+  "ingest": {
+    "checks": [
+      {
+        "message": "optical: CRS EPSG:32643",
+        "name": "crs_present",
+        "status": "PASS"
+      },
+      {
+        "message": "optical: 0.0% nodata",
+        "name": "nodata_fraction",
+        "status": "PASS"
+      },
+      {
+        "message": "optical: ~2% cloud",
+        "name": "cloud_cover",
+        "status": "PASS"
+      },
+      {
+        "message": "optical: 128x128",
+        "name": "min_dimension",
+        "status": "PASS"
+      },
+      {
+        "message": "sar: CRS EPSG:32643",
+        "name": "crs_present",
+        "status": "PASS"
+      },
+      {
+        "message": "sar: 0.0% nodata",
+        "name": "nodata_fraction",
+        "status": "PASS"
+      },
+      {
+        "message": "sar: 128x128",
+        "name": "min_dimension",
+        "status": "PASS"
+      },
+      {
+        "message": "both images in EPSG:32643",
+        "name": "crs_match",
+        "status": "PASS"
+      },
+      {
+        "message": "GSD ratio 1.00x",
+        "name": "gsd_ratio",
+        "status": "PASS"
+      },
+      {
+        "message": "footprint overlap 100%",
+        "name": "footprint_overlap",
+        "status": "PASS"
+      },
+      {
+        "message": "one optical and one SAR image present",
+        "name": "crossmodal_pairing",
+        "status": "PASS"
+      }
+    ],
+    "config": "CROSSMODAL_PAIR",
+    "images": [
+      {
+        "bands": [
+          "BLUE",
+          "GREEN",
+          "RED",
+          "NIR",
+          "SWIR1",
+          "SWIR2"
+        ],
+        "container_format": "GTiff",
+        "crs": "EPSG:32643",
+        "georeferenced": true,
+        "gsd_m": 10.0,
+        "lonlat_bounds": [
+          75.0,
+          18.0771,
+          75.0121,
+          18.0887
+        ],
+        "modality": "MSI",
+        "modality_reason": "optical_band_names_present",
+        "nodata_pct": 0.0,
+        "path": "<volatile>",
+        "polarisations": null,
+        "role": "optical",
+        "sensor_guess": "SENTINEL-2"
+      },
+      {
+        "bands": [
+          "VV",
+          "VH"
+        ],
+        "container_format": "GTiff",
+        "crs": "EPSG:32643",
+        "georeferenced": true,
+        "gsd_m": 10.0,
+        "lonlat_bounds": [
+          75.0,
+          18.0771,
+          75.0121,
+          18.0887
+        ],
+        "modality": "SAR",
+        "modality_reason": "sar_metadata_present_and_no_optical_band_names",
+        "nodata_pct": 0.0,
+        "path": "<volatile>",
+        "polarisations": [
+          "VV",
+          "VH"
+        ],
+        "role": "sar",
+        "sensor_guess": "EOS-04"
+      }
+    ],
+    "index_availability": {
+      "cov": true,
+      "glcm_texture": true,
+      "mndwi": true,
+      "ndbi": true,
+      "ndvi": true,
+      "ndwi": true,
+      "sigma0": true,
+      "vh_vv_ratio": true
+    },
+    "mode": "operational",
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieval_reason": null,
+      "retrieved_tiles": null
+    }
+  },
+  "query": "How many buildings are visible?",
+  "routing": {
+    "capability_matrix_version": "cm-2026.11.02",
+    "classifier": {
+      "margin": 0.9178,
+      "name": "tfidf_logreg_v1",
+      "top1": 0.9471
+    },
+    "config_excluded_task": null,
+    "legal_tasks": [
+      "XMODAL_JOINT_EXTRACT",
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "llm_tiebreak_invoked": false,
+    "selected_task": "SINGLE_VQA"
+  },
+  "run_id": "<volatile>",
+  "timestamp_utc": "<volatile>",
+  "verification": {
+    "built_up_path": "not_computed",
+    "complementarity": {},
+    "conflicts": [],
+    "entailment_gate": {
+      "action": "none",
+      "backend": "deterministic",
+      "flagged": 0,
+      "flagged_detail": [],
+      "retained": 0,
+      "sentences": 1,
+      "unverifiable": 1
+    },
+    "physics_agreement": {}
+  },
+  "weights_hashes": {}
+}

@@ -1,0 +1,278 @@
+{
+  "abstain_limiting_component": null,
+  "abstain_reason": null,
+  "abstain_resolving_input": null,
+  "abstain_trigger": null,
+  "abstained": false,
+  "answer": "Index thresholds indicate 23% vegetation (9,000 m2), 77% water (32,000 m2) and 19% likely built-up land (8,000 m2). These classes are measured independently and may overlap. The scene is centred at 18.0878\u00b0 N, 75.0010\u00b0 E and covers about 200 m by 200 m on the ground.",
+  "artifact_paths": "<volatile>",
+  "artifacts": [
+    "ndvi",
+    "ndwi",
+    "builtup_proxy",
+    "landcover_map"
+  ],
+  "code_version": "0.2.0-phase1",
+  "confidence": {
+    "band": "LOW",
+    "calibration": {
+      "T": 1.0,
+      "ece_after": -1.0,
+      "method": "uncalibrated (score is not a calibratable probability)"
+    },
+    "components": {
+      "agreement": 0.95,
+      "input_quality": 1.0,
+      "model": 1.0
+    },
+    "final": 0.44
+  },
+  "data_sources": [],
+  "execution": [
+    {
+      "confidence": 1.0,
+      "confidence_method": "deterministic",
+      "outputs": {
+        "glcm": {
+          "contrast": 7.2489,
+          "correlation": 0.9156,
+          "energy": 0.3957,
+          "homogeneity": 0.7212
+        },
+        "index_availability": {
+          "cov": false,
+          "glcm_texture": true,
+          "mndwi": false,
+          "ndbi": false,
+          "ndvi": true,
+          "ndwi": true,
+          "sigma0": false,
+          "vh_vv_ratio": false
+        },
+        "indices": {
+          "builtup_proxy": {
+            "fraction_above_threshold": 0.1898,
+            "stats": {
+              "max": 0.5,
+              "mean": 0.0883,
+              "min": 0.0,
+              "p10": 0.0,
+              "p50": 0.0008,
+              "p90": 0.4999,
+              "std": 0.1774,
+              "valid_fraction": 1.0
+            },
+            "threshold": 0.2236,
+            "threshold_method": "otsu"
+          },
+          "ndvi": {
+            "fraction_above_threshold": 0.2259,
+            "stats": {
+              "max": 0.4975,
+              "mean": 0.4022,
+              "min": 0.2941,
+              "p10": 0.3622,
+              "p50": 0.3849,
+              "p90": 0.485,
+              "std": 0.0457,
+              "valid_fraction": 1.0
+            },
+            "threshold": 0.4185,
+            "threshold_method": "otsu"
+          },
+          "ndwi": {
+            "fraction_above_threshold": 0.7741,
+            "stats": {
+              "max": -0.1241,
+              "mean": -0.2614,
+              "min": -0.3913,
+              "p10": -0.3735,
+              "p50": -0.2377,
+              "p90": -0.2083,
+              "std": 0.0617,
+              "valid_fraction": 1.0
+            },
+            "threshold": -0.3563,
+            "threshold_method": "otsu"
+          }
+        },
+        "substitutions": [
+          "MNDWI unavailable (no SWIR1); NDWI used as the water index",
+          "NDBI unavailable (no SWIR1); built-up estimated from low_ndvi + texture"
+        ],
+        "thresholds": [
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "ndvi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 5.7388,
+            "value": 0.4185
+          },
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "ndwi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 5.8636,
+            "value": -0.3563
+          },
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "builtup_proxy",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 4.353,
+            "value": 0.2236
+          }
+        ]
+      },
+      "params": {},
+      "rationale_tag": "QUANTITATIVE_REQUEST",
+      "runtime_ms": "<volatile>",
+      "step": "step_1",
+      "tool": "index_engine_v1",
+      "version": "1.0.0"
+    },
+    {
+      "confidence": 0.0,
+      "confidence_method": "stub",
+      "outputs": {
+        "classes": [
+          "forest",
+          "water"
+        ]
+      },
+      "params": {
+        "classes": [
+          "built_up",
+          "water"
+        ]
+      },
+      "rationale_tag": "QUANTITATIVE_REQUEST",
+      "runtime_ms": "<volatile>",
+      "step": "step_2",
+      "tool": "landcover_v1",
+      "version": "0.1.0-stub"
+    }
+  ],
+  "ingest": {
+    "checks": [
+      {
+        "message": "single: CRS EPSG:32643",
+        "name": "crs_present",
+        "status": "PASS"
+      },
+      {
+        "message": "single: 0.0% nodata",
+        "name": "nodata_fraction",
+        "status": "PASS"
+      },
+      {
+        "message": "single: ~12% cloud",
+        "name": "cloud_cover",
+        "status": "PASS"
+      },
+      {
+        "message": "single: 128x128",
+        "name": "min_dimension",
+        "status": "PASS"
+      }
+    ],
+    "config": "SINGLE",
+    "images": [
+      {
+        "bands": [
+          "BLUE",
+          "GREEN",
+          "RED",
+          "NIR"
+        ],
+        "container_format": "GTiff",
+        "crs": "EPSG:32643",
+        "georeferenced": true,
+        "gsd_m": 1.6,
+        "lonlat_bounds": [
+          75.0,
+          18.0869,
+          75.0019,
+          18.0887
+        ],
+        "modality": "MSI",
+        "modality_reason": "optical_band_names_present",
+        "nodata_pct": 0.0,
+        "path": "<volatile>",
+        "polarisations": null,
+        "role": "single",
+        "sensor_guess": "CARTOSAT-2S"
+      }
+    ],
+    "index_availability": {
+      "cov": false,
+      "glcm_texture": true,
+      "mndwi": false,
+      "ndbi": false,
+      "ndvi": true,
+      "ndwi": true,
+      "sigma0": false,
+      "vh_vv_ratio": false
+    },
+    "mode": "operational",
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieval_reason": null,
+      "retrieved_tiles": null
+    }
+  },
+  "query": "Classify the land cover.",
+  "routing": {
+    "capability_matrix_version": "cm-2026.11.02",
+    "classifier": {
+      "margin": 0.9954,
+      "name": "tfidf_logreg_v1",
+      "top1": 0.9969
+    },
+    "config_excluded_task": null,
+    "legal_tasks": [
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "llm_tiebreak_invoked": false,
+    "selected_task": "SINGLE_LANDCOVER"
+  },
+  "run_id": "<volatile>",
+  "timestamp_utc": "<volatile>",
+  "verification": {
+    "built_up_path": "swir_free_proxy",
+    "complementarity": {},
+    "conflicts": [
+      "substitution: MNDWI unavailable (no SWIR1); NDWI used as the water index",
+      "substitution: NDBI unavailable (no SWIR1); built-up estimated from low_ndvi + texture"
+    ],
+    "entailment_gate": {
+      "action": "none",
+      "backend": "deterministic",
+      "flagged": 0,
+      "flagged_detail": [],
+      "retained": 1,
+      "sentences": 3,
+      "unverifiable": 2
+    },
+    "physics_agreement": {
+      "built_up:fraction": 0.7,
+      "builtup_proxy": 1.0,
+      "ndvi": 1.0,
+      "ndwi": 1.0,
+      "vegetation:fraction": 1.0,
+      "water:fraction": 1.0
+    }
+  },
+  "weights_hashes": {}
+}

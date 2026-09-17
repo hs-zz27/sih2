@@ -1,0 +1,135 @@
+{
+  "abstain_limiting_component": null,
+  "abstain_reason": "the query could not be mapped to a supported task with sufficient confidence - rephrase the question naming the task explicitly, for example 'describe the change between these two images' or 'classify the land cover'",
+  "abstain_resolving_input": "rephrase the question naming the task explicitly, for example 'describe the change between these two images' or 'classify the land cover'",
+  "abstain_trigger": "routing",
+  "abstained": true,
+  "answer": "the query could not be mapped to a supported task with sufficient confidence - rephrase the question naming the task explicitly, for example 'describe the change between these two images' or 'classify the land cover'",
+  "artifact_paths": "<volatile>",
+  "artifacts": [],
+  "code_version": "0.2.0-phase1",
+  "confidence": {
+    "band": "HIGH",
+    "calibration": {
+      "T": 1.0,
+      "ece_after": -1.0,
+      "method": "uncalibrated (score is not a calibratable probability)"
+    },
+    "components": {
+      "agreement": 1.0,
+      "input_quality": 1.0,
+      "model": 1.0
+    },
+    "final": 1.0
+  },
+  "data_sources": [],
+  "execution": [],
+  "ingest": {
+    "checks": [
+      {
+        "message": "single: CRS EPSG:32643",
+        "name": "crs_present",
+        "status": "PASS"
+      },
+      {
+        "message": "single: 0.0% nodata",
+        "name": "nodata_fraction",
+        "status": "PASS"
+      },
+      {
+        "message": "single: ~2% cloud",
+        "name": "cloud_cover",
+        "status": "PASS"
+      },
+      {
+        "message": "single: 128x128",
+        "name": "min_dimension",
+        "status": "PASS"
+      }
+    ],
+    "config": "SINGLE",
+    "images": [
+      {
+        "bands": [
+          "BLUE",
+          "GREEN",
+          "RED",
+          "NIR",
+          "SWIR1",
+          "SWIR2"
+        ],
+        "container_format": "GTiff",
+        "crs": "EPSG:32643",
+        "georeferenced": true,
+        "gsd_m": 10.0,
+        "lonlat_bounds": [
+          75.0,
+          18.0771,
+          75.0121,
+          18.0887
+        ],
+        "modality": "MSI",
+        "modality_reason": "optical_band_names_present",
+        "nodata_pct": 0.0,
+        "path": "<volatile>",
+        "polarisations": null,
+        "role": "single",
+        "sensor_guess": "SENTINEL-2"
+      }
+    ],
+    "index_availability": {
+      "cov": false,
+      "glcm_texture": true,
+      "mndwi": true,
+      "ndbi": true,
+      "ndvi": true,
+      "ndwi": true,
+      "sigma0": false,
+      "vh_vv_ratio": false
+    },
+    "mode": "operational",
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieval_reason": null,
+      "retrieved_tiles": null
+    }
+  },
+  "query": "",
+  "routing": {
+    "capability_matrix_version": "cm-2026.11.02",
+    "classifier": {
+      "margin": 0.0494,
+      "name": "tfidf_logreg_v1",
+      "top1": 0.3597
+    },
+    "config_excluded_task": null,
+    "legal_tasks": [
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "llm_tiebreak_invoked": false,
+    "selected_task": "CLARIFY_OR_ABSTAIN"
+  },
+  "run_id": "<volatile>",
+  "timestamp_utc": "<volatile>",
+  "verification": {
+    "built_up_path": "not_computed",
+    "complementarity": {},
+    "conflicts": [],
+    "entailment_gate": {
+      "action": "none",
+      "backend": "deterministic",
+      "flagged": 0,
+      "flagged_detail": [],
+      "retained": 0,
+      "sentences": 0,
+      "unverifiable": 0
+    },
+    "physics_agreement": {}
+  },
+  "weights_hashes": {}
+}

@@ -1,0 +1,300 @@
+{
+  "abstain_limiting_component": null,
+  "abstain_reason": null,
+  "abstain_resolving_input": null,
+  "abstain_trigger": null,
+  "abstained": false,
+  "answer": "Note: this input configuration (SINGLE) cannot support TEMPORAL_CHANGE_MAP, which is what the question asks for. Answering with SINGLE_LANDCOVER instead. Index thresholds indicate 18% vegetation (291,000 m2), 82% water (1.35 km2) and 82% built-up land (1.35 km2). These classes are measured independently and may overlap. The scene is centred at 18.0829\u00b0 N, 75.0060\u00b0 E and covers about 1.3 km by 1.3 km on the ground.",
+  "artifact_paths": "<volatile>",
+  "artifacts": [
+    "ndvi",
+    "ndwi",
+    "mndwi",
+    "ndbi",
+    "landcover_map"
+  ],
+  "code_version": "0.2.0-phase1",
+  "confidence": {
+    "band": "LOW",
+    "calibration": {
+      "T": 1.0,
+      "ece_after": -1.0,
+      "method": "uncalibrated (score is not a calibratable probability)"
+    },
+    "components": {
+      "agreement": 1.0,
+      "input_quality": 1.0,
+      "model": 1.0
+    },
+    "final": 0.44
+  },
+  "data_sources": [],
+  "execution": [
+    {
+      "confidence": 1.0,
+      "confidence_method": "deterministic",
+      "outputs": {
+        "glcm": {
+          "contrast": 5.2406,
+          "correlation": 0.9347,
+          "energy": 0.4067,
+          "homogeneity": 0.7353
+        },
+        "index_availability": {
+          "cov": false,
+          "glcm_texture": true,
+          "mndwi": true,
+          "ndbi": true,
+          "ndvi": true,
+          "ndwi": true,
+          "sigma0": false,
+          "vh_vv_ratio": false
+        },
+        "indices": {
+          "mndwi": {
+            "fraction_above_threshold": 0.8222,
+            "stats": {
+              "max": -0.0865,
+              "mean": -0.0922,
+              "min": -0.0989,
+              "p10": -0.0976,
+              "p50": -0.0913,
+              "p90": -0.0899,
+              "std": 0.0027,
+              "valid_fraction": 1.0
+            },
+            "threshold": -0.0963,
+            "threshold_method": "otsu"
+          },
+          "ndbi": {
+            "fraction_above_threshold": 0.8223,
+            "stats": {
+              "max": -0.0317,
+              "mean": -0.1685,
+              "min": -0.3111,
+              "p10": -0.2935,
+              "p50": -0.1484,
+              "p90": -0.1194,
+              "std": 0.0604,
+              "valid_fraction": 1.0
+            },
+            "threshold": -0.2723,
+            "threshold_method": "otsu"
+          },
+          "ndvi": {
+            "fraction_above_threshold": 0.1779,
+            "stats": {
+              "max": 0.502,
+              "mean": 0.3984,
+              "min": 0.2918,
+              "p10": 0.3619,
+              "p50": 0.3838,
+              "p90": 0.4898,
+              "std": 0.0443,
+              "valid_fraction": 1.0
+            },
+            "threshold": 0.417,
+            "threshold_method": "otsu"
+          },
+          "ndwi": {
+            "fraction_above_threshold": 0.8222,
+            "stats": {
+              "max": -0.1204,
+              "mean": -0.2564,
+              "min": -0.3976,
+              "p10": -0.3803,
+              "p50": -0.2365,
+              "p90": -0.2076,
+              "std": 0.0599,
+              "valid_fraction": 1.0
+            },
+            "threshold": -0.3592,
+            "threshold_method": "otsu"
+          }
+        },
+        "substitutions": [],
+        "thresholds": [
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "ndvi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 5.384,
+            "value": 0.417
+          },
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "ndwi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 5.5208,
+            "value": -0.3592
+          },
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "mndwi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 4.4077,
+            "value": -0.0963
+          },
+          {
+            "bimodal": true,
+            "fallback_reason": null,
+            "index": "ndbi",
+            "method": "otsu",
+            "n_pixels": 16384,
+            "separation": 5.5379,
+            "value": -0.2723
+          }
+        ]
+      },
+      "params": {},
+      "rationale_tag": "QUANTITATIVE_REQUEST",
+      "runtime_ms": "<volatile>",
+      "step": "step_1",
+      "tool": "index_engine_v1",
+      "version": "1.0.0"
+    },
+    {
+      "confidence": 0.0,
+      "confidence_method": "stub",
+      "outputs": {
+        "classes": [
+          "forest",
+          "water"
+        ]
+      },
+      "params": {
+        "classes": [
+          "built_up",
+          "water"
+        ]
+      },
+      "rationale_tag": "QUANTITATIVE_REQUEST",
+      "runtime_ms": "<volatile>",
+      "step": "step_2",
+      "tool": "landcover_v1",
+      "version": "0.1.0-stub"
+    }
+  ],
+  "ingest": {
+    "checks": [
+      {
+        "message": "single: CRS EPSG:32643",
+        "name": "crs_present",
+        "status": "PASS"
+      },
+      {
+        "message": "single: 0.0% nodata",
+        "name": "nodata_fraction",
+        "status": "PASS"
+      },
+      {
+        "message": "single: ~2% cloud",
+        "name": "cloud_cover",
+        "status": "PASS"
+      },
+      {
+        "message": "single: 128x128",
+        "name": "min_dimension",
+        "status": "PASS"
+      }
+    ],
+    "config": "SINGLE",
+    "images": [
+      {
+        "bands": [
+          "BLUE",
+          "GREEN",
+          "RED",
+          "NIR",
+          "SWIR1",
+          "SWIR2"
+        ],
+        "container_format": "GTiff",
+        "crs": "EPSG:32643",
+        "georeferenced": true,
+        "gsd_m": 10.0,
+        "lonlat_bounds": [
+          75.0,
+          18.0771,
+          75.0121,
+          18.0887
+        ],
+        "modality": "MSI",
+        "modality_reason": "optical_band_names_present",
+        "nodata_pct": 0.0,
+        "path": "<volatile>",
+        "polarisations": null,
+        "role": "single",
+        "sensor_guess": "SENTINEL-2"
+      }
+    ],
+    "index_availability": {
+      "cov": false,
+      "glcm_texture": true,
+      "mndwi": true,
+      "ndbi": true,
+      "ndvi": true,
+      "ndwi": true,
+      "sigma0": false,
+      "vh_vv_ratio": false
+    },
+    "mode": "operational",
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieval_reason": null,
+      "retrieved_tiles": null
+    }
+  },
+  "query": "Produce a change mask for these images.",
+  "routing": {
+    "capability_matrix_version": "cm-2026.11.02",
+    "classifier": {
+      "margin": 0.1476,
+      "name": "tfidf_logreg_v1",
+      "top1": 0.376
+    },
+    "config_excluded_task": "TEMPORAL_CHANGE_MAP",
+    "legal_tasks": [
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "llm_tiebreak_invoked": false,
+    "selected_task": "SINGLE_LANDCOVER"
+  },
+  "run_id": "<volatile>",
+  "timestamp_utc": "<volatile>",
+  "verification": {
+    "built_up_path": "ndbi",
+    "complementarity": {},
+    "conflicts": [],
+    "entailment_gate": {
+      "action": "none",
+      "backend": "deterministic",
+      "flagged": 0,
+      "flagged_detail": [],
+      "retained": 1,
+      "sentences": 3,
+      "unverifiable": 2
+    },
+    "physics_agreement": {
+      "built_up:fraction": 1.0,
+      "mndwi": 1.0,
+      "ndbi": 1.0,
+      "ndvi": 1.0,
+      "ndwi": 1.0,
+      "vegetation:fraction": 1.0,
+      "water:fraction": 1.0
+    }
+  },
+  "weights_hashes": {}
+}
