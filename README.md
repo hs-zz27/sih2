@@ -7,6 +7,39 @@ Document 0 of 6 · Written 2026-08-27 · **Read this first.**
 
 ---
 
+## Current status — 2026-09-17
+
+**The up-to-date, sourced status is [`docs/as-built-status.md`](docs/as-built-status.md).**
+It replaces the status document measured on 7 September, and every figure in it names
+the file it comes from. The headlines, with the deployed Phase 5 checkpoints:
+
+| Capability | Measured |
+|---|---|
+| Single-image VQA | RSVQA-LR official test **0.8947** (published convention; base model 0.3717) |
+| Change mask | LEVIR-CD F1 **0.8550** |
+| Captioning / grounding | BLEU-4 **0.2658** / Acc@0.5 **0.1604** — grounding still far below published results |
+| Change VQA | CDVQA **0.6061** vs majority 0.5084 (v1 head; not yet re-run on the deployed head) |
+| Cross-modal fusion | **negative** — fused below optical alone under both architectures |
+| Orchestration | illegal plans **0 / 600**; system routing **0.8254** on a sealed 63-query holdout |
+| VRSBench | VQA zero-shot 0.2968 (pre-Phase-5 adapter); caption and referring evaluators ready, not yet run |
+
+Quick start:
+
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev,report]"
+satquery matrix --validate              # capability matrix is well-formed
+python -m pytest tests/ -q              # ~1,370 tests; no GPU or checkpoints needed
+python evaluation/adversarial.py        # illegal-plan gate, must be 0 / 600
+python evaluation/routing_eval.py       # raw vs system routing accuracy
+docker-compose up api web               # UI + API (make dev)
+```
+
+Learned tools fall back to clearly-labelled stubs when their checkpoints are absent,
+so everything above runs on a laptop CPU; the numbers in the table need the checkpoints.
+
+---
+
 ## 1. What this document set is
 
 Six documents. A consolidated build plan produced by merging five independent design passes over PS 26167 and resolving their disagreements, then adding the decisions none of them made.
@@ -44,13 +77,12 @@ Current headline status (see `docs/00` §3.1 for the evidence behind each):
 |---|---|---|
 | M1 | RS adaptation of a visual/VL component | **MET** |
 | M2 | Single-image VQA *(mandatory)* | **MET** |
-| M3 | Captioning **or** grounding | **MET (weak)** — both built; grounding near-floor |
+| M3 | Captioning **or** grounding | **MET (partial)** — both built; grounding Acc@0.5 0.1604, far below published |
 | M4 | Bi-temporal change description **or** change-VQA *(mandatory)* | **MET** |
 | M5 | Change map *(optional)* | **MET** |
 | M6 | Cross-modal optical + SAR extraction | **MET (negative)** — fusion does not beat optical alone |
-| M7 | Agentic orchestration | **MET** — illegal-plan rate 0/600; routing accuracy weak |
-| M8 | Auditable execution summary | **MET** |
-
+| M7 | Agentic orchestration | **MET** — illegal-plan rate 0/600; system routing 0.8254 (sealed holdout, n=63) |
+| M8 | Auditable execution summary | **MET** — trace now includes executor warnings |
 | M9 | Combine outputs, estimate confidence, return visual evidence | **VERIFIED** |
 
 Inputs I1, I4 and I5 are **VERIFIED**; **I2 and I3 are PARTIAL**. The pair
@@ -65,7 +97,7 @@ is built but is **not a PS clause**. **All three prescribed benchmarks are now
 evaluated** — RSVQA-LR on its official test split, CDVQA on official test1,
 and VRSBench zero-shot (updated 2026-09-07; the earlier claim that VRSBench's
 imagery "lives in DOTA, not on disk" was false — the HuggingFace repo hosts it
-directly, see L11). Twenty-eight known limitations are recorded in `docs/00` §3.6 —
+directly, see L11). Thirty-seven known limitations (L1–L37) are recorded in `docs/00` §3.6 —
 open and closed alike, with dates — rather than left to be discovered.
 
 The matrix was checked clause-by-clause against
