@@ -393,7 +393,7 @@ Here is our comparative defense across 6 critical architectural dimensions:
 ### 9. "You only evaluated two of the three prescribed benchmarks. Why?"
 * **🎈 2nd-Grade Story:** We completed all the math and history exam papers, but the third book was locked inside a library whose doors were closed for repairs!
 * **🔬 Space Agency Answer:**  
-  **Correct. RSVQA-LR and CDVQA are fully evaluated; VRSBench is not.**  
+  **Correct. RSVQA-LR and CDVQA are fully evaluated; VRSBench is not.** *(Superseded 2026-09-07/17: VRSBench VQA is evaluated zero-shot — 0.2968, n=7,999, `docs/research/phase4-results.md`; caption and referring evaluators exist in `evaluation/vrsbench_tasks.py` but have not been run. See `docs/as-built-status.md`.)*  
   VRSBench distributes text annotations (142,390 rows) referencing images that are stored in external DOTA and DIOR repositories. While DIOR was on disk, DOTA imagery was unavailable. We evaluated our captioning on **RSICD (BLEU-4: 0.2446)** and grounding on **DIOR-RSVG (Acc@0.5: 0.0762)**. We openly document this gap as Limitation **L11** in our technical report.
 
 ---

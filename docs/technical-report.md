@@ -264,7 +264,7 @@ a reviewer should know about without asking:
 4. **Task 3.1's refusal half failed** — 5/5 on lexical refusals, **2/12 on
    image-conditional** ones. The model refuses when the question is absurd,
    not when the image cannot support the answer.
-5. **VRSBench is not evaluated** — annotations only; imagery lives in DOTA,
+5. **VRSBench is not evaluated** *(Superseded 2026-09-07/17: VRSBench VQA is evaluated zero-shot — 0.2968, n=7,999, `docs/research/phase4-results.md`; caption and referring evaluators exist in `evaluation/vrsbench_tasks.py` but have not been run. See `docs/as-built-status.md`.)* — annotations only; imagery lives in DOTA,
    not on disk. One of three prescribed benchmarks has no number.
 6. **Captioning diversity is 13.4%** — 146 unique captions over 1,093 images.
 7. **`landcover_v1` at threshold 0.5 is worse than always predicting
