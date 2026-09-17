@@ -7,7 +7,9 @@ checkpoints_backup/
 # Phase 5 campaign state: which runs are done, and each run's log. Per-machine
 # and regenerated, so it is not shared - but it is what a killed session is
 # resumed from, so it must not be cleaned away between sessions either.
-runs/
+# Anchored to the root: an unanchored `runs/` also ignored the frontend's
+# `frontend/app/runs/[runId]` route, so edits to that page never showed up.
+/runs/
 
 *.egg-info/
 

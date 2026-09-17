@@ -426,5 +426,9 @@
       "water:fraction": 1.0
     }
   },
+  "warnings": [
+    "sigma0_vv: adaptive thresholding failed (no_bimodal_split_found - scene appears to contain a single class); used fixed prior 0.0",
+    "this answer came from a placeholder, not a trained model: the learned tool was unavailable and the registry fell back to its stub. The text is fixed and carries no information about these inputs"
+  ],
   "weights_hashes": {}
 }

@@ -641,4 +641,8 @@ class Executor:
             # no bytes, so it gets no digest. See satquery/tools/provenance.py.
             data_sources=list(place.sources) if place else [],
             weights_hashes=weights_hashes_for(t.tool for t in execution_traces),
+            # Every tool step appends its own copy of shared notices (each
+            # stub repeats STUB_WARNING), so duplicates are dropped here while
+            # keeping the order in which they were first raised.
+            warnings=list(dict.fromkeys(warnings)),
         )

@@ -74,6 +74,8 @@ export default function RunPage() {
   const steps = record.execution ?? record.steps ?? [];
   const gate = record.verification?.entailment_gate;
   const conflicts: string[] = record.verification?.conflicts ?? [];
+  // Absent on traces stored before the executor wrote its warnings.
+  const warnings: string[] = Array.isArray(record.warnings) ? record.warnings : [];
   const footprint = sceneFootprint(record.ingest?.images);
   const geolocatable = hasGeoreference(record.ingest?.images);
 
@@ -143,6 +145,15 @@ export default function RunPage() {
                 {gate.unverifiable ?? 0} unverifiable. Unverifiable means nothing in
                 the payload could speak to the sentence either way; it is not a pass.
                 {conflicts.length > 0 && <> Conflicts: {conflicts.join('; ')}.</>}
+              </p>
+            )}
+
+            {warnings.length > 0 && (
+              <p className="caveat">
+                <b>
+                  {warnings.length} execution warning{warnings.length === 1 ? '' : 's'}:
+                </b>{' '}
+                {warnings.join('; ')}.
               </p>
             )}
 

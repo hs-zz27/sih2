@@ -105,6 +105,13 @@ class Trace(BaseModel):
     abstain_resolving_input: str | None = None
     abstain_limiting_component: str | None = None
     weights_hashes: dict[str, str]
+    # Everything the executor noticed but did not stop for: a tool that failed
+    # and was skipped, a stub standing in for a model, a head that asserted
+    # nothing. The executor collected these from the start and never wrote
+    # them anywhere, so a degraded run read exactly like a healthy one. They
+    # are part of the auditable summary (PS M8), deduplicated in first-seen
+    # order. Defaults to empty so traces written before the field still load.
+    warnings: list[str] = []
     # Attribution for any third-party reference data an answer drew on - the
     # gazetteer rasters, today. The sibling of `weights_hashes`: that one
     # names the weights that produced an answer, this one names the data.

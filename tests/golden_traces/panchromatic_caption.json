@@ -184,5 +184,11 @@
     },
     "physics_agreement": {}
   },
+  "warnings": [
+    "no water index computed: MNDWI needs SWIR1 and NDWI needs NIR; neither band is present in these inputs",
+    "no built-up index computed: NDBI needs SWIR1 and NIR, and the SWIR-free proxy needs RED and NIR; these inputs support neither",
+    "no indices computable from these inputs - check band availability",
+    "this answer came from a placeholder, not a trained model: the learned tool was unavailable and the registry fell back to its stub. The text is fixed and carries no information about these inputs"
+  ],
   "weights_hashes": {}
 }

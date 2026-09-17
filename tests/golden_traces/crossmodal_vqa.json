@@ -209,5 +209,8 @@
     },
     "physics_agreement": {}
   },
+  "warnings": [
+    "this answer came from a placeholder, not a trained model: the learned tool was unavailable and the registry fell back to its stub. The text is fixed and carries no information about these inputs"
+  ],
   "weights_hashes": {}
 }

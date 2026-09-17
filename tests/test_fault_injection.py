@@ -86,7 +86,9 @@ class TestToolFailure:
         exploding_registry("index_engine_v1")
         trace = controller.run([msi_6band], "Classify the land cover.")
         assert "index_engine_v1" in trace.abstain_reason
-        assert any("index_engine_v1" in w for w in trace.execution or []) or True
+        # Previously `... for w in trace.execution or []) or True`, which could
+        # not fail: the executor's warnings were never written to the trace.
+        assert any("index_engine_v1" in w for w in trace.warnings)
 
     def test_a_tool_failure_is_not_blamed_on_the_user(
         self, controller, exploding_registry, msi_6band
