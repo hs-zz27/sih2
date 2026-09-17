@@ -1,0 +1,45 @@
+# Runtime dependencies, kept in step with pyproject.toml [project.dependencies].
+# Pinned exactly so Docker images and CI reproduce the tested environment.
+# Security pins (audited 2026-08-30 with pip-audit).
+#
+# pillow 12.1.0 carried 19 advisories and parses attacker-supplied uploads in
+# satquery/tools/imaging.py; python-multipart 0.0.30 carried one and parses
+# the multipart body itself; starlette 0.50.0 carried five and is the HTTP
+# layer under FastAPI. All three are reachable by an unauthenticated caller,
+# which is why they are pinned forward together rather than opportunistically.
+#
+# starlette could not move while fastapi 0.128.0 pinned `starlette<0.51.0`.
+# fastapi 0.141.1 relaxes that to `starlette>=0.46.0`, so the FastAPI bump is
+# what unblocks the starlette fix - it is not a gratuitous upgrade. starlette
+# is pinned explicitly rather than left transitive so the fix is reproducible
+# and cannot silently regress.
+
+pydantic==2.12.5
+pyyaml==6.0.3
+
+# Geospatial I/O (docs/01)
+rasterio==1.5.1
+numpy==2.4.1
+
+# Index engine: GLCM, Otsu, phase correlation, GMM thresholding
+scikit-image==0.26.0
+scipy==1.17.0
+
+# Tier-1 intent classifier (TF-IDF + logistic regression, CPU only)
+scikit-learn==1.8.0
+
+# API + SSE
+starlette==1.6.0
+fastapi==0.141.1
+uvicorn==0.40.0
+python-multipart==0.0.32
+
+# Browser previews (satquery/tools/imaging.py) and PDF image embedding. A
+# direct import that was undeclared, surviving only on scikit-image pulling
+# it in transitively.
+pillow==12.3.0
+
+# PDF report generation (task 3.12). Optional: satquery.report is not on the
+# runtime path, the import is deferred, and the error names this line. A
+# machine that only serves queries does not need a PDF engine.
+reportlab==5.0.1

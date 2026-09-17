@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "satquery"
+version = "0.1.0"
+description = "SatQuery AI"
+readme = "README.md"
+# rasterio 1.5.1 requires >=3.12; the rest of the pins are fine on
+# 3.11, but declaring 3.11 while depending on rasterio 1.5.1 is a
+# claim the dependency set cannot honour.
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic==2.12.5",
+    "pyyaml==6.0.3",
+    # Geospatial I/O (docs/01)
+    "rasterio==1.5.1",
+    "numpy==2.4.1",
+    # Index engine: GLCM, Otsu, phase correlation, GMM thresholding
+    "scikit-image==0.26.0",
+    "scipy==1.17.0",
+    # Tier-1 intent classifier (TF-IDF + logistic regression, CPU only)
+    "scikit-learn==1.8.0",
+    # API + SSE. python-multipart is required for multipart form uploads;
+    # FastAPI raises at import time on the upload routes without it.
+    "fastapi==0.141.1",
+    # Pinned explicitly: fastapi only requires >=0.46.0, and 0.50.0 carried
+    # five advisories on the unauthenticated request path.
+    "starlette==1.6.0",
+    "uvicorn==0.40.0",
+    "python-multipart==0.0.32",
+    # Direct runtime import: satquery/tools/imaging.py renders the browser
+    # previews the comparators need, and satquery/report/pdf_report.py embeds
+    # them. It was undeclared and only present because scikit-image happens to
+    # pull it in - a transitive dependency doing load-bearing work.
+    "pillow==12.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "httpx==0.28.1",  # required by fastapi.testclient
+    "reportlab==5.0.1",  # so CI actually exercises tests/test_report_pages.py
+]
+
+# PDF report generation (task 3.12). Optional because `satquery.report` is not
+# on the query-serving path and its import is deferred - a machine that only
+# answers queries does not need a PDF engine. It was in requirements.txt but
+# not here, and CI installs from here, so the PDF tests would have failed on
+# the runner.
+report = ["reportlab==5.0.1"]
+
+# The training and evaluation stack. Every one of these was previously
+# undeclared: the scripts under training/ imported them and nothing recorded
+# what to install, so reproducing a run meant reading import statements.
+#
+# Versions are LOWER BOUNDS here, unlike the runtime set above which is pinned
+# exactly. The runtime set is pinned so Docker and CI reproduce the tested
+# environment; the training set cannot be, because torch must match the host's
+# CUDA build (this project's runs used 2.13.0+cu126) and pinning it would hand
+# a different machine an unresolvable requirement. Record the exact versions of
+# a run in its checkpoint metadata, not here.
+train = [
+    "torch>=2.5",
+    "peft>=0.14",
+    "transformers>=4.48",
+    "bitsandbytes>=0.45",
+    "accelerate>=1.2",
+    "datasets>=3.2",
+    "h5py>=3.12",
+    "pandas>=2.2",
+    "pyarrow>=18.0",   # parquet reader behind training/prepare/*
+    "psutil>=6.1",     # RSS sampling in evaluation/soak.py
+]
+
+[project.scripts]
+satquery = "satquery.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["satquery*", "evaluation*"]

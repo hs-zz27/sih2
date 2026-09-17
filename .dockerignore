@@ -1,0 +1,54 @@
+# Build context exclusions.
+#
+# Both Python images end with `COPY . .`, and without this file that copies the
+# entire working tree into the build context - including data/ (BigEarthNet
+# shards, SECOND, the CDVQA mirror: tens of gigabytes), checkpoints/, models/
+# and .git. A verification build was still transferring context after eleven
+# minutes and 7.6 GB when this was written.
+#
+# Nothing excluded here is *needed* in the image: docker-compose mounts
+# ./models and ./data as volumes at runtime, so baking them in would ship a
+# second, stale copy of data the container is about to have mounted over it.
+
+# Datasets and trained weights - mounted as volumes, never baked in.
+data/
+checkpoints/
+checkpoints_backup/
+models/
+
+# Runtime output: gitignored already, and meaningless inside a fresh image.
+artifacts/
+*.db
+satquery_runs.db
+
+# Version control and local tooling.
+.git/
+.github/
+.gitignore
+.claude/
+.venv/
+venv/
+
+# Python build and cache artifacts.
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# The frontend has its own image and its own build context (context: frontend
+# in docker-compose.yml), so its dependencies must not travel in the API
+# context - node_modules alone is hundreds of megabytes.
+frontend/node_modules/
+frontend/.next/
+frontend/tsconfig.tsbuildinfo
+
+# Tests and their fixtures are not part of a serving image.
+tests/
+
+# Editor and OS noise.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
