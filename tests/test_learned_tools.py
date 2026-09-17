@@ -164,6 +164,33 @@ class TestGroundingTool:
         assert any("0.0762" in w for w in result.warnings)
 
 
+class TestGroundingReportsTheLoadedArchitecture:
+    """No checkpoint needed: the figure a trace quotes must match the weights.
+
+    Phase 5 deployed the v2 pretrained grounder (Acc@0.5 0.1604) while the
+    tool still reported v1's 0.0762 and blamed pooling v2 does not do.
+    """
+
+    def test_deployed_v2_pretrained(self):
+        acc, warning = grounding_mod.measured_accuracy("v2", True)
+        assert acc == 0.1604
+        assert "0.1604" in warning
+        assert "pools away" not in warning
+
+    def test_v2_from_scratch(self):
+        assert grounding_mod.measured_accuracy("v2", False)[0] == 0.1262
+
+    def test_v1_keeps_its_figure_and_its_cause(self):
+        acc, warning = grounding_mod.measured_accuracy("v1", False)
+        assert acc == 0.0762
+        assert "pools away" in warning
+
+    def test_unmeasured_combination_does_not_guess_high(self):
+        acc, warning = grounding_mod.measured_accuracy("v3", True)
+        assert acc == min(grounding_mod.MEASURED_ACC_AT_05.values())
+        assert "no measured accuracy" in warning
+
+
 @pytest.mark.skipif(
     not has_ckpt("checkpoints/change_caption"),
     reason="no change_caption checkpoint",

@@ -8,12 +8,14 @@ Opt-in via `SATQUERY_GROUNDING`, the same pattern the other learned tools use.
 
 ## Read the metric before trusting a box
 
-Published DIOR-RSVG results reach roughly 70-80% Acc@0.5. **This model reaches
-7.6%**, and the cause is architectural rather than mysterious: it
-global-average-pools the visual feature map before regressing the box, which
-discards exactly the spatial information localisation depends on, so it can
-only learn an "average" box. Task 2.7 recorded that, and wiring the model in
-does not change it.
+Published DIOR-RSVG results reach roughly 70-80% Acc@0.5. **The v1 model
+reaches 7.6%**, and the cause was architectural: it global-average-pools the
+visual feature map before regressing the box, which discards exactly the
+spatial information localisation depends on, so it can only learn an
+"average" box. Phase 5's v2 removes the pooling (12.6%) and, with an ImageNet
+backbone, reaches **16.0%** - the deployed default. Still far below published
+results; see `MEASURED_ACC_AT_05`, which reports the figure for whichever
+architecture is loaded.
 
 The tool therefore reports the box **with the model's own weak confidence**,
 and the three-component combiner and the abstention policy are what stop a
@@ -52,6 +54,46 @@ ENV_CHECKPOINT = "SATQUERY_GROUNDING"
 
 class GroundingPayload(ToolPayload):
     data: dict[str, Any]
+
+
+# DIOR-RSVG test Acc@0.5 (n=1,141) of each grounder architecture, from the
+# run that trained it: v1 from docs/model-cards.md, v2 from
+# docs/assets/phase5/{grounding,grounding_pre}/metrics.json. There is no
+# objectness head, so this dataset-level number is what a box is worth.
+#
+# It used to be a single constant, 0.0762, with a warning blaming global
+# average pooling. Phase 5 deployed the v2 pretrained grounder, which has no
+# such pooling and scores 0.1604, so every trace from the deployed model
+# quoted the wrong accuracy and named a cause its weights no longer had.
+MEASURED_ACC_AT_05: dict[tuple[str, bool], float] = {
+    ("v1", False): 0.0762,
+    ("v2", False): 0.1262,
+    ("v2", True): 0.1604,
+}
+
+
+def measured_accuracy(arch: str, pretrained: bool) -> tuple[float, str]:
+    """(Acc@0.5, warning) for the architecture that is actually loaded."""
+    key = (arch, bool(pretrained))
+    if key not in MEASURED_ACC_AT_05:
+        # An unmeasured combination gets the weakest measured figure rather
+        # than a guess, and says so.
+        return MEASURED_ACC_AT_05[("v1", False)], (
+            f"grounding architecture {arch} (pretrained={bool(pretrained)}) has "
+            "no measured accuracy; reporting the lowest measured Acc@0.5, 0.0762"
+        )
+    acc = MEASURED_ACC_AT_05[key]
+    if arch == "v1":
+        cause = ("the v1 head pools away spatial detail before regressing the "
+                 "box, so this localisation is weak by design")
+    else:
+        cause = ("the v2 head no longer pools, and training loss reached 0.0054 "
+                 "while test accuracy stayed low, so the remaining gap is data "
+                 "and pretraining rather than architecture")
+    return acc, (
+        f"grounding Acc@0.5 is {acc:.4f} on DIOR-RSVG against ~70-80% "
+        f"published; {cause}"
+    )
 
 
 def is_available() -> tuple[bool, str]:
@@ -110,8 +152,10 @@ class _Handle:
         pretrained = extra.get("pretrained")
         if pretrained is None:
             pretrained = any(k.startswith("proj.") for k in state)
+        self.arch = extra.get("arch", "v1")
+        self.pretrained = bool(pretrained)
         model = build_model(vocab_size=len(self.vocab), dim=dim,
-                            arch=extra.get("arch", "v1"), pretrained=pretrained)
+                            arch=self.arch, pretrained=pretrained)
         load_checkpoint(latest, model, map_location="cpu")
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -174,9 +218,9 @@ class GroundingTool(ToolProtocol):
 
         # There is no objectness head, so there is no learned score to report.
         # Fabricating one would be worse than reporting the measured ceiling:
-        # this is the model's Acc@0.5 on its own test split, which is what a
-        # box from it is actually worth.
-        confidence = 0.0762
+        # this is the loaded architecture's Acc@0.5 on its own test split,
+        # which is what a box from it is actually worth.
+        confidence, accuracy_warning = measured_accuracy(handle.arch, handle.pretrained)
 
         return ToolResult(
             tool=TOOL_NAME,
@@ -202,11 +246,7 @@ class GroundingTool(ToolProtocol):
             confidence_method="threshold_rule",
             model_card=f"referring grounder ({Path(handle.path).name})",
             runtime_ms=int((time.perf_counter() - started) * 1000),
-            warnings=warnings + [
-                "grounding Acc@0.5 is 0.0762 on DIOR-RSVG against ~70-80% "
-                "published; the head pools away spatial detail before "
-                "regressing the box, so this localisation is weak by design"
-            ],
+            warnings=warnings + [accuracy_warning],
         )
 
     def run_batch(self, manifests, params):
