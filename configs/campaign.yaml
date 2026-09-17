@@ -1,0 +1,353 @@
+# Phase 5 full-training campaign - the nine tools, trained on cluster GPU.
+#
+# Read `docs/phase5-full-training.md` before changing anything here.
+#
+# WHAT THIS FILE IS
+#
+# The dependency graph the run queue executes. `training/cluster/campaign.py`
+# validates it on load - unknown dependency, missing script or a cycle is an
+# error at import time, not at hour three of a run.
+#
+# WHY NINE TOOLS AND EIGHT RUNS
+#
+# `index_engine_v1` is deterministic NumPy and has never had a training run;
+# `docs/03` section 3 records it as zero GPU-hours and zero risk. It is listed
+# at the bottom as `trains: false` so the count of tools in this file matches
+# the count of tools in the registry, rather than looking like an omission.
+#
+# CHECKPOINT PATHS ARE ALL NEW
+#
+# Every `ckpt_dir` is under `checkpoints/v2/`. Nothing here writes into a
+# directory holding a published checkpoint. Under `docs/code-freeze.md` a
+# published number is immutable, and the way to keep that true while retraining
+# is to put the new weights somewhere else and report them as a new dated
+# result - not to overwrite and hope the old number is written down elsewhere.
+
+version: campaign-2026.09.09
+name: phase5-full-training
+checkpoint_root: checkpoints/v2
+
+runs:
+  # --- Track A: the encoder two tools are built on -------------------------
+  #
+  # First because `optsar_fusion` and the resolution ladder both want its
+  # weights, and because it is the run with the most headroom: mAP 0.2854 on
+  # 30k patches against a published 0.65-0.85. NOTE: `data/ben_full` holds
+  # 60,000 train patches (4 x 15,000 shards), NOT the ~549k of full
+  # BigEarthNet v2 - only that subset was ever prepared. v2 therefore sees
+  # 2x the v1 run's data, not 20x, and the headroom is correspondingly
+  # smaller than the published comparison suggests.
+  - id: track_a
+    tool: landcover_v1
+    family: encoder_multiband
+    script: training/track_a_full.py
+    needs_data: [ben_full]
+    depends_on: []
+    est_hours: 14
+    ckpt_dir: checkpoints/v2/track_a
+    note: >
+      All 60,000 prepared patches, all 12 bands, band dropout 0.3, GSD,
+      multi-resolution. The v1 ablation measured dropout as worth 84.4% ->
+      90.2% four-band retention, so it stays on.
+    args:
+      - --data
+      - data/ben_full
+      - --ckpt-dir
+      - checkpoints/v2/track_a
+      - --arch
+      - v2
+      - --epochs
+      - "12"
+      - --lr
+      - "0.0005"
+      - --dim
+      - "96"
+      - --band-dropout
+      - "0.3"
+      - --multires
+      # WITHOUT THIS the run reports only `map_all_bands`, and the two numbers
+      # the Cartosat case actually rests on - 4-band mAP and retention - are
+      # never computed. The v1 published run passed it; a v2 run that does not
+      # is not comparable on the claim that matters most, and for the
+      # `nodropout` arm it removes the entire point of the run.
+      - --ablation
+      - --save-every
+      - "500"
+
+  # The ablation arm. Same data, same schedule, dropout off - because the v1
+  # ablation was single-seed and `docs/03` says so outright. A retrain that
+  # does not re-run it inherits an unestablished claim.
+  - id: track_a_nodropout
+    tool: landcover_v1
+    family: encoder_multiband
+    script: training/track_a_full.py
+    needs_data: [ben_full]
+    depends_on: [track_a]
+    est_hours: 14
+    ckpt_dir: checkpoints/v2/track_a_nodropout
+    note: "Control arm for the band-dropout claim. Not a deployed checkpoint."
+    args:
+      - --data
+      - data/ben_full
+      - --ckpt-dir
+      - checkpoints/v2/track_a_nodropout
+      - --arch
+      - v2
+      - --epochs
+      - "12"
+      - --lr
+      - "0.0005"
+      - --dim
+      - "96"
+      - --band-dropout
+      - "0.0"
+      - --multires
+      # WITHOUT THIS the run reports only `map_all_bands`, and the two numbers
+      # the Cartosat case actually rests on - 4-band mAP and retention - are
+      # never computed. The v1 published run passed it; a v2 run that does not
+      # is not comparable on the claim that matters most, and for the
+      # `nodropout` arm it removes the entire point of the run.
+      - --ablation
+      - --save-every
+      - "500"
+
+  # --- Optical/SAR fusion --------------------------------------------------
+  - id: optsar_fusion
+    tool: optsar_fusion_v1
+    family: encoder
+    script: training/train_optsar_fusion.py
+    needs_data: [whu_opt_sar]
+    depends_on: [track_a]
+    est_hours: 6
+    ckpt_dir: checkpoints/v2/optsar_fusion
+    note: >
+      PS-mandatory. The three-head output is what makes the fusion claim
+      falsifiable - if `fused` does not beat `max(optical, sar)` the
+      cross-attention is decoration and the report has to say so.
+    args:
+      - --index
+      - data/whu_opt_sar/index.json
+      - --ckpt-dir
+      - checkpoints/v2/optsar_fusion
+      - --arch
+      - v2
+      - --epochs
+      - "40"
+      - --dim
+      - "48"
+
+  # --- Track B: the VLM ----------------------------------------------------
+  #
+  # No `--arch`: this one was already a real model. `training/track_b_vlm_qlora.py`
+  # does genuine QLoRA on Qwen2.5-VL-3B and its problem was never architecture,
+  # it was 200 steps on a 6 GB laptop. What changes is the step count, the data
+  # (the full instruction mix rather than a slice) and the precision, which
+  # `env_probe` picks from the card.
+  #
+  # This is also the tool whose weights are GONE - `docs/model-cards.md` records
+  # the adapter as 99.99% NUL bytes. It is the only one of the nine where
+  # retraining is recovery rather than improvement.
+  - id: track_b_vqa
+    tool: rs_vqa_v1
+    family: vlm_qlora
+    script: training/track_b_vlm_qlora.py
+    # instruct.jsonl is pointers only. 3,297 of its rows resolve into
+    # whu_opt_sar and 2,043 into rsvqa_lr_2k; staging the mix alone gives
+    # a run that opens the JSONL fine and then fails on the first image.
+    needs_data: [instruct_mix, whu_opt_sar, rsvqa_lr_2k]
+    depends_on: []
+    est_hours: 20
+    ckpt_dir: checkpoints/v2/track_b_vqa
+    note: >
+      Rebuilds the destroyed adapter. 5% refusal examples in the mix are not
+      filler - an abstention mechanism fights the model unless the model was
+      taught to say "the image does not show this".
+    args:
+      - --model
+      - models/qwen25_vl_3b
+      - --data
+      - data/instruct_mix
+      - --ckpt-dir
+      - checkpoints/v2/track_b_vqa
+      - --max-steps
+      - "6000"
+      - --lr
+      - "0.0001"
+      - --warmup-steps
+      - "180"
+      - --val-every
+      - "500"
+      - --save-every
+      - "250"
+
+  # `caption_v1` is NOT served by a Qwen adapter, whatever `docs/03` section 3
+  # planned. `satquery/tools/caption.py` loads a `training/train_caption.py`
+  # checkpoint from SATQUERY_CAPTION, and nothing in the registry loads a
+  # caption LoRA at all. A second Qwen adapter would therefore cost ~10 GPU-h
+  # and produce weights no tool can read, so the run that exists here is the
+  # one that improves the tool that is actually deployed.
+  - id: caption
+    tool: caption_v1
+    family: head
+    script: training/train_caption.py
+    needs_data: [rsicd]
+    depends_on: []
+    est_hours: 4
+    ckpt_dir: checkpoints/v2/caption
+    note: >
+      RSICD scene captioning, transformer decoder with cross-attention over
+      the feature map. v1 BLEU-4 was 0.2446.
+    args:
+      - --data
+      - data/rsicd
+      - --ckpt-dir
+      - checkpoints/v2/caption
+      - --arch
+      - v2
+      - --epochs
+      - "60"
+      - --dim
+      - "192"
+
+  # --- Grounding -----------------------------------------------------------
+  #
+  # The largest expected gain of the eight, and the one with a named cause:
+  # v1 pooled the feature map before regressing the box, so 0.0762 Acc@0.5 was
+  # architectural. v2 attends over the map instead.
+  - id: grounding
+    tool: grounding_v1
+    family: grounding
+    script: training/train_grounding.py
+    needs_data: [dior_rsvg]
+    depends_on: []
+    est_hours: 8
+    ckpt_dir: checkpoints/v2/grounding
+    note: "Still no trust_remote_code. Florence-2 remains excluded by policy."
+    args:
+      - --data
+      - data/dior_rsvg
+      - --ckpt-dir
+      - checkpoints/v2/grounding
+      - --arch
+      - v2
+      - --epochs
+      - "40"
+      - --lr
+      - "0.0003"
+      - --dim
+      - "128"
+      # A cap above the corpus size, not 0: the trainer slices `rows[:limit]`,
+      # so 0 means "train on nothing" rather than "no limit". v1 trained on
+      # the default 20,000 of ~38,000 referring expressions.
+      - --limit-train
+      - "1000000"
+      - --limit-eval
+      - "200000"
+
+  # --- Change: mask, caption, semantic -------------------------------------
+  - id: change_mask
+    tool: change_mask_v1
+    family: change
+    script: training/train_change_mask.py
+    needs_data: [levircd]
+    depends_on: []
+    est_hours: 7
+    ckpt_dir: checkpoints/v2/change_mask
+    note: >
+      Full LEVIR-CD. The change class is a small minority of pixels, so the
+      positive weighting v1 established stays; what changes is that small
+      buildings survive the decoder.
+    args:
+      - --index
+      - data/levircd/index.json
+      - --ckpt-dir
+      - checkpoints/v2/change_mask
+      - --arch
+      - v2
+      - --epochs
+      - "60"
+      - --dim
+      - "48"
+
+  - id: change_caption
+    tool: change_caption_v1
+    family: change
+    script: training/train_change_caption.py
+    needs_data: [levir_mci]
+    depends_on: [change_mask]
+    est_hours: 8
+    ckpt_dir: checkpoints/v2/change_caption
+    note: "Transformer decoder with cross-attention over the difference map."
+    args:
+      - --index
+      - data/levir_mci/index.json
+      - --ckpt-dir
+      - checkpoints/v2/change_caption
+      - --arch
+      - v2
+      - --epochs
+      - "50"
+      - --dim
+      - "128"
+
+  # --- Semantic change, behind change_vqa_v1 -------------------------------
+  #
+  # DELIBERATELY `--pretrained`, NOT `--arch v2`.
+  #
+  # SECOND has ~1,600 training pairs. v1 already measured a from-scratch
+  # encoder there at 0.1691 change-class mIoU, which put end-to-end CDVQA at
+  # 0.4439 - BELOW the 0.5084 a per-type majority answer scores - and moving
+  # to a pretrained ResNet-18 is what fixed it. A bigger from-scratch model on
+  # 1,600 pairs is the same mistake with more parameters. The v2 arm is run
+  # second, as an ablation, precisely so that claim is measured rather than
+  # assumed a second time.
+  #
+  # Note also that these weights are UNPUBLISHABLE: `docs/model-cards.md`
+  # records SECOND as stating no licence at all. Retraining does not change
+  # that, and the template answer path is what guarantees the tool a non-zero
+  # floor regardless.
+  - id: change_vqa
+    tool: change_vqa_v1
+    family: change
+    script: training/train_change_vqa.py
+    # CDVQA is the questions; SECOND is the imagery they are asked about.
+    needs_data: [cdvqa, second]
+    depends_on: [change_mask]
+    est_hours: 5
+    ckpt_dir: checkpoints/v2/change_vqa
+    args:
+      - --ckpt-dir
+      - checkpoints/v2/change_vqa
+      - --pretrained
+      - --epochs
+      - "60"
+      - --dim
+      - "64"
+
+  - id: change_vqa_scratch_v2
+    tool: change_vqa_v1
+    family: change
+    script: training/train_change_vqa.py
+    # CDVQA is the questions; SECOND is the imagery they are asked about.
+    needs_data: [cdvqa, second]
+    depends_on: [change_vqa]
+    est_hours: 5
+    ckpt_dir: checkpoints/v2/change_vqa_scratch
+    note: "Ablation arm: does v2 capacity beat a pretrained stem on 1,600 pairs?"
+    args:
+      - --ckpt-dir
+      - checkpoints/v2/change_vqa_scratch
+      - --arch
+      - v2
+      - --epochs
+      - "60"
+      - --dim
+      - "48"
+
+# Tools with no training run. Listed so the nine are all accounted for.
+untrained:
+  - tool: index_engine_v1
+    why: >
+      Deterministic NumPy - NDVI, NDWI, MNDWI, NDBI, sigma0, VH/VV, GLCM,
+      adaptive thresholding. Zero GPU-hours and zero risk by construction, and
+      the fallback every other tool degrades to.
