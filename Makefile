@@ -24,6 +24,10 @@ demo:
 	# Run the demo bundle
 	docker-compose up
 
+# Go / no-go before recording or presenting: API, UI, live models, GPU, disk, RAM.
+preflight:
+	python scripts/demo_preflight.py
+
 test:
 	python -m pytest tests/ -q
 
