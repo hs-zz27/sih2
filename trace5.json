@@ -1,0 +1,118 @@
+{
+  "run_id": "run_31dd9715236a",
+  "timestamp_utc": "2026-09-01T10:41:18.394552+05:30",
+  "code_version": "0.2.0-phase1",
+  "query": "Is there water in this image?",
+  "ingest": {
+    "mode": "operational",
+    "config": "SINGLE",
+    "images": [
+      {
+        "role": "single",
+        "path": "/tmp/satquery_run_31dd9715236a_pjvp683o/00_valid_crs.tif",
+        "modality": "OPTICAL",
+        "modality_reason": "band_count_lt_4_no_names_assumed_optical",
+        "crs": "EPSG:4326",
+        "gsd_m": 111320.0,
+        "bands": [
+          "BLUE",
+          "GREEN",
+          "RED"
+        ],
+        "nodata_pct": 0.0,
+        "sensor_guess": null,
+        "polarisations": null
+      }
+    ],
+    "index_availability": {
+      "ndvi": false,
+      "ndwi": false,
+      "mndwi": false,
+      "ndbi": false,
+      "sigma0": false,
+      "vh_vv_ratio": false,
+      "glcm_texture": true,
+      "cov": false
+    },
+    "checks": [
+      {
+        "name": "crs_present",
+        "status": "PASS",
+        "message": "single: CRS EPSG:4326"
+      },
+      {
+        "name": "nodata_fraction",
+        "status": "PASS",
+        "message": "single: 0.0% nodata"
+      },
+      {
+        "name": "min_dimension",
+        "status": "PASS",
+        "message": "single: 256x256"
+      }
+    ],
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieved_tiles": null,
+      "retrieval_reason": null
+    }
+  },
+  "routing": {
+    "legal_tasks": [
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "selected_task": "SINGLE_VQA",
+    "classifier": {
+      "name": "tfidf_logreg_v1",
+      "top1": 0.98509,
+      "margin": 0.979031
+    },
+    "llm_tiebreak_invoked": false,
+    "config_excluded_task": null,
+    "capability_matrix_version": "cm-2026.11.02"
+  },
+  "execution": [],
+  "verification": {
+    "physics_agreement": {},
+    "built_up_path": "not_computed",
+    "complementarity": {},
+    "conflicts": [],
+    "entailment_gate": {
+      "sentences": 0,
+      "retained": 0,
+      "flagged": 0,
+      "unverifiable": 0,
+      "backend": "deterministic",
+      "action": "none",
+      "flagged_detail": []
+    }
+  },
+  "confidence": {
+    "final": 1.0,
+    "band": "HIGH",
+    "components": {
+      "model": 1.0,
+      "agreement": 1.0,
+      "input_quality": 1.0
+    },
+    "calibration": {
+      "method": "uncalibrated (score is not a calibratable probability)",
+      "T": 1.0,
+      "ece_after": -1.0
+    }
+  },
+  "answer": "a required tool did not complete: rs_vqa_v1 failed and the plan cannot continue without it (RuntimeError: Failed to find C compiler. Please specify via CC environment variable or set triton.knobs.build.impl.) - this is a system-side failure, not a problem with the query or the inputs; the trace's warnings list carries the error, and retrying with the same inputs is reasonable",
+  "artifacts": [],
+  "artifact_paths": {},
+  "abstained": true,
+  "abstain_reason": "a required tool did not complete: rs_vqa_v1 failed and the plan cannot continue without it (RuntimeError: Failed to find C compiler. Please specify via CC environment variable or set triton.knobs.build.impl.) - this is a system-side failure, not a problem with the query or the inputs; the trace's warnings list carries the error, and retrying with the same inputs is reasonable",
+  "abstain_trigger": "tool_failure",
+  "abstain_resolving_input": "this is a system-side failure, not a problem with the query or the inputs; the trace's warnings list carries the error, and retrying with the same inputs is reasonable",
+  "abstain_limiting_component": "model",
+  "weights_hashes": {}
+}

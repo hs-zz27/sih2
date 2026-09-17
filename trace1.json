@@ -1,0 +1,116 @@
+{
+  "run_id": "run_3a8524d35725",
+  "timestamp_utc": "2026-09-01T04:48:26.040257+00:00",
+  "code_version": "0.2.0-phase1",
+  "query": "What is in this image?",
+  "ingest": {
+    "mode": "operational",
+    "config": "SINGLE",
+    "images": [
+      {
+        "role": "single",
+        "path": "/tmp/satquery_run_3a8524d35725_or4gmbyo/00_NH49E009023_03_01.tif",
+        "modality": "PAN",
+        "modality_reason": "single_band_defaulted_to_panchromatic",
+        "crs": "UNKNOWN",
+        "gsd_m": 1.0,
+        "bands": [
+          "BAND_1"
+        ],
+        "nodata_pct": 0.0,
+        "sensor_guess": null,
+        "polarisations": null
+      }
+    ],
+    "index_availability": {
+      "ndvi": false,
+      "ndwi": false,
+      "mndwi": false,
+      "ndbi": false,
+      "sigma0": false,
+      "vh_vv_ratio": false,
+      "glcm_texture": true,
+      "cov": false
+    },
+    "checks": [
+      {
+        "name": "crs_present",
+        "status": "FAIL",
+        "message": "single: no CRS - cannot georeference outputs or co-register"
+      },
+      {
+        "name": "nodata_fraction",
+        "status": "PASS",
+        "message": "single: 0.0% nodata"
+      },
+      {
+        "name": "min_dimension",
+        "status": "PASS",
+        "message": "single: 512x512"
+      }
+    ],
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieved_tiles": null,
+      "retrieval_reason": null
+    }
+  },
+  "routing": {
+    "legal_tasks": [
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "selected_task": "CLARIFY_OR_ABSTAIN",
+    "classifier": {
+      "name": "not_invoked",
+      "top1": 0.0,
+      "margin": 0.0
+    },
+    "llm_tiebreak_invoked": false,
+    "config_excluded_task": null,
+    "capability_matrix_version": "cm-2026.11.02"
+  },
+  "execution": [],
+  "verification": {
+    "physics_agreement": {},
+    "built_up_path": "not_computed",
+    "complementarity": {},
+    "conflicts": [],
+    "entailment_gate": {
+      "sentences": 0,
+      "retained": 0,
+      "flagged": 0,
+      "unverifiable": 0,
+      "backend": "deterministic",
+      "action": "none",
+      "flagged_detail": []
+    }
+  },
+  "confidence": {
+    "final": 0.793701,
+    "band": "HIGH",
+    "components": {
+      "model": 1.0,
+      "agreement": 1.0,
+      "input_quality": 0.5
+    },
+    "calibration": {
+      "method": "uncalibrated (score is not a calibratable probability)",
+      "T": 1.0,
+      "ece_after": -1.0
+    }
+  },
+  "answer": "input validation failed (crs_present) - no reliable answer is possible from these inputs - supply inputs that pass those checks; each check's own message is in the trace under ingest.checks",
+  "artifacts": [],
+  "artifact_paths": {},
+  "abstained": true,
+  "abstain_reason": "input validation failed (crs_present) - no reliable answer is possible from these inputs - supply inputs that pass those checks; each check's own message is in the trace under ingest.checks",
+  "abstain_trigger": "input_validation",
+  "abstain_resolving_input": "supply inputs that pass those checks; each check's own message is in the trace under ingest.checks",
+  "abstain_limiting_component": "input_quality",
+  "weights_hashes": {}
+}

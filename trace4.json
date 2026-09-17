@@ -1,0 +1,183 @@
+{
+  "run_id": "run_4ca24b065acc",
+  "timestamp_utc": "2026-09-01T10:38:53.027713+05:30",
+  "code_version": "0.2.0-phase1",
+  "query": "What is in this image?",
+  "ingest": {
+    "mode": "operational",
+    "config": "SINGLE",
+    "images": [
+      {
+        "role": "single",
+        "path": "/tmp/satquery_run_4ca24b065acc_v88aelpe/00_valid_crs.tif",
+        "modality": "OPTICAL",
+        "modality_reason": "band_count_lt_4_no_names_assumed_optical",
+        "crs": "EPSG:4326",
+        "gsd_m": 111320.0,
+        "bands": [
+          "BLUE",
+          "GREEN",
+          "RED"
+        ],
+        "nodata_pct": 0.0,
+        "sensor_guess": null,
+        "polarisations": null
+      }
+    ],
+    "index_availability": {
+      "ndvi": false,
+      "ndwi": false,
+      "mndwi": false,
+      "ndbi": false,
+      "sigma0": false,
+      "vh_vv_ratio": false,
+      "glcm_texture": true,
+      "cov": false
+    },
+    "checks": [
+      {
+        "name": "crs_present",
+        "status": "PASS",
+        "message": "single: CRS EPSG:4326"
+      },
+      {
+        "name": "nodata_fraction",
+        "status": "PASS",
+        "message": "single: 0.0% nodata"
+      },
+      {
+        "name": "min_dimension",
+        "status": "PASS",
+        "message": "single: 256x256"
+      }
+    ],
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieved_tiles": null,
+      "retrieval_reason": null
+    }
+  },
+  "routing": {
+    "legal_tasks": [
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "selected_task": "SINGLE_CAPTION",
+    "classifier": {
+      "name": "tfidf_logreg_v1",
+      "top1": 0.593355,
+      "margin": 0.236295
+    },
+    "llm_tiebreak_invoked": false,
+    "config_excluded_task": null,
+    "capability_matrix_version": "cm-2026.11.02"
+  },
+  "execution": [
+    {
+      "step": "step_1",
+      "tool": "index_engine_v1",
+      "version": "1.0.0",
+      "params": {},
+      "rationale_tag": "MASK_CONDITIONED_CAPTION",
+      "outputs": {
+        "indices": {},
+        "thresholds": [],
+        "glcm": {
+          "contrast": 162.414665,
+          "homogeneity": 0.091987,
+          "energy": 0.031748,
+          "correlation": -0.000257
+        },
+        "index_availability": {
+          "ndvi": false,
+          "ndwi": false,
+          "mndwi": false,
+          "ndbi": false,
+          "sigma0": false,
+          "vh_vv_ratio": false,
+          "glcm_texture": true,
+          "cov": false
+        },
+        "substitutions": []
+      },
+      "confidence": 1.0,
+      "confidence_method": "deterministic",
+      "runtime_ms": 3
+    },
+    {
+      "step": "step_2",
+      "tool": "landcover_v1",
+      "version": "0.1.0-stub",
+      "params": {},
+      "rationale_tag": "MASK_CONDITIONED_CAPTION",
+      "outputs": {
+        "classes": [
+          "forest",
+          "water"
+        ]
+      },
+      "confidence": 0.0,
+      "confidence_method": "stub",
+      "runtime_ms": 200
+    },
+    {
+      "step": "step_3",
+      "tool": "caption_v1",
+      "version": "0.1.0-stub",
+      "params": {},
+      "rationale_tag": "MASK_CONDITIONED_CAPTION",
+      "outputs": {
+        "caption": "[STUB - no model loaded] no caption - the captioning model is not loaded"
+      },
+      "confidence": 0.0,
+      "confidence_method": "stub",
+      "runtime_ms": 150
+    }
+  ],
+  "verification": {
+    "physics_agreement": {},
+    "built_up_path": "not_computed",
+    "complementarity": {},
+    "conflicts": [],
+    "entailment_gate": {
+      "sentences": 1,
+      "retained": 0,
+      "flagged": 0,
+      "unverifiable": 1,
+      "backend": "deterministic",
+      "action": "none",
+      "flagged_detail": []
+    }
+  },
+  "confidence": {
+    "final": 0.44,
+    "band": "LOW",
+    "components": {
+      "model": 1.0,
+      "agreement": 1.0,
+      "input_quality": 1.0
+    },
+    "calibration": {
+      "method": "uncalibrated (score is not a calibratable probability)",
+      "T": 1.0,
+      "ece_after": -1.0
+    }
+  },
+  "answer": "[STUB - no model loaded] no caption - the captioning model is not loaded",
+  "artifacts": [
+    "landcover_map"
+  ],
+  "artifact_paths": {
+    "landcover_map": "/fake/landcover.tif"
+  },
+  "abstained": false,
+  "abstain_reason": null,
+  "abstain_trigger": null,
+  "abstain_resolving_input": null,
+  "abstain_limiting_component": null,
+  "weights_hashes": {}
+}

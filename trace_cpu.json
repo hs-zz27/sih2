@@ -1,0 +1,118 @@
+{
+  "run_id": "run_004ee1097955",
+  "timestamp_utc": "2026-09-01T04:51:30.091307+00:00",
+  "code_version": "0.2.0-phase1",
+  "query": "Is there water in this image?",
+  "ingest": {
+    "mode": "operational",
+    "config": "SINGLE",
+    "images": [
+      {
+        "role": "single",
+        "path": "/tmp/satquery_run_004ee1097955_b8n72sxl/00_valid_crs.tif",
+        "modality": "OPTICAL",
+        "modality_reason": "band_count_lt_4_no_names_assumed_optical",
+        "crs": "EPSG:4326",
+        "gsd_m": 111320.0,
+        "bands": [
+          "BLUE",
+          "GREEN",
+          "RED"
+        ],
+        "nodata_pct": 0.0,
+        "sensor_guess": null,
+        "polarisations": null
+      }
+    ],
+    "index_availability": {
+      "ndvi": false,
+      "ndwi": false,
+      "mndwi": false,
+      "ndbi": false,
+      "sigma0": false,
+      "vh_vv_ratio": false,
+      "glcm_texture": true,
+      "cov": false
+    },
+    "checks": [
+      {
+        "name": "crs_present",
+        "status": "PASS",
+        "message": "single: CRS EPSG:4326"
+      },
+      {
+        "name": "nodata_fraction",
+        "status": "PASS",
+        "message": "single: 0.0% nodata"
+      },
+      {
+        "name": "min_dimension",
+        "status": "PASS",
+        "message": "single: 256x256"
+      }
+    ],
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieved_tiles": null,
+      "retrieval_reason": null
+    }
+  },
+  "routing": {
+    "legal_tasks": [
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "selected_task": "SINGLE_VQA",
+    "classifier": {
+      "name": "tfidf_logreg_v1",
+      "top1": 0.98509,
+      "margin": 0.979031
+    },
+    "llm_tiebreak_invoked": false,
+    "config_excluded_task": null,
+    "capability_matrix_version": "cm-2026.11.02"
+  },
+  "execution": [],
+  "verification": {
+    "physics_agreement": {},
+    "built_up_path": "not_computed",
+    "complementarity": {},
+    "conflicts": [],
+    "entailment_gate": {
+      "sentences": 0,
+      "retained": 0,
+      "flagged": 0,
+      "unverifiable": 0,
+      "backend": "deterministic",
+      "action": "none",
+      "flagged_detail": []
+    }
+  },
+  "confidence": {
+    "final": 1.0,
+    "band": "HIGH",
+    "components": {
+      "model": 1.0,
+      "agreement": 1.0,
+      "input_quality": 1.0
+    },
+    "calibration": {
+      "method": "uncalibrated (score is not a calibratable probability)",
+      "T": 1.0,
+      "ece_after": -1.0
+    }
+  },
+  "answer": "the active profile cannot answer this task: SINGLE_VQA needs a learned tool, and none was available under this profile's resource budget; the task has no deterministic fallback - run the full profile on a machine with a GPU, or ask a question the deterministic index engine can answer - land cover, vegetation, water and built-up extent are all available here",
+  "artifacts": [],
+  "artifact_paths": {},
+  "abstained": true,
+  "abstain_reason": "the active profile cannot answer this task: SINGLE_VQA needs a learned tool, and none was available under this profile's resource budget; the task has no deterministic fallback - run the full profile on a machine with a GPU, or ask a question the deterministic index engine can answer - land cover, vegetation, water and built-up extent are all available here",
+  "abstain_trigger": "profile_degraded",
+  "abstain_resolving_input": "run the full profile on a machine with a GPU, or ask a question the deterministic index engine can answer - land cover, vegetation, water and built-up extent are all available here",
+  "abstain_limiting_component": "model",
+  "weights_hashes": {}
+}

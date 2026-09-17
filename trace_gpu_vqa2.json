@@ -1,0 +1,158 @@
+{
+  "run_id": "run_53198df6bbd4",
+  "timestamp_utc": "2026-09-01T05:45:53.176759+00:00",
+  "code_version": "0.2.0-phase1",
+  "query": "Is there vegetation in this image?",
+  "ingest": {
+    "mode": "operational",
+    "config": "SINGLE",
+    "images": [
+      {
+        "role": "single",
+        "path": "/tmp/satquery_run_53198df6bbd4_05it6m8x/00_valid_crs.tif",
+        "modality": "OPTICAL",
+        "modality_reason": "band_count_lt_4_no_names_assumed_optical",
+        "crs": "EPSG:4326",
+        "gsd_m": 111320.0,
+        "bands": [
+          "BLUE",
+          "GREEN",
+          "RED"
+        ],
+        "nodata_pct": 0.0,
+        "sensor_guess": null,
+        "polarisations": null
+      }
+    ],
+    "index_availability": {
+      "ndvi": false,
+      "ndwi": false,
+      "mndwi": false,
+      "ndbi": false,
+      "sigma0": false,
+      "vh_vv_ratio": false,
+      "glcm_texture": true,
+      "cov": false
+    },
+    "checks": [
+      {
+        "name": "crs_present",
+        "status": "PASS",
+        "message": "single: CRS EPSG:4326"
+      },
+      {
+        "name": "nodata_fraction",
+        "status": "PASS",
+        "message": "single: 0.0% nodata"
+      },
+      {
+        "name": "min_dimension",
+        "status": "PASS",
+        "message": "single: 256x256"
+      }
+    ],
+    "tiling": {
+      "applied": false,
+      "level1_tiles": null,
+      "retrieved_tiles": null,
+      "retrieval_reason": null
+    }
+  },
+  "routing": {
+    "legal_tasks": [
+      "SINGLE_VQA",
+      "SINGLE_CAPTION",
+      "SINGLE_GROUND",
+      "SINGLE_LANDCOVER",
+      "CLARIFY_OR_ABSTAIN"
+    ],
+    "selected_task": "SINGLE_VQA",
+    "classifier": {
+      "name": "tfidf_logreg_v1",
+      "top1": 0.980712,
+      "margin": 0.972191
+    },
+    "llm_tiebreak_invoked": false,
+    "config_excluded_task": null,
+    "capability_matrix_version": "cm-2026.11.02"
+  },
+  "execution": [
+    {
+      "step": "step_1",
+      "tool": "rs_vqa_v1",
+      "version": "1.0.0-qlora",
+      "params": {
+        "answer_mode": "template"
+      },
+      "rationale_tag": "VQA_INFERENCE",
+      "outputs": {
+        "answer": "Yes, vegetation covers about 98% of the scene.",
+        "question": "Is there vegetation in this image?",
+        "image_provenance": {
+          "band_selection": "canonical_rgb",
+          "bands_shown": [
+            "RED",
+            "GREEN",
+            "BLUE"
+          ],
+          "preview_size": [
+            256,
+            256
+          ],
+          "source_size": [
+            256,
+            256
+          ],
+          "downsample_factor": 1.0,
+          "stretch": "percentile_2.0_98.0"
+        },
+        "n_generated_tokens": 14
+      },
+      "confidence": 0.870848,
+      "confidence_method": "logprob",
+      "runtime_ms": 2670
+    }
+  ],
+  "verification": {
+    "physics_agreement": {
+      "vegetation:fraction": 0.5
+    },
+    "built_up_path": "not_computed",
+    "complementarity": {},
+    "conflicts": [],
+    "entailment_gate": {
+      "sentences": 1,
+      "retained": 0,
+      "flagged": 0,
+      "unverifiable": 1,
+      "backend": "deterministic",
+      "action": "none",
+      "flagged_detail": []
+    }
+  },
+  "confidence": {
+    "final": 0.757945,
+    "band": "HIGH",
+    "components": {
+      "model": 0.870848,
+      "agreement": 0.5,
+      "input_quality": 1.0
+    },
+    "calibration": {
+      "method": "uncalibrated (score is not a calibratable probability)",
+      "T": 1.0,
+      "ece_after": -1.0
+    }
+  },
+  "answer": "Yes, vegetation covers about 98% of the scene.",
+  "artifacts": [],
+  "artifact_paths": {},
+  "abstained": false,
+  "abstain_reason": null,
+  "abstain_trigger": null,
+  "abstain_resolving_input": null,
+  "abstain_limiting_component": null,
+  "weights_hashes": {
+    "rs_vqa_v1": "sha256:2230c8c373c96c4865ac7bd29da7ed3fbf06d7494c1a66cdb6004353781c34a5"
+  }
+}
