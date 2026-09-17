@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -263,6 +264,22 @@ def require_gpu_stack() -> tuple[Any, Any, Any]:
     return torch, peft, transformers
 
 
+ENV_COMPUTE_DTYPE = "SATQUERY_BNB_COMPUTE_DTYPE"
+
+
+def compute_dtype(torch):
+    """4-bit compute dtype: bf16 where supported, else fp16, unless overridden.
+
+    `SATQUERY_BNB_COMPUTE_DTYPE=float32` exists for GPUs without bf16 (a T4)
+    where fp16 overflows to NaN loss. It is slower and uses more memory, so it
+    is an explicit fallback, never the default.
+    """
+    override = os.environ.get(ENV_COMPUTE_DTYPE, "").strip().lower()
+    if override in ("float32", "float16", "bfloat16"):
+        return getattr(torch, override)
+    return torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+
+
 def build_model(args, torch, peft, transformers):
     """Load the base model in 4-bit and attach a LoRA adapter."""
     from transformers import AutoProcessor, BitsAndBytesConfig
@@ -272,9 +289,7 @@ def build_model(args, torch, peft, transformers):
         bnb_4bit_quant_type="nf4",
         # Double quantisation saves ~0.4 GB, which matters on a 16 GB T4.
         bnb_4bit_use_double_quant=True,
-        bnb_4bit_compute_dtype=torch.bfloat16
-        if torch.cuda.is_bf16_supported()
-        else torch.float16,
+        bnb_4bit_compute_dtype=compute_dtype(torch),
     )
 
     processor = AutoProcessor.from_pretrained(args.model, local_files_only=True)

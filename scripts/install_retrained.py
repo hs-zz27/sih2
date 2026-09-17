@@ -30,7 +30,11 @@ DEPLOY_DIRS = [a.path.removeprefix("checkpoints/") for a in ASSETS if a.path.sta
 
 
 def find_retrained_root(folder: Path) -> Path | None:
+    """The real-run output folder. Smoke-pass output is never installed: its
+    weights come from a few steps on a few dozen examples."""
     for manifest in folder.rglob("retrain_manifest_*.json"):
+        if json.loads(manifest.read_text(encoding="utf-8")).get("smoke"):
+            continue
         return manifest.parent
     return None
 
@@ -40,7 +44,8 @@ def install(source: Path, dest_root: Path, force: bool = False) -> list[str]:
     messages: list[str] = []
     retrained = find_retrained_root(source)
     if retrained is None:
-        return [f"no retrain_manifest_*.json found under {source} - is this a Kaggle retrain output?"]
+        return [f"no real-run retrain_manifest_*.json under {source} (smoke output is not "
+                "installed) - download the retrained/ folder, not retrained_smoke/"]
 
     for rel in DEPLOY_DIRS:
         src = retrained / "checkpoints" / rel
@@ -59,8 +64,12 @@ def install(source: Path, dest_root: Path, force: bool = False) -> list[str]:
     keep = dest_root / "checkpoints" / "retrain_manifests"
     keep.mkdir(parents=True, exist_ok=True)
     for manifest in retrained.glob("retrain_manifest_*.json"):
-        shutil.copy2(manifest, keep / manifest.name)
         d = json.loads(manifest.read_text(encoding="utf-8"))
+        if not str(d.get("status", "")).startswith(("complete", "stopped by budget")):
+            messages.append(f"{d.get('model')}: NOT a finished run ({d.get('status')}) - "
+                            "its weights were not packaged; see its log")
+            continue
+        shutil.copy2(manifest, keep / manifest.name)
         messages.append(f"{d.get('model')}: {d.get('status')} ({d.get('elapsed_hours')} h on {d.get('gpu')})")
         for key in ("metrics.json", "metrics_after_budget.json"):
             if key in d:

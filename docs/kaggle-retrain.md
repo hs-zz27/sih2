@@ -36,6 +36,44 @@ against the HuggingFace datasets-server API. `arampacha/rsicd`'s columns
 (`filename`, `captions`, `image`) match what `training/train_caption.py`
 expects.
 
+## What could still go wrong — read this before spending quota
+
+Nothing here has run on Kaggle yet. What was checked locally, and what was not:
+
+| Checked on this machine | Not checkable without a Kaggle GPU session |
+|---|---|
+| RSVQA-LR-2k downloaded and converted end to end; instruction mix built | Kaggle's Python / preinstalled torch working with the pinned stack |
+| LEVIR-CD and RSICD column names and split sizes (HuggingFace API) | The LEVIR-CD and RSICD extraction on the full files |
+| Driver: budget stop, quiet-process output, one-GPU pinning, NaN guard, packaging, manifests (35 tests) | Qwen2.5-VL QLoRA in fp16 on a T4 (NaN risk), speed per step, VRAM |
+| Installer refuses smoke and unfinished runs | The trainers' full runs on real data |
+
+**That is why every notebook runs a smoke pass first**, in the same session:
+the real pipeline - install, environment check, download, prepare, a few
+training steps, validation, NaN check, packaging - with tiny limits. A version
+clash, a missing package, a wrong dataset format or an fp16 NaN stops the
+notebook in the first ~20-40 minutes instead of hours in. The real run then
+reuses the downloads and uses a separate checkpoint folder, so it cannot
+resume from the smoke weights.
+
+**Problems found and fixed while checking (2026-09-17), before any run:**
+
+* The VQA trainer loads with `device_map="auto"`; on Kaggle's T4 x2 that
+  splits the model across both GPUs. Every step is now pinned to one GPU.
+* A NaN first validation would have been saved as `adapter_best` (`min()`
+  returns a leading NaN), early-stopped the run, and been packaged as
+  "complete". The driver now refuses to package non-finite losses or metrics.
+* `--batch-size` is ignored by the VQA trainer's loop - each step processes
+  `--grad-accum` examples. The recipe is now `1 x 8`, honestly 8 per step,
+  as Phase 5 actually trained.
+* Library versions were unpinned; they are now the ones the team's trainer
+  last ran with (peft 0.20.0, bitsandbytes 0.50.2, accelerate 1.14.0,
+  transformers 5.x). torch/torchvision are never reinstalled.
+
+**If the VQA smoke pass stops with a non-finite loss:** open the notebook,
+set `FP32 = True` in its first code cell, and run it again. That switches the
+4-bit compute to float32 (`SATQUERY_BNB_COMPUTE_DTYPE`), which is slower and
+uses more memory but does not overflow.
+
 ## Running it — no local involvement needed after this
 
 For each model:
@@ -50,11 +88,13 @@ For each model:
 4. Wait. VQA is the long one (8–10 h estimated; the driver stops itself at
    10.5 h regardless, so it never loses work to Kaggle's 12 h hard limit).
    Change mask and caption are much shorter.
-5. When the version finishes, open it and check the last cell's output:
-   `STATUS: complete` (or `stopped by budget - packaged last good weights`,
-   which is also usable) means it worked. `STATUS: failed at: <step>` means
-   read that step's log.
-6. **Output tab → Download** the `retrained/` folder (or its zip).
+5. When the version finishes, open it and check the output:
+   - smoke pass: `STATUS: smoke complete`, then the real run starts
+   - real run: `STATUS: complete` or `stopped by budget - packaged last good
+     weights` (both usable). Anything else - `failed at: <step>` or
+     `failed check: <reason>` - means read the log; nothing was packaged.
+6. **Output tab → Download** the `retrained/` folder. Ignore
+   `retrained_smoke/` (the installer refuses it anyway).
 
 Run the three notebooks in **separate** Kaggle sessions (one GPU quota each);
 they do not depend on each other and can run in parallel across accounts if
@@ -99,7 +139,7 @@ record until pre-flight says **GO** with **MODELS n/8 LIVE**.
 |---|---|---|
 | VQA | No WHU-OPT-SAR — no SAR examples, no `not_in_image` refusals | The dataset (~10 GB) is not on HuggingFace; downloading it needs the GitHub mirror and manual staging, out of scope for an unattended run |
 | VQA | 1,500 steps with `--patience 3`, not the 6,000-step run | Matches the Phase 5 **early-stopping** arm (`track_b_vqa_es`), whose best checkpoint (step 1,500) was the one actually recommended for deployment |
-| VQA | fp16, effective batch 16 (2×8) | A T4 has no bf16 and 16 GB VRAM against the L40S's 47.7 GB |
+| VQA | fp16 4-bit compute, 8 examples per step (`--batch-size 1 --grad-accum 8`) | A T4 has no bf16; the trainer's loop ignores `--batch-size`, so 8 is what Phase 5 actually used |
 | Change mask | 30 epochs, not 60 | Fits one T4 session; re-run with more epochs if quota allows |
 | Caption | pretrained ResNet-50 downloaded at train start | Matches the deployed `caption_pre` recipe; needs internet on, which the notebook already requires |
 | All three | No official benchmark re-measurement | RSVQA-LR official split, LEVIR-CD F1, RSICD BLEU-4 all need the dedicated evaluators (`evaluation/rsvqa_official_eval.py`, etc.), which are a separate, deliberate next step — do not quote Phase 5 numbers for these weights until that is run |
