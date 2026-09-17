@@ -24,6 +24,14 @@ demo:
 	# Run the demo bundle
 	docker-compose up
 
+# The full demo on a machine with no GPU (16 GB RAM), natively: API + UI.
+demo-cpu:
+	bash scripts/run_demo_cpu.sh
+
+# Which checkpoints are present, and where to get the missing ones.
+demo-assets:
+	python scripts/demo_assets.py
+
 # Go / no-go before recording or presenting: API, UI, live models, GPU, disk, RAM.
 preflight:
 	python scripts/demo_preflight.py

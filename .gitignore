@@ -11,6 +11,9 @@ checkpoints_backup/
 # `frontend/app/runs/[runId]` route, so edits to that page never showed up.
 /runs/
 
+# Logs from scripts/run_demo_cpu.sh.
+.demo/
+
 *.egg-info/
 
 # Python packaging / test caches

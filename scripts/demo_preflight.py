@@ -106,8 +106,11 @@ def evaluate(
         gpu = readiness.get("gpu") or {}
         if gpu.get("cuda"):
             out.append(("OK", f"GPU: {gpu.get('name')}"))
+        elif readiness["demo_ready"]:
+            # Supported: the cpu profile runs every learned tool, slowly.
+            out.append(("OK", "running on CPU - VQA answers take tens of seconds; warm each tool once before recording"))
         else:
-            out.append(("WARN", f"no CUDA GPU behind the API ({gpu.get('note', 'unknown')}) - rs_vqa_v1 needs one"))
+            out.append(("WARN", f"no CUDA GPU behind the API ({gpu.get('note', 'unknown')})"))
 
     if free_disk_gb < MIN_FREE_DISK_GB:
         out.append(("WARN", f"free disk {free_disk_gb:.1f} GB (< {MIN_FREE_DISK_GB:.0f} GB for checkpoints + base models)"))
@@ -169,7 +172,14 @@ def main() -> int:
             print("[ FAIL ] demo bundle: a beat did not behave as scripted")
             go = False
 
-    print("\nGO - ready to record." if go else "\nNO-GO - fix the FAIL lines first.")
+    stubbed = bool(readiness and readiness.get("stubs"))
+    if not go:
+        print("\nNO-GO - fix the FAIL lines first.")
+    elif stubbed:
+        # --allow-stubs let this through; it must still not read as "record".
+        print("\nGO FOR LAYOUT REHEARSAL ONLY - stubbed tools answer with placeholder text. Do not record.")
+    else:
+        print("\nGO - ready to record.")
     return 0 if go else 1
 
 

@@ -52,8 +52,15 @@ def test_ui_down_is_no_go():
     assert not go
 
 
-def test_missing_gpu_low_disk_and_no_bundle_warn_but_do_not_block():
-    go, lines = evaluate(readiness=ready(cuda=False),
+def test_cpu_with_every_model_live_is_a_supported_go():
+    """The no-GPU demo: the cpu profile runs every learned tool, slowly."""
+    go, lines = evaluate(readiness=ready(cuda=False), **BASE)
+    assert go and "WARN" not in levels(lines)
+    assert any("running on CPU" in m for _, m in lines)
+
+
+def test_low_disk_low_ram_and_no_bundle_warn_but_do_not_block():
+    go, lines = evaluate(readiness=ready(),
                          **{**BASE, "free_disk_gb": 5.0, "ram_gb": 8.0, "bundle_built": False})
     assert go
-    assert levels(lines).count("WARN") == 4
+    assert levels(lines).count("WARN") == 3
