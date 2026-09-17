@@ -26,6 +26,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from training.common.paths import stored_path  # noqa: E402
+
 # WHU-OPT-SAR's published 7-class land-cover nomenclature (background = 0).
 CLASSES = [
     "background", "farmland", "city", "village", "water", "forest", "road",
@@ -185,9 +188,9 @@ def build_index(src: Path, val_fraction: float, seed: int) -> dict:
             name: [
                 {
                     "id": stem,
-                    "optical": str(complete[stem]["optical"]),
-                    "sar": str(complete[stem]["sar"]) if "sar" in complete[stem] else None,
-                    "label": str(complete[stem]["label"]),
+                    "optical": stored_path(complete[stem]["optical"]),
+                    "sar": stored_path(complete[stem]["sar"]) if "sar" in complete[stem] else None,
+                    "label": stored_path(complete[stem]["label"]),
                 }
                 for stem in members
             ]

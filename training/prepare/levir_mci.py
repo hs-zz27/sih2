@@ -19,6 +19,9 @@ import sys
 import zipfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from training.common.paths import stored_path  # noqa: E402
+
 IMAGE_ROOT = "LEVIR-MCI-dataset/images"
 CAPTIONS = "LEVIR-MCI-dataset/LevirCCcaptions.json"
 
@@ -45,7 +48,7 @@ def convert(archive: Path, dest: Path, limit: int | None = None) -> dict:
             member = f"{IMAGE_ROOT}/{split}/{folder}/{name}"
             if member in members:
                 z.extract(member, dest)
-                paths[kind] = str(dest / member)
+                paths[kind] = stored_path(dest / member)
         if "a" not in paths or "b" not in paths:
             continue
 

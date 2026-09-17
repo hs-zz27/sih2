@@ -23,6 +23,9 @@ import json
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from training.common.paths import stored_path  # noqa: E402
+
 # BigEarthNet v2 19-class nomenclature, fixed order so a trained head always
 # maps the same index to the same class.
 CLASSES = [
@@ -86,8 +89,8 @@ def build_index(src: Path, metadata: Path) -> dict:
             rows.append(
                 {
                     "patch_id": patch_id,
-                    "s2": str(s2_path),
-                    "s1": str(s1_path) if s1_path else None,
+                    "s2": stored_path(s2_path),
+                    "s1": stored_path(s1_path) if s1_path else None,
                     "labels": [CLASS_INDEX[x] for x in labels if x in CLASS_INDEX],
                 }
             )

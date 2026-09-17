@@ -22,7 +22,7 @@ from pathlib import Path, PureWindowsPath
 
 import pytest
 
-from training.common.paths import index_path
+from training.common.paths import index_path, stored_path
 
 BACKSLASH = chr(92)
 
@@ -146,3 +146,45 @@ class TestCallSitesUseTheHelper:
     def test_helper_is_imported(self, rel):
         text = Path(rel).read_text(encoding="utf-8")
         assert "from training.common.paths import index_path" in text
+
+
+# The modules that WRITE a path into an index or manifest (limitation L37).
+# Reading defensively kept old files usable; these make new files portable.
+WRITER_SITES = [
+    "training/prepare/bigearthnet.py",
+    "training/prepare/whu_opt_sar.py",
+    "training/prepare/levir.py",
+    "training/prepare/levir_mci.py",
+    "scripts/make_demo_bundle.py",
+]
+
+
+class TestWriteSideIsPosix:
+    def test_windows_path_is_written_with_forward_slashes(self):
+        stored = stored_path(PureWindowsPath("data", "levircd", "tiles", "000000.png"))
+        assert stored == "data/levircd/tiles/000000.png"
+
+    def test_backslash_string_is_normalised(self):
+        assert stored_path(BACKSLASH.join(["data", "x", "y.png"])) == "data/x/y.png"
+
+    def test_posix_input_is_unchanged(self):
+        assert stored_path(Path("data/x/y.png")) == "data/x/y.png"
+        assert stored_path("data/x/y.png") == "data/x/y.png"
+
+    def test_written_then_read_round_trips(self):
+        stored = stored_path(PureWindowsPath("data", "whu_opt_sar", "sar", "t1.tif"))
+        assert index_path(stored) == Path("data", "whu_opt_sar", "sar", "t1.tif")
+
+    @pytest.mark.parametrize("rel", WRITER_SITES)
+    def test_writer_does_not_record_str_of_a_path(self, rel):
+        text = Path(rel).read_text(encoding="utf-8")
+        raw = re.findall(
+            r'(?:paths\[kind\]\s*=|"(?:s1|s2|optical|sar|label)":)\s*str\('
+            r"|\[str\(x\) for x in i\.images\]",
+            text,
+        )
+        assert not raw, (
+            f"{rel} records str(Path), which writes backslashes on Windows: "
+            f"{raw}. Use training.common.paths.stored_path."
+        )
+        assert "stored_path" in text

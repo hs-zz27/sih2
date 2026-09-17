@@ -45,7 +45,7 @@ from evaluation.scenes import (  # noqa: E402
     structured_scene,
     write_raster,
 )
-from training.common.paths import index_path  # noqa: E402
+from training.common.paths import index_path, stored_path  # noqa: E402
 
 # Real products, held out from every training run (docs/03 §4.3). Paths are
 # relative to the repo root; each is optional and the bundle degrades to a
@@ -449,7 +449,7 @@ def main() -> int:
         "inputs": [
             {
                 "key": i.key, "beat": i.beat, "query": i.query,
-                "images": [str(x) for x in i.images],
+                "images": [stored_path(x) for x in i.images],
                 "expect": i.expect, "real_product": i.real, "notes": i.notes,
             }
             for i in inputs

@@ -42,7 +42,23 @@ relative path. Every path in the five index files is relative.
 
 from __future__ import annotations
 
-from pathlib import Path, PureWindowsPath
+from pathlib import Path, PurePath, PureWindowsPath
+
+
+def stored_path(path: str | PurePath) -> str:
+    """The string to record in an index or manifest for `path`: always `/`.
+
+    The write-side half of `index_path`. `str(Path)` uses the separator of the
+    OS doing the writing, so an index regenerated on Windows put backslashes
+    straight back into every row (limitation L37) and only the defensive read
+    kept it usable. Writing POSIX separators everywhere means the files are
+    portable as written, and `index_path` stays as the guard for copies that
+    were generated before this existed.
+    """
+    if isinstance(path, PurePath):
+        return path.as_posix()
+    text = str(path)
+    return PureWindowsPath(text).as_posix() if "\\" in text else text
 
 
 def index_path(stored: str | Path) -> Path:

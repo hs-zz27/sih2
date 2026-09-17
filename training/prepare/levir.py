@@ -12,6 +12,9 @@ import json
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from training.common.paths import stored_path  # noqa: E402
+
 
 def convert(src: Path, out: Path, limit: int | None = None) -> dict:
     import pyarrow.parquet as pq
@@ -40,7 +43,7 @@ def convert(src: Path, out: Path, limit: int | None = None) -> dict:
                     break
                 target = split_dir / kind / f"{i:06d}.png"
                 target.write_bytes(raw)
-                paths[kind] = str(target)
+                paths[kind] = stored_path(target)
             if len(paths) == 3:
                 rows.append({"id": f"{split}_{i:06d}", **paths})
         index["splits"][split] = rows
