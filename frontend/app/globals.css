@@ -1,0 +1,2113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   SatQuery Deck — design tokens
+   ----------------------------------------------------------------------------
+   Obsidian ground under film grain. Champagne is the ONLY accent; bronze gives
+   it depth. Sage / amber / clay are semantic and never decorative: they mean
+   PASS, WARN and FAIL, nothing else. Corners are 2–3px and hairlines are 1px —
+   there is no glow anywhere in this system, so a shadow is used only to lift
+   the one node that currently holds the baton.
+   ========================================================================== */
+
+:root {
+  --void: #08070a;
+  --sunk: #0b0a0e;
+  --pane: #121016;
+  --raised: #17141b;
+  --hair: #2a262e;
+  --hair-lit: rgba(232, 195, 158, 0.2);
+  --ink: #f2ede6;
+  --muted: #9a929e;
+  --dim: #6a6270;
+  --champ: #e8c39e;
+  --bronze: #a16207;
+  --sage: #9dbba4;
+  --amber: #e0ac4a;
+  --clay: #d9756b;
+
+  /* next/font supplies the three families; the fallbacks are declared here so
+     a blocked font host degrades to a real stack rather than to Times. */
+  --f-display: var(--font-ibm-plex-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-ui: var(--font-manrope), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --s1: 8px;
+  --s2: 12px;
+  --s3: 16px;
+  --s4: 24px;
+  --s5: 32px;
+  --gut: clamp(16px, 3.4vw, 44px);
+
+  /* Height of the sticky header, measured at runtime by Nav and written back
+     here. It is not a constant: the nav wraps to two rows on a narrow
+     viewport, and a hardcoded scroll offset tuned to the one-row case hides
+     the first line of whatever was scrolled to behind the second row. */
+  --nav-h: 72px;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    overflow-x: clip;
+    /* No scroll snapping. Even `proximity` grabs the wheel near a snap point,
+       and with two of them near the top of the page that reads as the scroll
+       catching and sticking. The deliberate jumps — the hero cue, `/`, the
+       nav item and the jump when a run starts — are explicit calls that do
+       not need the wheel hijacked to work.
+
+       `scroll-behavior` stays smooth so those explicit jumps glide; it does
+       not affect wheel or trackpad scrolling. */
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background: var(--void);
+    color: var(--ink);
+    font-family: var(--f-ui);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* WCAG 2.2: a 2px perimeter at 3:1 against both the control and the ground. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--champ);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: rgba(232, 195, 158, 0.24);
+  }
+}
+
+@layer components {
+  /* ---------------- ground ---------------- */
+  .ground {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background:
+      radial-gradient(880px 600px at 76% -8%, rgba(232, 195, 158, 0.085), transparent 63%),
+      radial-gradient(700px 520px at 4% 98%, rgba(161, 98, 7, 0.06), transparent 62%),
+      linear-gradient(180deg, #08070a 0%, #0b090d 54%, #070609 100%);
+  }
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .shell {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--gut);
+  }
+
+  /* `backwards` holds the from-state through the stagger delay, so the resting
+     state in the markup stays the visible one — nothing is parked at zero
+     opacity waiting for JavaScript that may never arrive. */
+  .enter {
+    animation: enter 420ms cubic-bezier(0.16, 0.9, 0.28, 1) backwards;
+    min-width: 0;
+  }
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+
+  .label {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .icon {
+    width: 15px;
+    height: 15px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex: none;
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* ---------------- nav ---------------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+    flex-wrap: wrap;
+    padding: var(--s2) var(--gut);
+    background: rgba(8, 7, 10, 0.82);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--hair);
+  }
+  .nav-brand {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s1);
+  }
+  .nav ul {
+    display: flex;
+    gap: var(--s4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nav a.link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 200ms ease;
+    position: relative;
+  }
+  .nav a.link:hover {
+    color: var(--ink);
+  }
+  .nav a.link[aria-current] {
+    color: var(--ink);
+  }
+  .nav a.link[aria-current]::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    height: 1px;
+    background: var(--champ);
+  }
+  .nav .right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    flex-wrap: wrap;
+  }
+  .device {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .device .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sage);
+  }
+  .device .dot.idle {
+    background: var(--dim);
+  }
+
+  /* ---------------- controls ---------------- */
+  .btn {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 44px;
+    padding: 0 var(--s4);
+    border-radius: 2px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s1);
+    transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
+  }
+  .btn-solid {
+    background: var(--champ);
+    color: var(--void);
+  }
+  .btn-solid:hover:not(:disabled) {
+    background: #f5dcc0;
+  }
+  .btn-solid:disabled {
+    background: #4a4038;
+    color: #8d8378;
+    cursor: default;
+  }
+  .btn-line {
+    border-color: var(--hair);
+    color: var(--ink);
+    background: rgba(8, 7, 10, 0.4);
+  }
+  .btn-line:hover {
+    border-color: var(--champ);
+    color: var(--champ);
+  }
+
+  .field {
+    display: grid;
+    gap: 6px;
+  }
+  .field > label {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  /* A field is a line you write on, not a box you fill in. One rule under the
+     text, nothing around it — which also lets the question be set large enough
+     to be the thing you look at first. */
+  .input {
+    font: inherit;
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--ink);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--hair);
+    border-radius: 0;
+    padding: 0 0 var(--s2);
+    min-height: 44px;
+    width: 100%;
+    transition: border-color 200ms ease;
+  }
+  .input:hover,
+  .input:focus {
+    border-bottom-color: var(--champ);
+  }
+  .input:focus {
+    outline: none;
+  }
+  .input::placeholder {
+    color: var(--dim);
+  }
+  /* The imagery field sits on the same rule as the question, because it is
+     the same kind of thing. The dashes are gone: this is a click-to-browse
+     label, and a dashed outline promises a drop target that is not there. */
+  .filedrop {
+    border: none;
+    border-bottom: 1px solid var(--hair);
+    border-radius: 0;
+    padding: 0 0 var(--s2);
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    flex-wrap: wrap;
+    font-family: var(--f-mono);
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 200ms ease;
+    min-height: 44px;
+  }
+  .filedrop:hover {
+    border-bottom-color: var(--champ);
+    color: var(--ink);
+  }
+  .filedrop .accepts {
+    margin-left: auto;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+  }
+  /* The filename is typed text, not a token. It reads as what you attached. */
+  .chipfile {
+    display: inline;
+    color: var(--champ);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    word-break: break-all;
+  }
+  .chipfile + .chipfile::before {
+    content: ' · ';
+    color: var(--dim);
+  }
+
+  /* ---------------- hero ---------------- */
+  /* The hero is one column, not two.
+     The query console used to sit in the right-hand column, which put the
+     headline, a form and a five-cell vitals strip inside one screen and left
+     the satellite nowhere to be. Giving the hero the full width lets the type
+     breathe, hands the right side back to the WebGL, and lets the console
+     become a full-width command bar directly underneath — the page reads
+     longer, and each band does one thing. */
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(var(--s5) * 2) 0;
+    /* The hero's start edge sits one header-height down the document, because
+       the sticky nav occupies flow space above it. Without this margin the
+       browser snaps the scrollport to that edge on load — parking the page at
+       y = navHeight instead of 0, which pushed the hero up by exactly the
+       header's height and let the query band show at the bottom. The margin
+       moves the snap position to the true top of the page. */
+    scroll-margin-top: var(--nav-h);
+    /* The opener holds the viewport: headline, lede and the satellite with the
+       planet limb under it, and the query rule appears right at the fold so
+       there is still something to scroll to. `svh` rather than `vh` so a
+       mobile browser's collapsing chrome does not crop the lede. The cap keeps
+       it from turning into a void on a very tall monitor, and because this is
+       a min-height the band still grows if the copy ever needs more room.
+       72px is the sticky header. */
+    min-height: 560px;
+    /* The header's real height, not a guess at it: the nav wraps to two rows
+       on a narrow viewport, and subtracting a one-row constant left the hero
+       taller than the space actually available. */
+    min-height: min(820px, calc(100svh - var(--nav-h)));
+  }
+  /* The seam between the opener and the instrument.
+     A single hairline was too quiet to divide two halves of a page this dark —
+     it read as an accident of spacing rather than as a boundary. This is a
+     band: a champagne-lit rule that fades out towards the window edges, over a
+     shadow that darkens the top of the deck, so the two regions sit on
+     visibly different planes. Full-bleed, because everything below is set
+     inside the shell and the seam is the one thing that should not be.
+     `overflow-x: clip` on <html> keeps the 100vw off the scrollbar. */
+  .hero::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 100vw;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--hair) 8%,
+      var(--hair-lit) 50%,
+      var(--hair) 92%,
+      transparent
+    );
+    box-shadow: 0 18px 44px -18px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+  }
+  .hero-inner {
+    width: 100%;
+  }
+  .hero-sky {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    overflow: hidden;
+    pointer-events: none;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 78%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 78%, transparent 100%);
+  }
+  .hero-rig {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    /* The rig now crosses the whole band, headline included, so it is held
+       well back from the type. Opacity lives here rather than on the canvas
+       element so the two breakpoints read as one decision. */
+    opacity: 0.55;
+  }
+  .hero-sky canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  .sunglow {
+    position: absolute;
+    top: -20%;
+    right: 5%;
+    z-index: 0;
+    width: min(520px, 48vw);
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(232, 195, 158, 0.16),
+      rgba(232, 195, 158, 0.05) 40%,
+      transparent 66%
+    );
+    filter: blur(8px);
+  }
+  .limb {
+    position: absolute;
+    left: 50%;
+    z-index: 0;
+    transform: translateX(-50%);
+    width: 300vw;
+    height: 300vw;
+    border-radius: 50%;
+    bottom: calc(78px - 300vw);
+    background: #0a0810;
+    border-top: 1px solid rgba(232, 195, 158, 0.22);
+    box-shadow: 0 -20px 84px -14px rgba(232, 195, 158, 0.17);
+  }
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+  }
+  .hero-copy {
+    max-width: min(760px, 62%);
+  }
+  .hero h1 {
+    font-family: var(--f-display);
+    /* A sans at display size needs more weight and tighter tracking than a
+       serif did to hold the same presence. */
+    font-weight: 600;
+    font-size: clamp(36px, 5vw, 68px);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+    margin: var(--s2) 0 0;
+    text-shadow: 0 8px 40px rgba(8, 7, 10, 0.9);
+  }
+  /* Emphasis by colour, not by an italic. */
+  .hero h1 .accent {
+    color: var(--champ);
+  }
+  .hero-lede {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 52ch;
+    margin: var(--s4) 0 0;
+    font-weight: 300;
+  }
+  .hero-lede b {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ---------------- query composer ---------------- */
+  /* The one bordered, filled object on the page.
+     Everything else is set with rules, so the single thing a visitor is meant
+     to touch is also the single thing that looks touchable. Structure follows
+     the 21st.dev Input Bar: attachment rail, then the question, then a
+     toolbar with attach on the left and run on the right. */
+  .composer {
+    display: block;
+    /* Clear the sticky header, whatever height it currently is. */
+    scroll-margin-top: calc(var(--nav-h) + var(--s4));
+  }
+  /* No top border here: the hero's full-bleed rule sits directly above and a
+     second, inset one right beneath it reads as a mistake. */
+  .composer-head {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    flex-wrap: wrap;
+    /* The seam needs air on both sides to read as a division rather than as a
+       line that happens to be there. */
+    padding-top: calc(var(--s5) * 1.5);
+    margin-bottom: var(--s4);
+  }
+  .composer-head .spacer,
+  .composer-tools .spacer,
+  .composer-foot .spacer {
+    flex: 1;
+  }
+  .composer-head .meta {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    color: var(--dim);
+  }
+
+  .composer-box {
+    position: relative;
+    background: linear-gradient(168deg, var(--pane), #0d0b11);
+    border: 1px solid var(--hair);
+    border-radius: 3px;
+    padding: var(--s3) var(--s3) var(--s2);
+    cursor: text;
+    transition: border-color 200ms ease;
+  }
+  .composer-box:focus-within {
+    border-color: var(--hair-lit);
+  }
+  .composer.dragging .composer-box {
+    border-color: var(--champ);
+  }
+
+  /* A 0fr -> 1fr grid row: the rail takes exactly no space when empty, and
+     opens without a hardcoded height that would have to guess how many chips
+     there are. */
+  .composer-rail {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 220ms cubic-bezier(0.16, 0.9, 0.28, 1);
+  }
+  .composer-rail.open {
+    grid-template-rows: 1fr;
+  }
+  .composer-rail-inner {
+    overflow: hidden;
+  }
+  .attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s1);
+    list-style: none;
+    margin: 0 0 var(--s3);
+    padding: 0;
+  }
+  .attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s1);
+    max-width: 100%;
+    padding: 6px var(--s1) 6px var(--s2);
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    background: rgba(8, 7, 10, 0.5);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--ink);
+  }
+  .attachment .icon {
+    width: 13px;
+    height: 13px;
+    color: var(--dim);
+  }
+  .attachment-name {
+    max-width: 26ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .attachment-size {
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .attachment-remove {
+    font: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 2px;
+    background: none;
+    color: var(--dim);
+    cursor: pointer;
+    transition: color 200ms ease, background 200ms ease;
+  }
+  .attachment-remove:hover {
+    color: var(--clay);
+    background: rgba(217, 117, 107, 0.12);
+  }
+  .attachment-remove .icon {
+    width: 12px;
+    height: 12px;
+    color: currentColor;
+  }
+
+  .composer-input {
+    font: inherit;
+    font-size: 19px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--ink);
+    background: none;
+    border: none;
+    outline: none;
+    resize: none;
+    width: 100%;
+    display: block;
+    padding: 0;
+    min-height: 32px;
+  }
+  .composer-input::placeholder {
+    color: var(--dim);
+  }
+  .composer-input:disabled {
+    opacity: 0.5;
+  }
+
+  .composer-tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s2);
+    flex-wrap: wrap;
+    margin-top: var(--s3);
+    padding-top: var(--s2);
+    border-top: 1px solid var(--hair);
+  }
+  .composer-group {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    min-width: 0;
+  }
+  .composer-group.right {
+    margin-left: auto;
+  }
+  .composer-attach {
+    font: inherit;
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 0 var(--s2);
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .composer-attach:hover:not(:disabled) {
+    color: var(--champ);
+    border-color: var(--hair-lit);
+  }
+  .composer-attach:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .composer-hint {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .composer-kbd {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--dim);
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    padding: 2px 7px;
+  }
+
+  .composer-spinner {
+    width: 11px;
+    height: 11px;
+    border: 1.5px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: composer-spin 700ms linear infinite;
+  }
+  @keyframes composer-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .composer-drop {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 3px;
+    background: rgba(8, 7, 10, 0.86);
+    color: var(--champ);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .composer-foot {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    flex-wrap: wrap;
+    margin-top: var(--s2);
+  }
+  .composer-formats,
+  .composer-note {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--dim);
+  }
+  .composer-error {
+    margin: var(--s2) 0 0;
+    padding-left: var(--s2);
+    border-left: 2px solid var(--clay);
+    font-size: 12.5px;
+    color: #e5a49d;
+  }
+
+  /* ---------------- query console ---------------- */
+  /* A command bar: ask, attach, run — left to right in the order you do them,
+     the three controls sharing one baseline. Full width, because it is the
+     one thing on the page a visitor is meant to touch first. */
+  .console {
+    position: relative;
+    z-index: 1;
+  }
+  .console-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.1fr) auto;
+    gap: var(--s5);
+    align-items: end;
+  }
+
+  /* The one call to action in the hero: it does not navigate anywhere, it
+     moves you to the composer and puts the caret in it. The shortcut is shown
+     on the control rather than documented elsewhere, so it is discoverable
+     without being the only way in. */
+  .hero-cue {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s2);
+    min-height: 44px;
+    margin-top: var(--s4);
+    padding: 0 var(--s3) 0 var(--s4);
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    background: rgba(8, 7, 10, 0.5);
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 200ms ease, color 200ms ease;
+  }
+  .hero-cue:hover {
+    border-color: var(--champ);
+    color: var(--champ);
+  }
+  .hero-cue kbd {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    line-height: 1;
+    color: var(--dim);
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    padding: 3px 6px;
+  }
+  .hero-cue:hover kbd {
+    color: var(--champ);
+    border-color: var(--hair-lit);
+  }
+  .hero-cue .icon {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* ---------------- attached scene ---------------- */
+  /* Inline under the composer rather than in a modal: it belongs to setting
+     up the run, not to a dialog you have to know to open. */
+  .scenebox {
+    margin-top: var(--s3);
+    border-top: 1px solid var(--hair);
+    padding-top: var(--s3);
+  }
+  .scenebox-head,
+  .scenebox-foot {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    flex-wrap: wrap;
+  }
+  .scenebox-head {
+    margin-bottom: var(--s2);
+  }
+  .scenebox-foot {
+    margin-top: var(--s2);
+  }
+  .scenebox-head .spacer,
+  .scenebox-foot .spacer {
+    flex: 1;
+  }
+  .scenebox-head .meta {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    color: var(--dim);
+  }
+  .scenebox-map {
+    height: clamp(260px, 34vh, 420px);
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    background: #0a090c;
+    cursor: crosshair;
+  }
+  .attachment.aoi {
+    border-color: var(--hair-lit);
+  }
+  .attachment.aoi .icon {
+    color: var(--champ);
+  }
+
+  /* ---------------- vitals ---------------- */
+  /* The hairline grid is drawn by the cells, not by a lighter background
+     showing through the gaps: an auto-fit row that does not fill leaves empty
+     track, and a container-coloured gap turns that into a stray pale block. */
+  .vitals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(124px, 1fr));
+    border-top: 1px solid var(--hair);
+    border-bottom: 1px solid var(--hair);
+    margin-top: var(--s5);
+  }
+  .vital {
+    padding: var(--s3);
+    min-width: 0;
+    border-left: 1px solid var(--hair);
+  }
+  .vital:first-child {
+    border-left: none;
+    padding-left: 0;
+  }
+  .vital .k {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .vital .v {
+    font-family: var(--f-mono);
+    font-size: 19px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .vital .v.accent {
+    color: var(--champ);
+  }
+  .vital .n {
+    font-size: 11px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------------- surfaces ---------------- */
+  /* Dashboard density inside a panel, generous rhythm between them: the tight
+     8/12/16 scale is what makes a readings table legible, and the thing that
+     made the page feel congested was applying it to the gaps between whole
+     sections as well. Those get 24/32 instead. */
+  /* `minmax(0, 1fr)`, not the implicit `auto`: an auto track sizes to its
+     content's max-content width, and the pipeline board is 1236px wide before
+     it is scaled down to fit. That let the board widen its own container,
+     which then measured as wide enough, which cancelled the scaling — a
+     feedback loop that ended with the graph running off the right edge. */
+  .deck {
+    padding: calc(var(--s5) * 1.5) 0 var(--s5);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s5);
+  }
+  .deck-row {
+    display: grid;
+    gap: var(--s4);
+  }
+  /* Paired sections are divided by a column rule, the way facing columns of a
+     table are, rather than by two facing card edges. */
+  .deck-row > .panel + .panel {
+    border-left: 1px solid var(--hair);
+    padding-left: var(--s5);
+  }
+  .row-2 {
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  }
+  .row-2b {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  /* A section is a RULE, not a card.
+     Every block having the same border, the same fill and the same radius is
+     what makes a layout read as generated: nothing is ranked, so the eye is
+     given no reason to look anywhere first. Sections are set the way a printed
+     instrument sheet sets them instead — a hairline across the top, the label
+     hung under it, the content sitting directly on the page ground so the
+     grain shows through.
+
+     Borders are spent only where something really is a separate object you
+     can touch or that holds an image: the run button, the pipeline nodes, the
+     map plate, the evidence frames. Four bordered things on the page instead
+     of fourteen. */
+  .panel {
+    border-top: 1px solid var(--hair);
+    padding: var(--s3) 0 0;
+    min-width: 0;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    flex-wrap: wrap;
+    margin-bottom: var(--s4);
+  }
+  .panel-head .label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+  }
+  .panel-head .spacer {
+    flex: 1;
+  }
+  .panel-head .meta {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .page-head {
+    padding: var(--s5) 0 var(--s3);
+  }
+  .page-head h1 {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: clamp(28px, 3.2vw, 42px);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin: var(--s1) 0 0;
+  }
+  .page-head h1 .accent {
+    color: var(--champ);
+  }
+  .page-head p {
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 68ch;
+    margin: var(--s2) 0 0;
+  }
+
+  /* ---------------- pipeline board ---------------- */
+  /* The board is what a starting run scrolls to, so it clears the header. */
+  .pipeline-anchor {
+    scroll-margin-top: calc(var(--nav-h) + var(--s3));
+  }
+  .rig-head {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    flex-wrap: wrap;
+    margin-bottom: var(--s3);
+  }
+  .rig-head .live {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s1);
+  }
+  .pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--champ);
+  }
+  .pulse.idle {
+    background: var(--dim);
+  }
+  .rig-head .clock {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .rig-head .clock b {
+    color: var(--champ);
+    font-weight: 500;
+  }
+  .rig-head .rail {
+    flex: 1;
+    min-width: 100px;
+    height: 1px;
+    background: var(--hair);
+    position: relative;
+    overflow: hidden;
+  }
+  .rig-head .rail i {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, var(--bronze), var(--champ));
+  }
+
+  .stage-fit {
+    position: relative;
+    width: 100%;
+    /* The stage keeps its design width and is scaled with a transform, which
+       does not shrink its layout box. Clipping here stops that box from
+       reaching the container's width calculation. */
+    overflow: hidden;
+  }
+  .stage {
+    position: relative;
+    transform-origin: top left;
+  }
+  .stage svg.wires {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+
+  .node {
+    position: absolute;
+    background: linear-gradient(168deg, var(--raised), #0e0c12);
+    border: 1px solid var(--hair);
+    border-radius: 3px;
+    padding: var(--s2) var(--s3);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+  }
+  .node .node-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--bronze), var(--champ));
+  }
+  .node .kind {
+    font-family: var(--f-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+  }
+  .node .title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: color 300ms ease;
+  }
+  .node .val {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+    transition: color 300ms ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .node .sub {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    color: var(--dim);
+    opacity: 0;
+    transition: opacity 300ms ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .node .badge {
+    position: absolute;
+    top: 11px;
+    right: 13px;
+    font-family: var(--f-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+    color: var(--sage);
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+  .node .badge.warn {
+    color: var(--amber);
+  }
+  .node .badge.fail {
+    color: var(--clay);
+  }
+  .node.active {
+    border-color: var(--hair-lit);
+    box-shadow: 0 0 0 1px rgba(232, 195, 158, 0.07), 0 22px 54px -34px rgba(232, 195, 158, 0.5);
+  }
+  .node.active .title,
+  .node.done .title {
+    color: var(--ink);
+  }
+  .node.active .val,
+  .node.done .val {
+    color: var(--champ);
+  }
+  .node.active .sub,
+  .node.done .sub {
+    opacity: 1;
+  }
+  .node.done {
+    border-color: #342f39;
+  }
+  .node.done .node-fill {
+    background: linear-gradient(90deg, rgba(161, 98, 7, 0.6), rgba(232, 195, 158, 0.6));
+  }
+  .node.done .badge {
+    opacity: 1;
+  }
+
+  .edge-base {
+    fill: none;
+    stroke: #241f28;
+    stroke-width: 1;
+  }
+  .edge-flow {
+    fill: none;
+    stroke: url(#flowGrad);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+
+  .stage.stacked {
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    padding-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+  }
+  .stage.stacked::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
+    background: var(--hair);
+  }
+  .stage.stacked svg.wires {
+    display: none;
+  }
+  .stage.stacked .node {
+    position: relative;
+    width: 100% !important;
+    height: auto !important;
+    left: auto !important;
+    top: auto !important;
+  }
+  .stage.stacked .node::after {
+    content: '';
+    position: absolute;
+    left: -19px;
+    top: 20px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--void);
+    border: 1px solid var(--hair);
+  }
+  .stage.stacked .node.done::after,
+  .stage.stacked .node.active::after {
+    background: var(--champ);
+    border-color: var(--champ);
+  }
+
+  /* ---------------- answer ---------------- */
+  .taskline {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    margin-bottom: var(--s2);
+    flex-wrap: wrap;
+  }
+  .task {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--champ);
+  }
+  .rid {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    color: var(--dim);
+  }
+  .answer {
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 300;
+    margin: 0 0 var(--s3);
+    max-width: 62ch;
+    white-space: pre-wrap;
+  }
+  .answer b {
+    font-weight: 500;
+    color: var(--champ);
+  }
+  .answer.empty {
+    color: var(--dim);
+  }
+  .permalink {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--hair);
+    padding-bottom: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .permalink:hover {
+    color: var(--champ);
+    border-bottom-color: var(--champ);
+  }
+
+  .checks {
+    list-style: none;
+    margin: var(--s3) 0 0;
+    padding: 0;
+  }
+  .checks li {
+    display: grid;
+    grid-template-columns: 14px 1fr auto;
+    gap: var(--s2);
+    align-items: baseline;
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--hair);
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .checks li:last-child {
+    border-bottom: none;
+  }
+  .checks .mk {
+    font-family: var(--f-mono);
+    font-size: 11px;
+  }
+  .checks .st {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+  }
+  .checks .pass .mk,
+  .checks .pass .st {
+    color: var(--sage);
+  }
+  .checks .warn .mk,
+  .checks .warn .st {
+    color: var(--amber);
+  }
+  .checks .fail .mk,
+  .checks .fail .st {
+    color: var(--clay);
+  }
+
+  /* ---------------- confidence ---------------- */
+  .score {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s2);
+    flex-wrap: wrap;
+  }
+  .score .n {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: 56px;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .score .band {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    padding: 2px 7px;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+  }
+  .score .band.HIGH {
+    color: var(--sage);
+  }
+  .score .band.MEDIUM {
+    color: var(--amber);
+  }
+  .score .band.LOW {
+    color: var(--clay);
+  }
+  .score .band.NA {
+    color: var(--dim);
+  }
+  .comps {
+    display: grid;
+    gap: var(--s2);
+    margin-top: var(--s4);
+  }
+  .comp {
+    display: grid;
+    grid-template-columns: 92px 1fr 38px;
+    align-items: center;
+    gap: var(--s2);
+  }
+  .comp .cl {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .comp .track {
+    height: 1px;
+    background: var(--hair);
+    position: relative;
+  }
+  .comp .track i {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 1px;
+    background: var(--champ);
+  }
+  .comp .track i::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: -2px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--champ);
+  }
+  .comp .cv {
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    text-align: right;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .caveat {
+    margin: var(--s4) 0 0;
+    padding-top: var(--s3);
+    border-top: 1px solid var(--hair);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .caveat b {
+    color: var(--amber);
+    font-weight: 500;
+  }
+
+  /* ---------------- telemetry ---------------- */
+  .tele-canvas {
+    width: 100%;
+    height: 190px;
+    display: block;
+  }
+  .tele-legend {
+    display: flex;
+    gap: var(--s4);
+    flex-wrap: wrap;
+    margin-top: var(--s2);
+    align-items: center;
+  }
+  .leg {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  .leg .swatch {
+    width: 18px;
+    height: 0;
+    border-top-width: 2px;
+  }
+  .leg .swatch.solid {
+    border-top-style: solid;
+    border-top-color: var(--champ);
+  }
+  .leg .swatch.dashed {
+    border-top-style: dashed;
+    border-top-color: var(--sage);
+  }
+  .leg b {
+    color: var(--ink);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .leg.off {
+    color: var(--dim);
+  }
+  .tele-btn {
+    font: inherit;
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    min-height: 44px;
+    padding: 0 var(--s3);
+    background: transparent;
+    border: 1px solid var(--hair);
+    color: var(--muted);
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .tele-btn:hover {
+    color: var(--champ);
+    border-color: var(--hair-lit);
+  }
+
+  /* ---------------- trace log ---------------- */
+  /* The log is a list of lines, so it is ruled like one. */
+  .trace {
+    max-height: 320px;
+    overflow: auto;
+  }
+  .trace .event {
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--hair);
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: var(--s2);
+    align-items: baseline;
+  }
+  .trace .event:last-child {
+    border-bottom: none;
+  }
+  .trace .event .name {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--champ);
+  }
+  .trace .event pre {
+    margin: 0;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--muted);
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+  }
+
+  /* ---------------- evidence frames ---------------- */
+  .frame {
+    position: relative;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    border: 1px solid var(--hair);
+    background: #0a090c;
+  }
+  .frame .stamp {
+    position: absolute;
+    bottom: 9px;
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    background: rgba(8, 7, 10, 0.72);
+    padding: 2px 7px;
+    z-index: 2;
+  }
+  .frame .stamp.l {
+    left: 9px;
+  }
+  .frame .stamp.r {
+    right: 9px;
+  }
+  .cap {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    color: var(--dim);
+    margin: var(--s2) 0 0;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---------------- comparator (logic unchanged, skin only) ------------- */
+  .cmp-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: var(--s2);
+  }
+  .cmp {
+    position: relative;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    border: 1px solid var(--hair);
+    background: #0a090c;
+    touch-action: none;
+    cursor: ew-resize;
+  }
+  .cmp img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .cmp .cmp-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--champ);
+    pointer-events: none;
+  }
+  .cmp .cmp-handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -13px;
+    width: 26px;
+    height: 26px;
+    margin-top: -13px;
+    border-radius: 50%;
+    background: rgba(8, 7, 10, 0.9);
+    border: 1px solid var(--champ);
+  }
+  input[type='range'] {
+    accent-color: var(--champ);
+    height: 44px;
+  }
+
+  /* ---------------- map (MapView is untouched; this is its skin) -------- */
+  .mapview {
+    position: relative;
+  }
+  .mapview-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    flex-wrap: wrap;
+    margin-bottom: var(--s2);
+  }
+  .mapview-badge {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    color: var(--dim);
+  }
+  .mapview-badge.online {
+    color: var(--sage);
+  }
+  .mapview-badge.offline {
+    color: var(--amber);
+  }
+  .mapview-layer {
+    font: inherit;
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    padding: 5px 9px;
+    min-height: 30px;
+    border: 1px solid var(--hair);
+    color: var(--muted);
+    background: rgba(8, 7, 10, 0.72);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .mapview-layer:hover {
+    color: var(--ink);
+  }
+  .mapview-layer.active {
+    color: var(--champ);
+    border-color: var(--hair-lit);
+  }
+  .mapview-canvas {
+    width: 100%;
+    height: 420px;
+    border: 1px solid var(--hair);
+    background: #0a090c;
+  }
+  .mapview-note {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.06em;
+  }
+  .mapview-note.error {
+    color: var(--clay);
+  }
+  .mapview-attribution {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    color: var(--dim);
+    margin-top: 6px;
+  }
+  .mapview-attribution a {
+    color: var(--muted);
+  }
+
+  /* ---------------- tables ---------------- */
+  .tablewrap {
+    overflow-x: auto;
+  }
+  table.reg {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 620px;
+  }
+  table.reg th {
+    text-align: left;
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 500;
+    padding: 0 var(--s2) var(--s1);
+    border-bottom: 1px solid var(--hair);
+  }
+  table.reg td {
+    padding: var(--s2);
+    border-bottom: 1px solid var(--hair);
+    vertical-align: top;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  table.reg tr:last-child td {
+    border-bottom: none;
+  }
+  table.reg td.name {
+    font-family: var(--f-mono);
+    font-size: 12px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  table.reg td.num {
+    font-family: var(--f-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--champ);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .cav {
+    display: block;
+    margin-top: 6px;
+    padding-left: var(--s2);
+    border-left: 2px solid var(--amber);
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 76ch;
+  }
+  .tag {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    padding: 2px 7px;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .tag.ok {
+    color: var(--sage);
+  }
+  .tag.no {
+    color: var(--clay);
+  }
+  .tag.hold {
+    color: var(--amber);
+  }
+
+  /* ---------------- bars ---------------- */
+  .bars {
+    display: grid;
+    gap: var(--s2);
+  }
+  .bar {
+    display: grid;
+    grid-template-columns: minmax(96px, 168px) minmax(0, 1fr) 66px;
+    align-items: center;
+    gap: var(--s2);
+  }
+  .bar .bl {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bar .btrack {
+    height: 14px;
+    background: var(--sunk);
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bar .bfill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, var(--bronze), var(--champ));
+  }
+  .bar .bfill.muted {
+    background: linear-gradient(90deg, #3a3540, #5c5566);
+  }
+  .bar .bv {
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    text-align: right;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-grid,
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    border-top: 1px solid var(--hair);
+    border-bottom: 1px solid var(--hair);
+  }
+  .stat {
+    padding: var(--s3);
+    min-width: 0;
+    border-left: 1px solid var(--hair);
+  }
+  .stat:first-child {
+    border-left: none;
+    padding-left: 0;
+  }
+  .stat .label {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .stat .value {
+    font-family: var(--f-mono);
+    font-size: 19px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
+  }
+  .stat .sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .load-error {
+    font-family: var(--f-mono);
+    font-size: 12px;
+    color: var(--clay);
+    border: 1px solid var(--clay);
+    border-radius: 2px;
+    padding: var(--s2) var(--s3);
+  }
+
+  /* ------------------------------------------------------------------------
+     Evidence pages (/benchmarks, /runs/[runId]) keep their own markup.
+     Those two pages are dense with measured numbers and their structure is
+     load-bearing, so they are re-skinned through their existing class names
+     rather than rewritten — the smaller change is the safer one where every
+     row is a benchmark someone will read off the screen.
+     --------------------------------------------------------------------- */
+  .page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--s5) var(--gut);
+  }
+  .page > h1 {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: clamp(28px, 3.2vw, 42px);
+    letter-spacing: -0.03em;
+    margin: var(--s1) 0 0;
+  }
+  .page > h2 {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: var(--s5) 0 var(--s2);
+    padding-bottom: var(--s2);
+    border-bottom: 1px solid var(--hair);
+  }
+  .page h3 {
+    font-family: var(--f-ui);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 var(--s1);
+    color: var(--ink);
+  }
+  .page .note,
+  .page .question {
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 74ch;
+  }
+  .page code {
+    font-family: var(--f-mono);
+    font-size: 12px;
+    color: var(--champ);
+  }
+  .card {
+    border-top: 1px solid var(--hair);
+    padding: var(--s3) 0 var(--s4);
+    margin-bottom: var(--s3);
+  }
+  /* The one exception: a report that has not been generated is a warning, and
+     a warning is allowed to be an object on the page. */
+  .card.warn {
+    border: 1px solid rgba(224, 172, 74, 0.4);
+    border-radius: 2px;
+    padding: var(--s3) var(--s4) var(--s4);
+  }
+  .card ul {
+    margin: var(--s2) 0 0;
+    padding-left: 18px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .card .task {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: var(--champ);
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    padding: 2px 7px;
+    margin-left: var(--s1);
+  }
+  table.table {
+    width: 100%;
+    border-collapse: collapse;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  table.table th {
+    text-align: left;
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 500;
+    padding: 0 var(--s2) var(--s1);
+    border-bottom: 1px solid var(--hair);
+  }
+  table.table td {
+    padding: var(--s2);
+    border-bottom: 1px solid var(--hair);
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  table.table td:first-child {
+    font-family: var(--f-ui);
+    font-size: 13px;
+    color: var(--muted);
+    white-space: normal;
+  }
+  table.table tr.muted td {
+    color: var(--dim);
+  }
+  .page .caveat {
+    margin: var(--s2) 0 0;
+    padding: var(--s2) var(--s3);
+    border: none;
+    border-left: 2px solid var(--amber);
+    background: rgba(224, 172, 74, 0.06);
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  /* These two pages list checks as plain sentences, not as the three-column
+     mark/message/status row the deck uses, so the grid is switched off here. */
+  .page .checks li {
+    display: block;
+    font-size: 13px;
+  }
+  .page .checks li.check-FAIL {
+    color: var(--clay);
+  }
+  .page .checks li.check-FAIL code {
+    color: var(--clay);
+  }
+
+  .foot {
+    border-top: 1px solid var(--hair);
+    padding: var(--s4) 0 var(--s5);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--s3);
+    flex-wrap: wrap;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    color: var(--dim);
+  }
+}
+
+/* Outside @layer components on purpose.
+   OpenLayers ships its own unlayered ol.css, and Tailwind only emits rules
+   from `@layer components` whose class names it finds in the scanned source —
+   `.ol-viewport` and friends exist only inside that stylesheet, so a rule
+   naming them is dropped before it reaches the browser. Written as plain CSS
+   it is always emitted, and it outranks the layered rules besides.
+
+   The basemap is someone else's daylight raster and arrives far brighter than
+   the deck. Damping it here keeps MapView.tsx untouched: this is a skin over
+   the tiles, not a change to how the map works. The overlay is drawn into the
+   same canvas, so it is damped alongside them and keeps its contrast. */
+/* `.ol-viewport canvas { all: unset }` in ol.css resets `filter` too, and it
+   loads after this file at equal specificity, so the extra class is what makes
+   this rule stick rather than lose the source-order tie. */
+.mapview-canvas .ol-viewport canvas,
+.scenebox-map .ol-viewport canvas {
+  filter: saturate(0.62) brightness(0.82) contrast(1.04);
+}
+.scenebox-map .ol-control button {
+  background: rgba(8, 7, 10, 0.82);
+  border: 1px solid var(--hair);
+  color: var(--ink);
+  border-radius: 2px;
+  font-family: var(--f-mono);
+}
+.mapview-canvas .ol-control button {
+  background: rgba(8, 7, 10, 0.82);
+  border: 1px solid var(--hair);
+  color: var(--ink);
+  border-radius: 2px;
+  font-family: var(--f-mono);
+}
+.mapview-canvas .ol-control button:hover {
+  background: rgba(8, 7, 10, 0.95);
+  color: var(--champ);
+}
+.mapview-canvas .ol-attribution {
+  background: rgba(8, 7, 10, 0.72);
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+}
+
+@media (max-width: 1024px) {
+  .row-2 {
+    grid-template-columns: 1fr;
+  }
+}
+/* A cell divider only reads as a divider while the cells are on one row. Once
+   the strip wraps, the rule moves to the top edge so the first cell of a new
+   row does not start with a stray vertical hairline. */
+@media (max-width: 700px) {
+  .vitals,
+  .stat-grid,
+  .stats {
+    grid-template-columns: 1fr;
+  }
+  .vital,
+  .stat {
+    border-left: none;
+    border-top: 1px solid var(--hair);
+    padding-left: 0;
+  }
+  .vital:first-child,
+  .stat:first-child {
+    border-top: none;
+  }
+}
+
+@media (max-width: 900px) {
+  /* The command bar stacks before the panels do: three controls side by side
+     stop being a bar and start being three cramped boxes well above 768px. */
+  .console-grid {
+    grid-template-columns: 1fr;
+    gap: var(--s3);
+    align-items: stretch;
+  }
+  .console-grid > .btn {
+    justify-self: start;
+  }
+  .hero-copy {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .row-2b {
+    grid-template-columns: 1fr;
+  }
+  .nav ul {
+    order: 3;
+    width: 100%;
+    gap: var(--s3);
+  }
+  .trace .event {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* Motion is a layer over a page that already reads correctly without it. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Below the two-column breakpoint the hero copy runs full width, so the rig
+   shares that space with the headline. It drops back to atmosphere there —
+   the type has to stay the most legible thing on the band. */
+@media (max-width: 900px) {
+  .hero-rig {
+    opacity: 0.32;
+  }
+}

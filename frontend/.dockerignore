@@ -1,0 +1,10 @@
+# The builder stage runs `npm ci` from the lockfile, so a host node_modules
+# in the build context is pure transfer cost - hundreds of megabytes, and
+# possibly built for a different platform than the image.
+node_modules/
+.next/
+out/
+tsconfig.tsbuildinfo
+npm-debug.log*
+Dockerfile
+.dockerignore
