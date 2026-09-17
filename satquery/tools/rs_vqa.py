@@ -6,10 +6,19 @@ is the component that makes a real fine-tuned model answer inside the trace.
 
 Activation is explicit and opt-in via environment variables:
 
-    SATQUERY_VQA_BASE     path to the 4-bit base model directory
-    SATQUERY_VQA_ADAPTER  path to the trained LoRA adapter
+    SATQUERY_VQA_BASE       path to the base model directory
+    SATQUERY_VQA_ADAPTER    path to the trained LoRA adapter
+    SATQUERY_VQA_CPU_DTYPE  bfloat16 (default) or float32, CPU only
 
-If either is unset, or the GPU stack is missing, the registry keeps the stub.
+With a CUDA device the base loads in 4-bit NF4, the configuration every
+published number was measured on. Without one it loads unquantised on the CPU
+(bitsandbytes' 4-bit kernels are CUDA-only), which needs about 7.5 GB of RAM in
+bfloat16 and answers in tens of seconds rather than one. The answers come from
+the same adapter; the precision differs, and every CPU answer says so in its
+warnings.
+
+If either path is unset, or torch/peft/transformers are missing, the registry
+keeps the stub.
 That is deliberate: CI and every developer without a GPU must still get a
 green test suite, and a silently-degraded model answering real questions would
 be worse than an obvious stub.
@@ -40,6 +49,7 @@ TOOL_VERSION = "1.0.0-qlora"
 
 ENV_BASE = "SATQUERY_VQA_BASE"
 ENV_ADAPTER = "SATQUERY_VQA_ADAPTER"
+ENV_CPU_DTYPE = "SATQUERY_VQA_CPU_DTYPE"
 
 # Answers are short in this domain ("rural", "5", "yes"). A tight cap keeps
 # latency and VRAM predictable and discourages the model from rambling.
@@ -68,29 +78,22 @@ class _ModelHandle:
     def __init__(self, base: Path, adapter: Path):
         import torch
         from peft import PeftModel
-        from transformers import AutoProcessor, BitsAndBytesConfig
+        from transformers import AutoProcessor
 
         try:
             from transformers import AutoModelForImageTextToText as AutoVLM
         except ImportError:  # transformers < 5
             from transformers import AutoModelForVision2Seq as AutoVLM
 
-        quant = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_compute_dtype=(
-                torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
-            ),
-        )
         self.torch = torch
         self.processor = AutoProcessor.from_pretrained(str(base), local_files_only=True)
+        self.on_cpu = not torch.cuda.is_available()
+        self.precision = load_precision(on_cpu=self.on_cpu)
         model = AutoVLM.from_pretrained(
             str(base),
-            quantization_config=quant,
-            device_map={"": 0} if torch.cuda.is_available() else "cpu",
             local_files_only=True,
             trust_remote_code=False,
+            **model_load_kwargs(torch, on_cpu=self.on_cpu),
         )
         # The adapter is ours, produced by training/track_b_vlm_qlora.py, so
         # loading it is not the third-party-code risk that trust_remote_code is.
@@ -137,6 +140,50 @@ def is_available() -> tuple[bool, str]:
         except ImportError:
             return False, f"{module} is not installed"
     return True, "ready"
+
+
+CPU_PRECISION_WARNING = (
+    "rs_vqa_v1 is running unquantised on the CPU ({precision}); its published "
+    "accuracy was measured on the 4-bit GPU build, so answers can differ slightly"
+)
+
+
+def load_precision(on_cpu: bool) -> str:
+    """The precision the base model is loaded in, as recorded in warnings."""
+    if not on_cpu:
+        return "nf4-4bit"
+    choice = os.getenv(ENV_CPU_DTYPE, "bfloat16").lower()
+    return choice if choice in ("bfloat16", "float32") else "bfloat16"
+
+
+def model_load_kwargs(torch, on_cpu: bool) -> dict:
+    """`from_pretrained` keyword arguments for the device actually present.
+
+    Separate from the handle so both branches are testable without weights.
+    """
+    if not on_cpu:
+        from transformers import BitsAndBytesConfig
+
+        return {
+            "quantization_config": BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_compute_dtype=(
+                    torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+                ),
+            ),
+            "device_map": {"": 0},
+        }
+    # bitsandbytes' 4-bit path needs CUDA, so the CPU loads full weights.
+    # bfloat16 halves the memory of float32 (~7.5 GB instead of ~15 GB for
+    # the 3B model), which is what makes a 16 GB machine viable at all.
+    # low_cpu_mem_usage streams the checkpoint in rather than materialising a
+    # random-init copy first, which would double the peak.
+    return {
+        "torch_dtype": getattr(torch, load_precision(on_cpu=True)),
+        "low_cpu_mem_usage": True,
+    }
 
 
 class RSVQATool(ToolProtocol):
@@ -195,6 +242,8 @@ class RSVQATool(ToolProtocol):
         if not answer:
             answer = "The image does not support an answer to that question."
             warnings.append("model produced an empty answer; abstained in wording")
+        if handle.on_cpu:
+            warnings.append(CPU_PRECISION_WARNING.format(precision=handle.precision))
 
         payload = VQAPayload(
             data={
@@ -212,8 +261,8 @@ class RSVQATool(ToolProtocol):
             artifacts=[],
             confidence=confidence,
             confidence_method="logprob",
-            model_card=f"{Path(handle.base_path).name} + QLoRA adapter "
-                       f"{Path(handle.adapter_path).name}",
+            model_card=f"{Path(handle.base_path).name} ({handle.precision}) + "
+                       f"QLoRA adapter {Path(handle.adapter_path).name}",
             runtime_ms=int((time.perf_counter() - started) * 1000),
             warnings=warnings,
         )
