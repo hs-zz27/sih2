@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="300" viewBox="0 0 340 300" font-family="sans-serif" font-size="10">
+<rect width="340" height="300" fill="white"/>
+<text x="170.0" y="18" text-anchor="middle" font-size="12">intent</text>
+<line x1="46" y1="73.1" x2="294" y2="73.1" stroke="#c0392b" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="290" y="69.1" text-anchor="end" fill="#c0392b">base error 0.379</text>
+<polyline points="54.6,254.0 63.1,254.0 71.7,254.0 80.2,254.0 88.8,254.0 97.3,254.0 105.9,254.0 114.4,254.0 123.0,201.0 131.5,206.3 140.1,210.7 148.6,214.3 157.2,217.3 165.7,219.9 174.3,222.2 182.8,224.2 191.4,226.0 199.9,201.0 208.5,178.7 217.0,158.6 225.6,163.2 234.1,145.6 242.7,129.6 251.2,134.8 259.8,120.5 268.3,107.3 276.9,95.1 285.4,83.7 294.0,73.1" fill="none" stroke="#2e86de" stroke-width="1.6"/>
+<rect x="46" y="46" width="248" height="208" fill="none" stroke="#333" stroke-width="1"/>
+<text x="170.0" y="288" text-anchor="middle">coverage</text>
+<text x="14" y="150.0" text-anchor="middle" transform="rotate(-90 14 150.0)">risk (error among answered)</text>
+<text x="50" y="60">AURC 0.1302 | E-AURC 0.0405 | n=29</text>
+</svg>

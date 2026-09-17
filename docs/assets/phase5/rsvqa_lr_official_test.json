@@ -1,0 +1,260 @@
+{
+  "benchmark": "RSVQA-LR official test split",
+  "source": "Zenodo 10.5281/zenodo.6344334, CC-BY-4.0",
+  "n_questions": 10004,
+  "n_images": 100,
+  "type_counts": {
+    "rural_urban": 100,
+    "presence": 2955,
+    "count": 2947,
+    "comp": 4002
+  },
+  "constant_baseline": {
+    "answers": {
+      "comp": "no",
+      "count": "0",
+      "presence": "yes",
+      "rural_urban": "rural"
+    },
+    "all_types_accuracy": 0.5694722111155538,
+    "published_convention_accuracy": 0.7005809834207171
+  },
+  "arms": {
+    "base": {
+      "all_types": {
+        "n": 10004,
+        "accuracy": 0.2621951219512195,
+        "ci95": [
+          0.2537,
+          0.2709
+        ]
+      },
+      "published_convention": {
+        "types": [
+          "presence",
+          "comp",
+          "rural_urban"
+        ],
+        "n": 7057,
+        "micro_accuracy": 0.37168768598554625,
+        "ci95": [
+          0.3605,
+          0.383
+        ],
+        "macro_average_accuracy": 0.28756190432702433
+      },
+      "by_type": {
+        "comp": {
+          "n": 4002,
+          "correct": 2028,
+          "accuracy": 0.5067466266866567,
+          "ci95": [
+            0.4913,
+            0.5222
+          ],
+          "constant_accuracy": 0.6674162918540729
+        },
+        "count": {
+          "n": 2947,
+          "correct": 0,
+          "accuracy": 0.0,
+          "ci95": [
+            0.0,
+            0.0013
+          ],
+          "constant_accuracy": 0.25551408211740756
+        },
+        "presence": {
+          "n": 2955,
+          "correct": 579,
+          "accuracy": 0.19593908629441625,
+          "ci95": [
+            0.182,
+            0.2106
+          ],
+          "constant_accuracy": 0.750253807106599
+        },
+        "rural_urban": {
+          "n": 100,
+          "correct": 16,
+          "accuracy": 0.16,
+          "ci95": [
+            0.101,
+            0.2442
+          ],
+          "constant_accuracy": 0.56
+        }
+      },
+      "vs_constant": {
+        "both_correct": 1493,
+        "model_only_correct": 1130,
+        "constant_only_correct": 4204,
+        "mcnemar_chi2_cc": 1770.403,
+        "significant_at_0.05": true
+      }
+    },
+    "v2_final": {
+      "all_types": {
+        "n": 10004,
+        "accuracy": 0.6958216713314674,
+        "ci95": [
+          0.6867,
+          0.7048
+        ]
+      },
+      "published_convention": {
+        "types": [
+          "presence",
+          "comp",
+          "rural_urban"
+        ],
+        "n": 7057,
+        "micro_accuracy": 0.8947144679042086,
+        "ci95": [
+          0.8873,
+          0.9017
+        ],
+        "macro_average_accuracy": 0.8800380266719432
+      },
+      "by_type": {
+        "comp": {
+          "n": 4002,
+          "correct": 3590,
+          "accuracy": 0.8970514742628686,
+          "ci95": [
+            0.8873,
+            0.9061
+          ],
+          "constant_accuracy": 0.6674162918540729
+        },
+        "count": {
+          "n": 2947,
+          "correct": 647,
+          "accuracy": 0.21954530030539532,
+          "ci95": [
+            0.205,
+            0.2349
+          ],
+          "constant_accuracy": 0.25551408211740756
+        },
+        "presence": {
+          "n": 2955,
+          "correct": 2639,
+          "accuracy": 0.893062605752961,
+          "ci95": [
+            0.8814,
+            0.9037
+          ],
+          "constant_accuracy": 0.750253807106599
+        },
+        "rural_urban": {
+          "n": 100,
+          "correct": 85,
+          "accuracy": 0.85,
+          "ci95": [
+            0.7672,
+            0.9069
+          ],
+          "constant_accuracy": 0.56
+        }
+      },
+      "vs_constant": {
+        "both_correct": 5193,
+        "model_only_correct": 1768,
+        "constant_only_correct": 504,
+        "mcnemar_chi2_cc": 702.099,
+        "significant_at_0.05": true
+      }
+    },
+    "v2_es_best": {
+      "all_types": {
+        "n": 10004,
+        "accuracy": 0.6958216713314674,
+        "ci95": [
+          0.6867,
+          0.7048
+        ]
+      },
+      "published_convention": {
+        "types": [
+          "presence",
+          "comp",
+          "rural_urban"
+        ],
+        "n": 7057,
+        "micro_accuracy": 0.8850786453167068,
+        "ci95": [
+          0.8774,
+          0.8923
+        ],
+        "macro_average_accuracy": 0.8273095009178997
+      },
+      "by_type": {
+        "comp": {
+          "n": 4002,
+          "correct": 3589,
+          "accuracy": 0.8968015992003998,
+          "ci95": [
+            0.887,
+            0.9058
+          ],
+          "constant_accuracy": 0.6674162918540729
+        },
+        "count": {
+          "n": 2947,
+          "correct": 715,
+          "accuracy": 0.24261961316593145,
+          "ci95": [
+            0.2275,
+            0.2584
+          ],
+          "constant_accuracy": 0.25551408211740756
+        },
+        "presence": {
+          "n": 2955,
+          "correct": 2586,
+          "accuracy": 0.8751269035532995,
+          "ci95": [
+            0.8627,
+            0.8866
+          ],
+          "constant_accuracy": 0.750253807106599
+        },
+        "rural_urban": {
+          "n": 100,
+          "correct": 71,
+          "accuracy": 0.71,
+          "ci95": [
+            0.6146,
+            0.7899
+          ],
+          "constant_accuracy": 0.56
+        }
+      },
+      "vs_constant": {
+        "both_correct": 5134,
+        "model_only_correct": 1827,
+        "constant_only_correct": 563,
+        "mcnemar_chi2_cc": 667.435,
+        "significant_at_0.05": true
+      }
+    }
+  },
+  "timing": {
+    "base": {
+      "generate_s": 2936.6,
+      "s_per_question": 0.2935,
+      "adapter": "BASE"
+    },
+    "v2_final": {
+      "generate_s": 1760.0,
+      "s_per_question": 0.1759,
+      "adapter": "checkpoints/v2/track_b_vqa/adapter_final"
+    },
+    "v2_es_best": {
+      "generate_s": 1746.9,
+      "s_per_question": 0.1746,
+      "adapter": "checkpoints/v2/track_b_vqa_es/adapter_best"
+    }
+  }
+}

@@ -1,0 +1,433 @@
+{
+  "schema_version": "1.0",
+  "generated": "2026-09-03",
+  "document": "docs/external_benchmark_audit.md",
+  "rules": {
+    "measured_here": "produced by this repository's own evaluation code during the 2026-09-03 audit",
+    "published": "quoted from a paper; NOT reproduced by this project",
+    "comparability": {
+      "A": "same dataset, split, task, metric and protocol",
+      "B": "same task and dataset family, one or more protocol differences",
+      "C": "not comparable"
+    }
+  },
+
+  "corrections": {
+    "added": "2026-09-07",
+    "convention": "Additive. No original field in this file was edited - it is the companion to a dated audit, and its fields record what was measured on 2026-09-03. Consumers should prefer the corrected values here over the superseded fields they name.",
+    "cdvqa_overall_accuracy": {
+      "superseded_value": 0.5380,
+      "corrected_value": 0.606133,
+      "coverage_superseded": "100%",
+      "coverage_corrected": 0.9982,
+      "cause": "the 0.5380 run fed channel-reversed (BGR) images to an ImageNet-pretrained ResNet-18 semantic-change head, and ImageNet pretraining is RGB-specific. Established by A/B across commits pre-import:P0-worktree (pre-fix, reproduces 0.5380 exactly on all eight types and overall) and pre-import:P0-primary (post-fix, 0.606133). Only the code changed.",
+      "source": "docs/research/cdvqa-baseline-correction-2026-09-03.md",
+      "supersedes_fields": [
+        "satquery_published_component_metrics.change_vqa_v1.overall_accuracy",
+        "satquery_published_component_metrics.change_vqa_v1.coverage",
+        "satquery_published_component_metrics.change_vqa_v1.per_type",
+        "category_a_comparisons[0].satquery",
+        "category_a_comparisons[0].delta_vs_best",
+        "category_a_comparisons[0].delta_vs_oldest_baseline",
+        "category_a_comparisons[0].per_type_vs_qwen35_2b",
+        "largest_gaps[0].satquery",
+        "largest_gaps[0].delta"
+      ],
+      "corrected_deltas": {
+        "vs_qwen35_2b_0_7474": -0.1413,
+        "vs_vista_0_7310": -0.1249,
+        "vs_soba_0_6920": -0.0859,
+        "vs_cdvqa_baseline_2021_0_6590": -0.0529,
+        "vs_per_type_majority_constant_0_5084": 0.0977
+      },
+      "corrected_per_type": {
+        "change_or_not": 0.709336,
+        "change_ratio": 0.187500,
+        "change_ratio_types": 0.556359,
+        "change_to_what": 0.521899,
+        "decrease_or_not": 0.754830,
+        "increase_or_not": 0.717826,
+        "largest_change": 0.616736,
+        "smallest_change": 0.152204
+      },
+      "verdict_unchanged": "SatQuery still loses this Category-A comparison to all four published comparators and still loses on all eight question types; every gap narrows, none closes. competitive_position.change_understanding stays red, and largest_gaps G1 keeps its diagnosis - the segmenter, against an oracle ceiling of 0.99748.",
+      "verdict_changed": "The margin over a per-type majority constant rises from +3.0 to +9.8 points, and the number of question types beating that constant rises from 5 of 8 to 7 of 8."
+    }
+  },
+
+  "satquery": {
+    "parameters": {
+      "base_model": "Qwen2.5-VL-3B-Instruct",
+      "base_total": 3754622976,
+      "base_vision_tower": 668684288,
+      "base_vision_tower_fraction": 0.1781,
+      "adapter_v2_trainable": 37152768,
+      "adapter_v3_trainable": 82726912,
+      "adapter_v3_vision_side": 22859776,
+      "adapter_v3_vision_fraction_of_tower": 0.0342,
+      "specialist_heads_total": 9260023,
+      "specialist_heads": {
+        "landcover_v1": 422231,
+        "caption_v1": 1556442,
+        "grounding_v1": 549865,
+        "change_mask_v1": 49543,
+        "change_caption_v1": 292911,
+        "change_vqa_v1": 6257001,
+        "optsar_fusion_v1": 132030
+      },
+      "entailment_gate_nli_deberta_mnli": 184424963,
+      "system_total_v3_config": 4031034874,
+      "trained_by_this_project_v3_config": 91986935,
+      "trained_fraction": 0.0228,
+      "measurement_method": "safetensors headers and model_state_dict tensors read from disk"
+    },
+    "hardware": {
+      "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
+      "vram_total_mib": 6141,
+      "vram_used_mib_measured": [2567, 2819],
+      "torch": "2.13.0+cu126",
+      "quantisation": "4-bit NF4, double quant"
+    },
+    "latency": {
+      "rs_vqa_v1_trace_ms": 2670,
+      "trace_tokens_generated": 14,
+      "trace_image_px": [256, 256],
+      "trace_run_id": "run_53198df6bbd4",
+      "sweep_s_per_example_base": 1.5228,
+      "sweep_s_per_example_v2": 1.3056,
+      "sweep_s_per_example_v3": 1.2626,
+      "sweep_s_per_example_v3_probe": 1.2476,
+      "note": "sweep figures are means over the 534-item mixed val split, unmerged LoRA on a 4-bit base"
+    }
+  },
+
+  "local_evaluation": {
+    "provenance": "evaluation/track_b_eval.py Adapter+score and evaluation/metrics/vqa.py normalise_answer, unmodified; a scratchpad BaseOnly handle adds the no-adapter arm",
+    "split": "data/instruct_mix/val.jsonl",
+    "n": 534,
+    "composition": {"whu_opt_sar": 322, "rsvqa_lr": 207, "synthetic_refusal": 5},
+    "kinds": {"vqa": 517, "refusal": 17},
+    "train_val_image_overlap": {"rsvqa_lr": 0, "whu_opt_sar_images": 22, "whu_opt_sar_val_images": 322},
+    "offline": true,
+
+    "full_val": {
+      "base": {
+        "source": "measured here",
+        "exact_match": 0.079304,
+        "token_f1": 0.202717,
+        "rsvqa_lr_exact_match": 0.198068,
+        "whu_opt_sar_exact_match": 0.0,
+        "whu_opt_sar_token_f1": 0.177088,
+        "refusal_recall": 0.0,
+        "false_refusal_rate": 0.0,
+        "lexical_shortcut_probe": 0.0
+      },
+      "track_b_v2": {
+        "source": "measured here 2026-09-03; reproduces the 2026-09-01 published run in docs/assets/refusal/track_b_v2_fullval.json exactly on all eight metrics (delta 0 to 12 decimal places)",
+        "reproduction_exact": true,
+        "exact_match": 0.379110251450677,
+        "token_f1": 0.7927424102262215,
+        "rsvqa_lr_exact_match": 0.6473429951690821,
+        "whu_opt_sar_exact_match": 0.2,
+        "whu_opt_sar_token_f1": 0.8898316970546984,
+        "refusal_recall": 0.4117647058823529,
+        "false_refusal_rate": 0.007736943907156673,
+        "lexical_shortcut_probe": 0.16666666666666666
+      },
+      "track_b_v3_probe": {
+        "source": "measured here",
+        "exact_match": 0.394584,
+        "token_f1": 0.807712,
+        "rsvqa_lr_exact_match": 0.671498,
+        "whu_opt_sar_exact_match": 0.209677,
+        "whu_opt_sar_token_f1": 0.898700,
+        "refusal_recall": 0.294118,
+        "false_refusal_rate": 0.001934,
+        "lexical_shortcut_probe": 0.0
+      },
+      "track_b_v3": {
+        "source": "measured here",
+        "exact_match": 0.460348,
+        "token_f1": 0.855027,
+        "rsvqa_lr_exact_match": 0.787440,
+        "whu_opt_sar_exact_match": 0.241935,
+        "whu_opt_sar_token_f1": 0.900200,
+        "refusal_recall": 0.352941,
+        "false_refusal_rate": 0.003868,
+        "lexical_shortcut_probe": 0.083333
+      }
+    },
+
+    "rsvqa_lr_slice_retyped": {
+      "n": 207,
+      "provenance": "dmarsili/RSVQA-LR-2k is a 2,000-question subset of the RSVQA-LR VALIDATION split; stratified 90/10 by training/prepare/instruction_mix.py seed 42",
+      "type_counts": {"presence": 68, "comparison": 81, "count": 57, "rural_urban": 1},
+      "binary_answer_share": 0.7198,
+      "constant_baseline_per_type_majority_fitted_on_train": {
+        "answers": {"presence": "yes", "comparison": "no", "count": "0", "rural_urban": "urban"},
+        "overall_accuracy": 0.6473,
+        "by_type": {"presence": 0.8088, "comparison": 0.7284, "count": 0.3509, "rural_urban": 0.0},
+        "published_convention_micro": 0.76
+      },
+      "arms": {
+        "base": {
+          "exact_match_all_types": 0.198068, "ci95": [0.1495, 0.2576],
+          "published_convention_micro_n150": 0.273333,
+          "presence": 0.132353, "comparison": 0.395062, "count": 0.0, "rural_urban": 0.0,
+          "vs_constant": {"model_only_correct": 18, "constant_only_correct": 111, "both": 23},
+          "mean_answer_tokens": 8.74, "gold_appears_in_answer": 0.483092
+        },
+        "track_b_v2": {
+          "exact_match_all_types": 0.647343, "ci95": [0.5801, 0.7092],
+          "published_convention_micro_n150": 0.813333,
+          "presence": 0.882353, "comparison": 0.753086, "count": 0.210526, "rural_urban": 1.0,
+          "vs_constant": {"model_only_correct": 17, "constant_only_correct": 17, "both": 117},
+          "mean_answer_tokens": 1.0, "gold_appears_in_answer": 0.647343
+        },
+        "track_b_v3_probe": {
+          "exact_match_all_types": 0.671498, "ci95": [0.6049, 0.7318],
+          "published_convention_micro_n150": 0.833333,
+          "presence": 0.75, "comparison": 0.913580, "count": 0.245614, "rural_urban": 0.0,
+          "vs_constant": {"model_only_correct": 30, "constant_only_correct": 25, "both": 109},
+          "mean_answer_tokens": 1.0, "gold_appears_in_answer": 0.671498
+        },
+        "track_b_v3": {
+          "exact_match_all_types": 0.787440, "ci95": [0.7267, 0.8377],
+          "published_convention_micro_n150": 0.953333,
+          "presence": 0.955882, "comparison": 0.950617, "count": 0.350877, "rural_urban": 1.0,
+          "vs_constant": {"model_only_correct": 35, "constant_only_correct": 6, "both": 128,
+                           "mcnemar_chi2_approx": 20.5, "p": "<0.001"},
+          "mean_answer_tokens": 1.0, "gold_appears_in_answer": 0.787440
+        }
+      },
+      "caveats": [
+        "validation split, not the official RSVQA-LR test split",
+        "n=207 (150 under the published convention); 95% intervals are wide",
+        "v3 was trained under the label-masking defect; its advantage confounds rank, vision-tower targeting and step count"
+      ]
+    }
+  },
+
+  "satquery_published_component_metrics": {
+    "caption_v1": {"dataset": "RSICD test", "n": 1093, "bleu4_sentence_mean_smoothed_5ref": 0.24460787515482577, "unique_captions": 146, "unique_fraction": 0.1336},
+    "grounding_v1": {"dataset": "DIOR-RSVG", "split": "self-made (run_metadata: NO published split in this mirror)", "n": 1141, "acc@0.5": 0.07624890446976336, "acc@0.7": 0.008764241893076249, "miou": 0.14048209367087824},
+    "landcover_v1": {"dataset": "BigEarthNet-19", "map_all_bands": 0.2853654937481183, "map_cartosat_4band": 0.2572603470980011, "retention": 0.9015117550444813},
+    "change_mask_v1": {"dataset": "LEVIR-CD official split, 256px tiling 7120/1024/2048", "f1_change_class": 0.5597365719863596, "iou": 0.3886348574151661, "precision": 0.44255118259648896, "recall": 0.7613341262268545, "params": 49543},
+    "change_caption_v1": {"dataset": "LEVIR-CC test", "n": 1929, "bleu4_changed_1ref": 0.3063, "bleu4_unchanged_1ref": 0.9706, "bleu4_aggregate_1ref": 0.5686, "unique_captions": 85},
+    "change_vqa_v1": {"dataset": "CDVQA test1", "n_questions": 39686, "n_pairs": 968, "coverage": 1.0, "overall_accuracy": 0.5380, "per_type_majority_baseline": 0.5084, "oracle_ceiling": 0.9975, "change_class_miou": 0.263639,
+      "per_type": {"change_or_not": {"n": 13882, "baseline": 0.5617, "system": 0.6772},
+                   "change_ratio_types": {"n": 5811, "baseline": 0.4770, "system": 0.4791},
+                   "decrease_or_not": {"n": 4658, "baseline": 0.6900, "system": 0.6496},
+                   "increase_or_not": {"n": 4600, "baseline": 0.6663, "system": 0.6437},
+                   "change_to_what": {"n": 2991, "baseline": 0.3805, "system": 0.3714},
+                   "largest_change": {"n": 2904, "baseline": 0.4291, "system": 0.4497},
+                   "smallest_change": {"n": 2904, "baseline": 0.2231, "system": 0.1319},
+                   "change_ratio": {"n": 1936, "baseline": 0.1529, "system": 0.1952}}},
+    "optsar_fusion_v1": {"dataset": "WHU-OPT-SAR", "metric": "tile-level multi-label mAP", "optical": 0.7777944611792945, "sar": 0.7409939886934886, "fused": 0.7714183422364739, "complementarity_gain": -0.006376118942820641, "split_method": "deterministic random by tile; NOT geographic"},
+    "calibration": {"head": "change_mask", "ece_before": 0.0668, "ece_after": 0.0034, "transform": "affine (temperature scaling rejected)"},
+    "orchestration": {"illegal_plan_rate": [0, 600], "routing_accuracy_clean_holdout": 0.5862, "n_holdout": 29}
+  },
+
+  "top5": [
+    {"rank": 1, "name": "EarthDial", "score": 22, "params": "4B", "base_llm": "Phi-3-mini", "vision_encoder": "InternViT-300M",
+     "date": "2025-04-07 (arXiv 2412.15190v2)", "org": "MBZUAI / IBM Research / Linkoping / ANU",
+     "modalities": ["optical", "SAR", "multispectral", "NIR/infrared", "hyperspectral", "bi-temporal"],
+     "training_pairs": 11110000, "weights_public": true, "licence": "CC BY 4.0",
+     "url": "https://arxiv.org/abs/2412.15190", "code": "https://github.com/hiyamdebary/EarthDial",
+     "locally_evaluable": "in principle at 4-bit; download not made",
+     "published": {"rsvqa_lr_presence": 92.58, "rsvqa_lr_comparison": 92.75, "rsvqa_lr_avg": 92.70,
+                   "rsvqa_hr_avg": 72.45, "bigearthnet_rgb_acc": 68.82, "bigearthnet_ms_acc": 69.94,
+                   "sosat_lcz42_acc": 60.72, "xbd_recall": 96.37, "fmow_acc": 70.03,
+                   "rsicd_rouge1": 33.77, "rsicd_rougeL": 27.61, "ucm_captions_rouge1": 40.0,
+                   "nwpu_captions_rouge1": 45.84, "levir_mci_rouge1": 33.78, "levir_mci_rougeL": 30.47,
+                   "sar_ship_map50_single": 6.06, "sar_ship_map50_multiple": 26.02, "quakeset_acc": 57.53},
+     "excluded_from_audit": ["METEOR column: extracted values above 50 are outside the metric's range; not quoted"]},
+
+    {"rank": 2, "name": "Earth-OneVision", "score": 21, "params": "2B", "base_llm": "Qwen3-2B", "vision_encoder": "SigLIP-2 (0.3B)",
+     "date": "2026-06-09 (arXiv 2606.10819v1)", "org": "Beijing Institute of Technology",
+     "modalities": ["optical", "SAR", "infrared", "multispectral", "temporal", "video", "cross-sensor fusion"],
+     "training_pairs": 34000000, "weights_public": false,
+     "url": "https://arxiv.org/abs/2606.10819", "code": null, "locally_evaluable": false,
+     "published": {"rsvqa_lr_acc": 92.91, "rsvqa_hr_acc": 86.36, "vrsbench_vqa_acc": 80.32,
+                   "dior_rsvg_p@0.5": 94.41, "opt_rsvg_p@0.5": 87.52, "vrsbench_vg_p@0.5": 90.77,
+                   "rsvg_hr_p@0.5": 82.36, "rsicd_meteor": 33.98, "sarlang_bench_vqa_acc": 80.68,
+                   "sarlang_complex_captioning_cider": 110.24, "bigearthnet_ms_recall": 75.74,
+                   "bigearthnet_rgb_recall": 78.03, "ucmerced_acc": 91.83, "whu_rs19_acc": 97.31,
+                   "levir_cdc_f1": 73.28, "whu_cdc_f1": 70.91, "levir_mci_mf1": 85.85,
+                   "earthmind_bench_optical_mcq": 80.70, "earthmind_bench_sar_mcq": 76.10,
+                   "earthmind_bench_fusion_mcq": 81.94, "era_acc": 89.14, "capera_cider": 71.73,
+                   "sosat_lcz42_acc": 59.44},
+     "excluded_from_audit": ["LEVIR-MCI METEOR 76.45 and xBD ROUGE-1 92.33 are outside normal ranges; not quoted"]},
+
+    {"rank": 3, "name": "RingMo-Agent", "score": 21, "params": "3B (DeepSeekMoE)", "base_llm": "DeepSeek-VL2 3B", "vision_encoder": "SigLIP-SO400M-384",
+     "date": "2026-08-18 (arXiv 2507.20776v3)", "org": "Aerospace Information Research Institute, CAS",
+     "modalities": ["optical", "SAR", "infrared"], "platforms": ["satellite", "UAV"],
+     "training_pairs": 3000000, "weights_public": "not stated",
+     "url": "https://arxiv.org/abs/2507.20776", "locally_evaluable": false,
+     "published": {"rsvqa_lr_presence_ft": 93.10, "rsvqa_lr_comparison_ft": 87.50, "rsvqa_lr_avg_ft": 90.30,
+                   "rsvqa_hr_presence_zs": 75.24, "rsvqa_hr_comparison_zs": 83.92, "rsvqa_hr_avg_zs": 79.58,
+                   "ucm_captions_bleu4": 77.63, "ucm_captions_meteor": 51.79, "ucm_captions_rougeL": 85.51,
+                   "ucm_captions_cider": 373.68, "sardet_100k_map50": 53.84, "ir_det_map50": 59.88}},
+
+    {"rank": 4, "name": "EarthMind", "score": 18, "params": "4B", "base_llm": "Qwen2.5-3B",
+     "vision_encoder": "InternVL2 multi-scale + SAM2 + GPT4RoI",
+     "date": "2025-06-02 (arXiv 2506.01667v1)", "org": "Trento / Pisa / INSAIT / TUM / TU Berlin",
+     "modalities": ["optical", "SAR", "multispectral", "RGB-SAR fusion"],
+     "weights_public": "code public, weights not stated",
+     "url": "https://arxiv.org/abs/2506.01667", "code": "https://github.com/shuyansy/EarthMind",
+     "locally_evaluable": "uncertain",
+     "published": {"earthmind_bench_mcq_rgb": 69.0, "earthmind_bench_mcq_sar": 67.5, "earthmind_bench_mcq_fusion": 70.6,
+                   "aid_acc": 97.2, "ucmerced_acc": 95.0, "rsvqa_hrben_acc": 74.0, "vrsbench_vqa_acc": 78.9,
+                   "vrsbench_vg_acc@0.5": 55.6, "dior_rsvg_region_caption_cider": 428.2,
+                   "rrsis_d_miou": 82.2, "refsegrs_miou": 62.6, "bigearthnet_acc": 70.4, "sosat_lcz42_acc": 58.3,
+                   "sar_ship_map_small": 13.58, "sar_ship_map_medium": 28.55, "sar_ship_map_large": 36.78}},
+
+    {"rank": 5, "name": "EarthGPT", "score": 18, "params": "LLaMA-2 class (7B)", "base_llm": "LLaMA-2",
+     "vision_encoder": "DINOv2 ViT-L/14 + frozen CLIP ConvNeXt-L",
+     "date": "2024-03 (arXiv 2401.16822, IEEE TGRS)", "org": "Beijing Institute of Technology",
+     "modalities": ["optical", "SAR", "infrared"], "training_pairs": 1000000, "weights_public": true,
+     "url": "https://arxiv.org/abs/2401.16822", "code": "https://github.com/wivizhang/EarthGPT",
+     "locally_evaluable": "marginal at 4-bit; not attempted",
+     "published": {"nwpu_resisc45_top1": 93.84, "clrs_zs_top1": 77.37, "nasc_tg2_zs_top1": 74.72,
+                   "nwpu_captions_bleu4": 65.5, "nwpu_captions_meteor": 44.5, "nwpu_captions_rougeL": 78.2,
+                   "nwpu_captions_cider": 192.6, "crsvqa_overall_acc": 82.00, "rsvqa_hr_zs_overall_acc": 72.05,
+                   "dior_rsvg_miou": 69.34, "dior_rsvg_ciou": 81.54, "mar20_hbb_zs_ap40": 90.47}}
+  ],
+
+  "reference_models": [
+    {"name": "GeoChat", "params": "7B", "base": "LLaVA-1.5", "date": "CVPR 2024", "modalities": ["optical"],
+     "weights": "https://huggingface.co/MBZUAI/geochat-7B", "url": "https://arxiv.org/abs/2311.15826",
+     "published": {"rsvqa_lr_presence_ft": 91.09, "rsvqa_lr_comparison_ft": 90.33, "rsvqa_lr_avg_ft": 90.70,
+                   "rsvqa_hr_avg_zs": 70.82,
+                   "vrsbench_caption_bleu4_ft": 13.8, "vrsbench_grounding_acc@0.5_ft": 39.6, "vrsbench_vqa_avg_ft": 60.6,
+                   "vrsbench_caption_bleu4_zs": 1.4, "vrsbench_grounding_acc@0.5_zs": 12.9, "vrsbench_vqa_avg_zs": 40.8}},
+    {"name": "LHRS-Bot-Nova", "params": "8B", "base": "LLaMA-3 + SigLIP-L/14@336", "date": "2024-11-14",
+     "modalities": ["optical"], "url": "https://arxiv.org/abs/2411.09301", "code": "https://github.com/NJU-LHRS/LHRS-Bot",
+     "published": {"rsvqa_lr_presence": 89.11, "rsvqa_lr_comparison": 89.00, "rsvqa_lr_rural_urban": 90.71,
+                   "rsvqa_lr_avg": 89.61, "rsvqa_hr_avg": 92.06, "vqa_overall_avg": 90.59,
+                   "dior_rsvg_acc@0.5": 92.87, "rsvg_acc@0.5": 81.85, "classification_avg": 76.60,
+                   "lhrs_bench_overall": 34.93}},
+    {"name": "TinyRS / TinyRS-R1", "params": "2B", "base": "Qwen2-VL-2B", "date": "2025-10-17",
+     "modalities": ["optical"], "url": "https://arxiv.org/abs/2505.12099", "code": "https://github.com/aybora/TinyRS",
+     "published": {"vqa_avg_tinyrs": 83.5, "vqa_avg_tinyrs_r1": 76.0,
+                   "lr_presence": [90.4, 78.1], "lr_comparison": [89.9, 84.0], "lr_rural": [92.0, 76.0],
+                   "hr_presence": [64.5, 68.6], "hr_comparison": [80.6, 73.5],
+                   "dior_rsvg_p@0.5": [69.4, 74.9], "classification_avg": [81.0, 85.6],
+                   "latency_ms": [90, 689], "vram_gb": [4.4, 4.6],
+                   "seven_b_reference_latency_ms": [216, 1990], "seven_b_reference_vram_gb": [16.6, 16.8]}}
+  ],
+
+  "category_a_comparisons": [
+    {"task": "change VQA", "dataset": "CDVQA test1", "n_questions": 39686, "n_pairs": 968, "metric": "overall accuracy",
+     "satquery": 0.5380, "satquery_source": "measured, docs/phase1-status.md 2026-08-30",
+     "external": [
+       {"name": "Qwen3.5-2B change-VQA", "value": 0.7474, "aa": 0.6859, "year": 2026, "source": "https://arxiv.org/abs/2604.18429"},
+       {"name": "VisTA", "value": 0.7310, "aa": 0.6590, "year": 2024, "source": "https://arxiv.org/abs/2604.18429 Table III"},
+       {"name": "SOBA", "value": 0.6920, "aa": 0.6030, "year": 2024, "source": "https://arxiv.org/abs/2604.18429 Table III"},
+       {"name": "CDVQA baseline", "value": 0.6590, "aa": 0.5530, "year": 2021, "source": "https://arxiv.org/abs/2112.06343"}],
+     "delta_vs_best": -0.2094, "delta_vs_oldest_baseline": -0.1210,
+     "per_type_vs_qwen35_2b": {
+       "change_or_not": [0.6772, 0.8395], "change_ratio_types": [0.4791, 0.7986],
+       "decrease_or_not": [0.6496, 0.8270], "increase_or_not": [0.6437, 0.8324],
+       "change_to_what": [0.3714, 0.6172], "largest_change": [0.4497, 0.6446],
+       "smallest_change": [0.1319, 0.3523], "change_ratio": [0.1952, 0.5755]},
+     "diagnosis": "answer layer is exact (oracle 0.9975); the deficit is the 6.26M-param ResNet-18 semantic-change segmenter at change-class mIoU 0.2636"},
+
+    {"task": "binary change detection", "dataset": "LEVIR-CD official split, 256px tiling", "metric": "change-class F1",
+     "satquery": 0.5597, "satquery_iou": 0.3886, "satquery_params": 49543,
+     "external": [
+       {"name": "PhyUnfold-Net", "f1": 0.9227, "year": 2026, "source": "https://arxiv.org/abs/2603.19566"},
+       {"name": "ChangeRWKV-B", "f1": 0.8601, "iou": 0.7546, "year": 2025, "source": "https://arxiv.org/abs/2603.19606"},
+       {"name": "ConvFormer-CD/48", "f1": 0.8530, "iou": 0.7437, "year": 2025},
+       {"name": "ChangeDA", "iou": 0.8565, "year": 2025}],
+     "delta_f1_vs_best": -0.3630,
+     "diagnosis": "49,543-parameter TinyCD-style screening detector, 4 epochs; precision 0.4426 vs recall 0.7613 by design"}
+  ],
+
+  "category_b_comparisons": [
+    {"task": "VQA", "dataset": "RSVQA-LR", "note": "SatQuery on a 207-question validation slice vs official test split; count included vs excluded",
+     "satquery_all_types": {"v2": 0.6473, "v3": 0.7874},
+     "satquery_published_convention_micro_n150": {"v2": 0.8133, "v3": 0.9533},
+     "external_published_convention": {"LHRS-Bot-Nova": 0.8961, "RingMo-Agent": 0.9030, "GeoChat": 0.9070,
+                                        "EarthDial": 0.9270, "Earth-OneVision": 0.9291},
+     "count_inclusive_anchor": {"RSVQA baseline OA": 0.7908, "RSVQA baseline AA": 0.8149, "count_accuracy": 0.6701},
+     "verdict": "plausibly in the same band; NOT a claim of beating them - different split, 60x fewer questions"},
+    {"task": "captioning", "dataset": "RSICD test", "satquery_bleu4_sentence_mean_smoothed": 0.2446,
+     "external_corpus_bleu4": {"RSGPT": 0.6574}, "verdict": "metric implementations differ; not subtractable"},
+    {"task": "land cover", "dataset": "BigEarthNet-19", "satquery_map": 0.2854,
+     "external_map": {"ResNet50": 0.7998, "ResNet152": 0.7978, "VGG16": 0.7842, "AlexNet": 0.7715, "SeCo (AP)": 0.8262},
+     "verdict": "30,000 training patches / 3 epochs / dim 64 vs full-corpus training"}
+  ],
+
+  "category_c_comparisons": [
+    {"task": "grounding", "dataset": "DIOR-RSVG", "satquery_acc@0.5": 0.0762,
+     "external_acc@0.5": {"Earth-OneVision": 0.9441, "LHRS-Bot-Nova": 0.9287, "TinyRS-R1": 0.749},
+     "why_not_comparable": "SatQuery's split is self-made (run_metadata: NO published split in this mirror)"},
+    {"task": "change captioning", "dataset": "LEVIR-CC", "satquery_bleu4_1ref_changed": 0.3063,
+     "external_bleu4_5ref": {"SAGE-CC": 0.6550, "KCFI": 0.6530}, "external_cider": {"SAT-Cap": 140.23},
+     "why_not_comparable": "one reference vs five"},
+    {"task": "optical-SAR fusion", "dataset": "WHU-OPT-SAR", "satquery_metric": "tile-level multi-label mAP",
+     "satquery": {"optical": 0.7778, "sar": 0.7410, "fused": 0.7714, "gain": -0.0064},
+     "external_metric": "semantic segmentation mIoU / OA / mF1",
+     "external": {"PAD": {"miou": 56.26, "oa": 84.56, "mf1": 70.14}},
+     "why_not_comparable": "different task and metric; only the SIGN of the fusion effect is comparable",
+     "sign_comparison": {"EarthMind": "fusion 70.6 > RGB 69.0 > SAR 67.5 (positive)",
+                          "Earth-OneVision": "fusion 81.94 > optical 80.70 > SAR 76.10 (positive)",
+                          "SatQuery": "fused 0.7714 < optical 0.7778 (negative)"}}
+  ],
+
+  "competitive_position": {
+    "vqa": {"verdict": "yellow", "note": "clean internal gain 0.1981 -> 0.6473 (v2) -> 0.7874 (v3); against the literature the row is Category B"},
+    "captioning": {"verdict": "white", "note": "metric mismatch; 13.4% unique captions is a determinable weakness"},
+    "grounding": {"verdict": "red", "note": "0.0762 vs 0.749-0.9441"},
+    "land_cover_rs_understanding": {"verdict": "red", "note": "mAP 0.2854 vs 0.7998"},
+    "change_understanding": {"verdict": "red", "note": "both Category-A comparisons; CDVQA -0.2094, LEVIR-CD -0.363"},
+    "multimodal_sar": {"verdict": "red/white", "note": "no SAR benchmark result exists for SatQuery; fusion gain is negative where two published models report positive"},
+    "calibration_reliability": {"verdict": "green", "note": "ECE 0.0668 -> 0.0034, refusal metric with lexical control, entailment gate, 0/600 illegal plans - no Top-5 model reports any of these"}
+  },
+
+  "largest_gaps": [
+    {"id": "G1", "task": "change VQA", "class": "A", "satquery": 0.5380, "best_external": 0.7474, "delta": -0.2094,
+     "cause": "semantic-change segmenter (6.26M params, 1,600 training pairs, change-class mIoU 0.2636)",
+     "cause_category": "data + training budget, partly architectural"},
+    {"id": "G2", "task": "binary change detection", "class": "A", "satquery": 0.5597, "best_external": 0.9227, "delta": -0.3630,
+     "cause": "49,543-parameter screening detector, 4 epochs", "cause_category": "architectural + training budget, by design"},
+    {"id": "G3", "task": "referring grounding", "class": "C", "satquery": 0.0762, "best_external": 0.9441, "delta": null,
+     "cause": "text-conditioned box regressor with a from-scratch backbone, 6,359 examples", "cause_category": "architectural"},
+    {"id": "G4", "task": "multi-label land cover", "class": "B", "satquery": 0.2854, "best_external": 0.7998, "delta": -0.5144,
+     "cause": "30,000 patches, 3 epochs, dim 64", "cause_category": "training budget"},
+    {"id": "G5", "task": "instruction-data scale", "class": "B", "satquery": 4806, "best_external": 34000000, "ratio": 7075,
+     "cause": "4,806 examples / 300-2,000 steps on one 6 GiB laptop GPU vs 3M-34M pairs on 8xH100",
+     "cause_category": "data + compute"},
+    {"id": "G6", "task": "cross-modal fusion direction", "class": "C", "satquery": -0.0064, "best_external": "positive",
+     "cause": "unknown - metric saturation, fusion-module capacity, or genuine dataset property; untested",
+     "cause_category": "unknown"}
+  ],
+
+  "recommendations": [
+    {"priority": "P1", "action": "give the CDVQA semantic-change segmenter a pretrained backbone and a real budget",
+     "expected_gain": "largest and best-evidenced; oracle ceiling 0.9975 vs 0.5380 achieved", "cost": "low - single GPU, hours",
+     "frozen": true},
+    {"priority": "P2", "action": "commit the label-masking fix and re-run Track B with validation-based checkpoint selection; run the missing rank-32 language-only ablation",
+     "expected_gain": "isolates the vision-tower contribution to v3's +0.1401; v3 is currently the best checkpoint but its ablation is confounded",
+     "cost": "one overnight run", "frozen": false},
+    {"priority": "P3", "action": "evaluate on the official RSVQA-LR test split (per-type) and on VRSBench",
+     "expected_gain": "converts seven white verdicts into numbers; cheapest item on the list", "cost": "a DOTA/DIOR download",
+     "frozen": true},
+    {"priority": "P4", "action": "replace the grounding head rather than retraining it", "cost": "a rebuild", "frozen": true},
+    {"priority": "P5", "action": "re-score the opt-SAR triad under a segmentation metric and a geographic split before changing the fusion module",
+     "cost": "evaluation only, data already on disk", "frozen": false}
+  ],
+
+  "limitations": [
+    "no external model was downloaded or run; every external number is published and unreproduced",
+    "Earth-OneVision has released no code, weights or dataset and has one preprint version",
+    "EarthDial's METEOR column and Earth-OneVision's LEVIR-MCI METEOR / xBD ROUGE-1 values are outside normal metric ranges and are excluded rather than quoted",
+    "CDVQA comparators SOBA and VisTA are quoted from Bazi et al. 2026 Table III, not from their own papers",
+    "published RSVQA-LR figures use at least three different type-averaging conventions and are not internally consistent",
+    "VRSBench and RSVQA-HR are not evaluated for SatQuery",
+    "track_b_v3 was trained under a label-masking defect; its measured advantage confounds LoRA rank, vision-tower targeting and step count",
+    "the 207-question RSVQA slice has a 95% interval of about +/-0.065",
+    "whu_opt_sar has 22 of 322 validation images also present in training (6.8%); rsvqa_lr has zero overlap"
+  ]
+}

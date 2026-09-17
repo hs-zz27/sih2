@@ -1,0 +1,11 @@
+{
+  "bleu4_changed": 0.1641,
+  "bleu4_unchanged": 0.9846,
+  "bleu4_aggregate": 0.5746,
+  "bleu4_sentence_mean": 0.5745830375184284,
+  "n_changed": 964,
+  "n_unchanged": 965,
+  "n": 1929,
+  "unique_captions": 638,
+  "note": "bleu4_changed is the meaningful figure; the aggregate is inflated by the trivially-unchanged half."
+}

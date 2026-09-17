@@ -1,0 +1,102 @@
+{
+  "split": "val",
+  "n_examples": 534,
+  "results": {
+    "v1": {
+      "n": 534,
+      "overall": {
+        "exact_match": 0.38104448742746616,
+        "token_f1": 0.7912917332436296
+      },
+      "refusal": {
+        "refusal_recall": 0.4117647058823529,
+        "false_refusal_rate": 0.007736943907156673,
+        "n_matched_pairs": 12,
+        "lexical_shortcut_probe": 0.16666666666666666
+      },
+      "groups": {
+        "kind:refusal": {
+          "n": 17,
+          "exact_match": null,
+          "token_f1": null,
+          "refusal_rate": 0.4117647058823529
+        },
+        "kind:vqa": {
+          "n": 517,
+          "exact_match": 0.38104448742746616,
+          "token_f1": 0.7912917332436296,
+          "refusal_rate": 0.007736943907156673
+        },
+        "rsvqa_lr": {
+          "n": 207,
+          "exact_match": 0.642512077294686,
+          "token_f1": 0.642512077294686,
+          "refusal_rate": 0.0
+        },
+        "synthetic_refusal": {
+          "n": 5,
+          "exact_match": null,
+          "token_f1": null,
+          "refusal_rate": 1.0
+        },
+        "whu_opt_sar": {
+          "n": 322,
+          "exact_match": 0.2064516129032258,
+          "token_f1": 0.8906381486676016,
+          "refusal_rate": 0.018633540372670808
+        }
+      },
+      "samples": [
+        {
+          "question": "What is the amount of residential areas?",
+          "expected": "1",
+          "predicted": "10",
+          "kind": "vqa"
+        },
+        {
+          "question": "What is the number of circular grass areas?",
+          "expected": "0",
+          "predicted": "1",
+          "kind": "vqa"
+        },
+        {
+          "question": "Is there road visible in this image?",
+          "expected": "Yes, road covers about 2% of the scene.",
+          "predicted": "Yes, road covers about 1% of the scene.",
+          "kind": "vqa"
+        },
+        {
+          "question": "Are there less large water areas than medium grass areas?",
+          "expected": "yes",
+          "predicted": "no",
+          "kind": "vqa"
+        },
+        {
+          "question": "Is there farmland visible in this image?",
+          "expected": "Yes, farmland covers about 66% of the scene.",
+          "predicted": "Yes, farmland covers about 1% of the scene.",
+          "kind": "vqa"
+        },
+        {
+          "question": "Is there village visible in this image?",
+          "expected": "Yes, village covers about 0% of the scene.",
+          "predicted": "Yes, village covers about 0% of the scene.",
+          "kind": "vqa"
+        },
+        {
+          "question": "Is there farmland visible in this image?",
+          "expected": "Yes, farmland covers about 5% of the scene.",
+          "predicted": "Yes, farmland covers about 1% of the scene.",
+          "kind": "vqa"
+        },
+        {
+          "question": "Is there village visible in this image?",
+          "expected": "Yes, village covers about 14% of the scene.",
+          "predicted": "Yes, village covers about 1% of the scene.",
+          "kind": "vqa"
+        }
+      ]
+    }
+  },
+  "note": "Both adapters are scored on the IDENTICAL split. The whu_opt_sar and refusal rows favour v1 by construction - it saw that distribution and v0 did not - so they measure whether the new data taught anything. The rsvqa_lr rows are the fair comparison, since both models trained on that distribution, and are the ones that can regress."
+}

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" font-family="sans-serif" font-size="10">
+<rect width="320" height="320" fill="white"/>
+<text x="160.0" y="18" text-anchor="middle" font-size="12">landcover - after (affine)</text>
+<rect x="44.0" y="258.5" width="15.5" height="17.5" fill="#c8d6e5"/>
+<rect x="59.5" y="244.1" width="15.5" height="31.9" fill="#c8d6e5"/>
+<rect x="74.9" y="234.2" width="15.5" height="41.8" fill="#c8d6e5"/>
+<rect x="90.4" y="235.9" width="15.5" height="40.1" fill="#c8d6e5"/>
+<rect x="105.9" y="259.8" width="15.5" height="16.2" fill="#c8d6e5"/>
+<rect x="121.3" y="269.9" width="15.5" height="6.1" fill="#c8d6e5"/>
+<rect x="136.8" y="273.9" width="15.5" height="2.1" fill="#c8d6e5"/>
+<rect x="152.3" y="275.2" width="15.5" height="0.8" fill="#c8d6e5"/>
+<rect x="167.7" y="275.6" width="15.5" height="0.4" fill="#c8d6e5"/>
+<rect x="183.2" y="275.8" width="15.5" height="0.2" fill="#c8d6e5"/>
+<rect x="198.7" y="275.9" width="15.5" height="0.1" fill="#c8d6e5"/>
+<rect x="214.1" y="276.0" width="15.5" height="0.0" fill="#c8d6e5"/>
+<rect x="229.6" y="276.0" width="15.5" height="0.0" fill="#c8d6e5"/>
+<rect x="245.1" y="276.0" width="15.5" height="0.0" fill="#c8d6e5"/>
+<rect x="260.5" y="276.0" width="15.5" height="0.0" fill="#c8d6e5"/>
+<rect x="44.0" y="246.0" width="15.5" height="30.0" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="59.5" y="271.4" width="15.5" height="4.6" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="74.9" y="242.8" width="15.5" height="33.2" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="90.4" y="217.0" width="15.5" height="59.0" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="105.9" y="195.5" width="15.5" height="80.5" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="121.3" y="184.8" width="15.5" height="91.2" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="136.8" y="182.0" width="15.5" height="94.0" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="152.3" y="172.7" width="15.5" height="103.3" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="167.7" y="160.8" width="15.5" height="115.2" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="183.2" y="140.0" width="15.5" height="136.0" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="198.7" y="78.4" width="15.5" height="197.6" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="214.1" y="44.0" width="15.5" height="232.0" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="229.6" y="44.0" width="15.5" height="232.0" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="245.1" y="44.0" width="15.5" height="232.0" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<rect x="260.5" y="44.0" width="15.5" height="232.0" fill="#2e86de" fill-opacity="0.55" stroke="#1b4f72" stroke-width="0.5"/>
+<line x1="44" y1="276" x2="276" y2="44" stroke="#c0392b" stroke-width="1" stroke-dasharray="4 3"/>
+<rect x="44" y="44" width="232" height="232" fill="none" stroke="#333" stroke-width="1"/>
+<text x="160.0" y="308" text-anchor="middle">confidence</text>
+<text x="14" y="160.0" text-anchor="middle" transform="rotate(-90 14 160.0)">observed frequency</text>
+<text x="48" y="58">ECE 0.0470 | MCE 0.2447 | n=55,727</text>
+</svg>

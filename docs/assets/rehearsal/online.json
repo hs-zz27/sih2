@@ -1,0 +1,1132 @@
+{
+  "runs": 10,
+  "offline": false,
+  "all_beats_ok": true,
+  "total_seconds": {
+    "median": 118.535,
+    "min": 110.971,
+    "max": 268.16,
+    "stdev": 64.535
+  },
+  "per_beat_median_seconds": {
+    "0:30 the rejection - incompatible pair": 0.033,
+    "0:30 the rejection - PNG in operational mode": 0.013,
+    "1:10 cross-modal flagship": 0.295,
+    "2:20 single optical, real Cartosat": 56.585,
+    "2:20 single SAR, real EOS-04": 2.321,
+    "3:10 bi-temporal - what changed and where": 0.227,
+    "3:10 bi-temporal - increased or decreased": 0.241,
+    "4:50 the abstention - clouded optical": 0.28,
+    "5:40 the large scene": 55.356
+  },
+  "beats_over_budget": [
+    "2:20 single optical, real Cartosat",
+    "5:40 the large scene"
+  ],
+  "detail": [
+    {
+      "run": 1,
+      "total_seconds": 126.457,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.037,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.006,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 7.106,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 58.15,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 2.5,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.377,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 3.178,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.256,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 54.847,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "total_seconds": 116.639,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.025,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.013,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 0.279,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 57.479,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 2.155,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.212,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 0.255,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.27,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 55.95,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "total_seconds": 120.43,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat",
+        "5:40 the large scene"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.027,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.014,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 0.306,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 55.691,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 2.308,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.208,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 0.206,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.29,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 61.376,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        }
+      ]
+    },
+    {
+      "run": 4,
+      "total_seconds": 267.301,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat",
+        "5:40 the large scene"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.068,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.015,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 0.576,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 130.659,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 4.891,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.358,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 0.328,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.455,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 129.95,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        }
+      ]
+    },
+    {
+      "run": 5,
+      "total_seconds": 268.16,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat",
+        "5:40 the large scene"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.099,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.024,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 0.642,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 129.536,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 4.899,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.36,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 0.323,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.452,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 131.825,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        }
+      ]
+    },
+    {
+      "run": 6,
+      "total_seconds": 189.632,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.081,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.024,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 0.625,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 127.645,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 4.993,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.364,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 0.319,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.467,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 55.113,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        }
+      ]
+    },
+    {
+      "run": 7,
+      "total_seconds": 113.052,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.028,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.006,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 0.285,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 54.16,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 2.261,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.229,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 0.206,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.276,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 55.6,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        }
+      ]
+    },
+    {
+      "run": 8,
+      "total_seconds": 110.971,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.04,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.005,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 0.257,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 53.426,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 2.299,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.224,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 0.228,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.285,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 54.207,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        }
+      ]
+    },
+    {
+      "run": 9,
+      "total_seconds": 112.363,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.023,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.015,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 0.281,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 54.287,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 2.299,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.17,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 0.202,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.268,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 54.817,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        }
+      ]
+    },
+    {
+      "run": 10,
+      "total_seconds": 111.562,
+      "beats_ok": 9,
+      "beats_total": 9,
+      "over_budget": [
+        "2:20 single optical, real Cartosat"
+      ],
+      "beats": [
+        {
+          "beat": "0:30 the rejection - incompatible pair",
+          "key": "incompatible_pair",
+          "budget_s": 40.0,
+          "seconds": 0.023,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "0:30 the rejection - PNG in operational mode",
+          "key": "png_operational",
+          "budget_s": 40.0,
+          "seconds": 0.007,
+          "task": "CLARIFY_OR_ABSTAIN",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "1:10 cross-modal flagship",
+          "key": "crossmodal_pair",
+          "budget_s": 70.0,
+          "seconds": 0.282,
+          "task": "XMODAL_JOINT_EXTRACT",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "2:20 single optical, real Cartosat",
+          "key": "single_optical",
+          "budget_s": 50.0,
+          "seconds": 53.359,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": false
+        },
+        {
+          "beat": "2:20 single SAR, real EOS-04",
+          "key": "single_sar",
+          "budget_s": 50.0,
+          "seconds": 2.333,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - what changed and where",
+          "key": "change_what_and_where",
+          "budget_s": 60.0,
+          "seconds": 0.184,
+          "task": "TEMPORAL_CHANGE_DESC",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "3:10 bi-temporal - increased or decreased",
+          "key": "bitemporal_pair",
+          "budget_s": 60.0,
+          "seconds": 0.194,
+          "task": "TEMPORAL_CHANGE_VQA",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "4:50 the abstention - clouded optical",
+          "key": "clouded_optical",
+          "budget_s": 50.0,
+          "seconds": 0.265,
+          "task": "SINGLE_CAPTION",
+          "abstained": true,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        },
+        {
+          "beat": "5:40 the large scene",
+          "key": "large_scene",
+          "budget_s": 60.0,
+          "seconds": 54.914,
+          "task": "SINGLE_CAPTION",
+          "abstained": false,
+          "answered": true,
+          "ok": true,
+          "within_budget": true
+        }
+      ]
+    }
+  ],
+  "not_measured_here": "Narration, timing against the spoken script, the venue laptop itself, and recovery from an interruption. This measures the system's half of the rehearsal only - see docs/rehearsal.md."
+}

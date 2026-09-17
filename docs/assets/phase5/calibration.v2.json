@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "generated_utc": "2026-09-12T06:00:29.003477+00:00",
+  "heads": {
+    "SINGLE_LANDCOVER": {
+      "method": "affine",
+      "T": 22.154711112676374,
+      "a": 0.04513712658739318,
+      "b": -1.1770889900964554,
+      "ece_before": 0.214577566098187,
+      "ece_after": 0.0228288025756715,
+      "n_fit": 2934,
+      "n_eval": 2933,
+      "dataset": "BigEarthNet-19",
+      "split_note": "BigEarthNet official test shard (test_p8.hdf5), all 12 bands at native 10 m, checkpoint ckpt_step_107625.pt (gsd_conditioning=True). Uniformly 10 m, so this split measures calibration at native resolution ONLY and cannot show whether confidence stays honest as resolution coarsens - that needs the multi-resolution split."
+    },
+    "TEMPORAL_CHANGE_MAP": {
+      "method": "affine",
+      "T": 1.9962220088059657,
+      "a": 0.5009462853273254,
+      "b": -0.4575773707999713,
+      "ece_before": 0.010615118253727698,
+      "ece_after": 0.0052409997809285454,
+      "n_fit": 1024,
+      "n_eval": 1024,
+      "dataset": "LEVIR-CD",
+      "split_note": "LEVIR-CD official test split, 2048 tiles, 1024 pixels sampled per tile, checkpoint ckpt_step_26700.pt. Split for fitting is by TILE, not by pixel, because pixels within a tile are spatially correlated and a pixel-wise split would leak. The head was trained with pos_weight=10.1, so its logits carry a deliberate positive-class offset that temperature scaling alone cannot remove."
+    }
+  },
+  "rejected": {
+    "_router_intent": {
+      "method": "temperature",
+      "T": 1.1170871266414273,
+      "a": null,
+      "b": null,
+      "ece_before": 0.30329490760042804,
+      "ece_after": 0.18004501943855647,
+      "n_fit": 14,
+      "n_eval": 15,
+      "dataset": "CLEAN_HOLDOUT",
+      "split_note": "CLEAN_HOLDOUT from satquery/synth/holdout.py, n=29, hand-written and never used to tune the templates. The synthetic bank's own held-out split was NOT used: it measures template memorisation, so a temperature fitted there would be calibrated to a distribution the router never meets.",
+      "rejection_reason": "only 14 fitting samples, below the 500 needed for a temperature that is not fitted to noise"
+    }
+  },
+  "note": "Heads under `rejected` are deliberately left uncalibrated at runtime and keep reporting ece_after = -1.0. A fitted parameter that did not survive its own held-out check is worse than none."
+}

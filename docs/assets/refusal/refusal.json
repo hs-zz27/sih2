@@ -1,0 +1,30 @@
+{
+  "split": "val",
+  "n_examples": 534,
+  "results": {
+    "always_refuse": {
+      "n_refusal": 17,
+      "n_answerable": 517,
+      "refusal_recall": 1.0,
+      "false_refusal_rate": 1.0,
+      "refusal_recall_by_reason": {
+        "not_in_image": 1.0,
+        "single_image_temporal": 1.0,
+        "out_of_scope": 1.0
+      },
+      "n_matched_pairs": 12,
+      "lexical_shortcut_probe": 0.0,
+      "note": "lexical_shortcut_probe scores matched pairs where the question wording is identical and only the image differs. A model that learned to refuse on phrasing scores ~0.5 here (it gets one of each pair right) while refusal_recall alone can still look excellent. Read it first."
+    },
+    "never_refuse": {
+      "n_refusal": 17,
+      "n_answerable": 517,
+      "refusal_recall": 0.0,
+      "false_refusal_rate": 0.0,
+      "refusal_recall_by_reason": {},
+      "n_matched_pairs": 12,
+      "lexical_shortcut_probe": 0.0,
+      "note": "lexical_shortcut_probe scores matched pairs where the question wording is identical and only the image differs. A model that learned to refuse on phrasing scores ~0.5 here (it gets one of each pair right) while refusal_recall alone can still look excellent. Read it first."
+    }
+  }
+}

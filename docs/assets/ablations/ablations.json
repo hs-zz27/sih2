@@ -1,0 +1,114 @@
+{
+  "ablations": [
+    {
+      "name": "verifier on/off",
+      "question": "What does the entailment gate remove, and what does it cost?",
+      "status": "measured",
+      "arms": {
+        "verifier_off": {
+          "queries": 8,
+          "sentences_examined": 0,
+          "sentences_flagged": 0,
+          "answers_modified": 0,
+          "total_runtime_ms": 984.3,
+          "ms_per_query": 123.0
+        },
+        "verifier_on": {
+          "queries": 8,
+          "sentences_examined": 10,
+          "sentences_flagged": 0,
+          "answers_modified": 0,
+          "total_runtime_ms": 992.0,
+          "ms_per_query": 124.0
+        },
+        "verifier_on_with_nli": {
+          "queries": 8,
+          "sentences_examined": 10,
+          "sentences_flagged": 0,
+          "answers_modified": 0,
+          "total_runtime_ms": 19337.7,
+          "ms_per_query": 2417.2
+        },
+        "controlled_false_sentences": {
+          "false_sentences_presented": 9,
+          "caught_by_deterministic": 5,
+          "caught_by_deterministic+nli": 9,
+          "reached_the_user_if_gate_off": 9
+        }
+      },
+      "verdict": "On the controlled set the best backend catches 9/9 sentences that contradict the measured indices; with the gate off all 9 reach the user. The deterministic backend costs +1.0 ms per query; adding NLI costs +2294.2 ms per query, which is 19x the whole unverified pipeline and is too slow for an interactive demo on CPU.",
+      "caveat": "The END-TO-END arm currently flags almost nothing, and that is a property of the system's current state rather than of the gate: eight of the nine tools are stubs returning fixed strings, and a fixed string does not contradict anything. The gate's value cannot be demonstrated end to end until the learned tools replace the stubs. The controlled arm is what shows the gate works; the end-to-end arm is reported so the difference is visible rather than glossed."
+    },
+    {
+      "name": "agent vs monolith",
+      "question": "Does config gating + plan validation prevent anything the same classifier would otherwise do?",
+      "status": "measured",
+      "arms": {
+        "agent (gated + validated)": {
+          "plans": 600,
+          "illegal_plans": 0,
+          "illegal_plan_rate": 0.0
+        },
+        "monolith (classifier alone)": {
+          "plans": 600,
+          "illegal_plans": 148,
+          "illegal_plan_rate": 0.24666666666666667,
+          "example_impossible_selections": [
+            "BITEMPORAL:XMODAL_JOINT_EXTRACT",
+            "CROSSMODAL:TEMPORAL_CHANGE_DESC",
+            "CROSSMODAL:TEMPORAL_CHANGE_MAP",
+            "CROSSMODAL:TEMPORAL_CHANGE_VQA",
+            "SINGLE:TEMPORAL_CHANGE_DESC",
+            "SINGLE:TEMPORAL_CHANGE_MAP"
+          ]
+        }
+      },
+      "verdict": "The same classifier, ungated, selects an impossible task on 148/600 plans (24.7%) - change detection on a single image, fusion without SAR. Gated, the rate is 0/600. The structure, not the model, is what produces the guarantee.",
+      "caveat": "This measures LEGALITY, not answer quality. It shows the guards prevent impossible plans; it does not show the agent answers better, which needs the learned tools and a labelled set."
+    },
+    {
+      "name": "triad (optical / SAR / fused)",
+      "question": "Does optical-SAR fusion beat the better single modality?",
+      "status": "measured_offline",
+      "arms": {
+        "optical only": {
+          "score": 0.7777944611792945
+        },
+        "sar only": {
+          "score": 0.7409939886934886
+        },
+        "fused": {
+          "score": 0.7714183422364739
+        },
+        "complementarity": {
+          "best_single": 0.7777944611792945,
+          "gain": -0.006376118942820641
+        }
+      },
+      "verdict": "Gain is -0.0064 - fusion does NOT beat optical alone (0.7714 against 0.7778). Reported as a negative result.",
+      "caveat": "Measured on WHU-OPT-SAR scene-level multi-label classification, where both modalities can independently answer 'is there water somewhere in this tile', leaving nothing for fusion to add. Complementarity is inherently spatial, so demonstrating it needs a per-pixel segmentation head. The triad machinery is correct and reports the honest number; the number is ~zero."
+    },
+    {
+      "name": "two-track (specialist vs VLM)",
+      "question": "Does the two-track split earn its complexity?",
+      "status": "not_comparable",
+      "arms": {
+        "track_a (specialist head)": {
+          "benchmark": "BigEarthNet-19 official test shard",
+          "metric": "mAP",
+          "value": 0.2853654937481183,
+          "n": 5867
+        },
+        "track_b (QLoRA VLM)": {
+          "benchmark": "VRSBench + RSVQA-LR subset",
+          "metric": "VQA accuracy",
+          "value": null,
+          "note": "not run here - needs the 4-bit base model and a GPU"
+        }
+      },
+      "verdict": "Not answerable from what exists. The two tracks were trained and evaluated on DIFFERENT tasks and DIFFERENT splits - land-cover mAP on BigEarthNet against VQA accuracy on VRSBench - so no comparison between the numbers means anything.",
+      "caveat": "What would make this a real ablation, stated so it can be built: one task both tracks can perform, on one split, with one metric. Land-cover classification is the natural choice - ask the VLM 'which of these 19 classes are present' on the same BigEarthNet test shard the specialist head is scored on. That is a Phase 3 run that has not happened, not a number that is missing."
+    }
+  ],
+  "note": "Each arm reports its own status. Two of the four are measured, one is a negative result measured offline in task 2.3, and one is not comparable yet with the reason and the missing run named. Four tables of equal apparent authority would have been the dishonest presentation."
+}

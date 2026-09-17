@@ -1,0 +1,19 @@
+{
+  "passed": 931,
+  "failed": null,
+  "skipped": 32,
+  "errors": null,
+  "summary_line": "931 passed, 32 skipped, 435 warnings in 292.24s (0:04:52)",
+  "failed_tests": [],
+  "error_tests": [],
+  "duration_s": 298.09,
+  "exit_code": 0,
+  "blocked_modules": [
+    "torch",
+    "peft",
+    "transformers",
+    "bitsandbytes",
+    "accelerate",
+    "datasets"
+  ]
+}

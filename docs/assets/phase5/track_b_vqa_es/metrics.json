@@ -1,0 +1,10 @@
+{
+  "val_loss_best": 0.130084,
+  "val_loss_final": 0.139485,
+  "best_step": 1500,
+  "steps_trained": 2250,
+  "n_val": 160,
+  "stopped_early": true,
+  "deploy_adapter": "adapter_best",
+  "note": "val_loss is held-out cross-entropy on the instruction mix, NOT an RSVQA or VRSBench score. Deploy adapter_best, not adapter_final - the first v2 run's final adapter scored 0.2529 against its own best of 0.1649."
+}

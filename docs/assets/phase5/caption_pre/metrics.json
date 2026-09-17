@@ -1,0 +1,6 @@
+{
+  "bleu4_sentence_mean": 0.26583788386132046,
+  "n": 1093,
+  "unique_captions": 764,
+  "unique_fraction": 0.699
+}

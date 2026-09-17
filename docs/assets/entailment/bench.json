@@ -1,0 +1,149 @@
+{
+  "suites": {
+    "tuned": 25,
+    "clean": 25
+  },
+  "provenance": {
+    "tuned": "Written before either backend was scored, but the gate was then CHANGED twice in response to these results - the strong/weak precedence rule and the premise independence clause both came from failures here. Optimistic; do not quote as a generalisation estimate.",
+    "clean": "Written after the gate was final and never used to change it. This is the honest number. Still small (n=25) and single-author.",
+    "thresholds": "CONTRADICTION_THRESHOLD and ENTAILMENT_THRESHOLD were never tuned against either suite."
+  },
+  "scores": [
+    {
+      "suite": "tuned",
+      "backend": "deterministic",
+      "total": 25,
+      "correct": 19,
+      "accuracy": 0.76,
+      "dangerous_false_retained": 6,
+      "destructive_true_flagged": 0,
+      "overclaimed_unverifiable_retained": 0,
+      "confusion": {
+        "retained": {
+          "retained": 9
+        },
+        "flagged": {
+          "flagged": 4,
+          "retained": 6
+        },
+        "unverifiable": {
+          "unverifiable": 6
+        }
+      }
+    },
+    {
+      "suite": "tuned",
+      "backend": "nli",
+      "total": 25,
+      "correct": 23,
+      "accuracy": 0.92,
+      "dangerous_false_retained": 0,
+      "destructive_true_flagged": 0,
+      "overclaimed_unverifiable_retained": 0,
+      "confusion": {
+        "retained": {
+          "retained": 8,
+          "unverifiable": 1
+        },
+        "flagged": {
+          "flagged": 9,
+          "unverifiable": 1
+        },
+        "unverifiable": {
+          "unverifiable": 6
+        }
+      }
+    },
+    {
+      "suite": "tuned",
+      "backend": "deterministic+nli",
+      "total": 25,
+      "correct": 24,
+      "accuracy": 0.96,
+      "dangerous_false_retained": 1,
+      "destructive_true_flagged": 0,
+      "overclaimed_unverifiable_retained": 0,
+      "confusion": {
+        "retained": {
+          "retained": 9
+        },
+        "flagged": {
+          "flagged": 9,
+          "retained": 1
+        },
+        "unverifiable": {
+          "unverifiable": 6
+        }
+      }
+    },
+    {
+      "suite": "clean",
+      "backend": "deterministic",
+      "total": 25,
+      "correct": 20,
+      "accuracy": 0.8,
+      "dangerous_false_retained": 4,
+      "destructive_true_flagged": 1,
+      "overclaimed_unverifiable_retained": 0,
+      "confusion": {
+        "retained": {
+          "retained": 9,
+          "flagged": 1
+        },
+        "flagged": {
+          "flagged": 5,
+          "retained": 4
+        },
+        "unverifiable": {
+          "unverifiable": 6
+        }
+      }
+    },
+    {
+      "suite": "clean",
+      "backend": "nli",
+      "total": 25,
+      "correct": 20,
+      "accuracy": 0.8,
+      "dangerous_false_retained": 0,
+      "destructive_true_flagged": 1,
+      "overclaimed_unverifiable_retained": 0,
+      "confusion": {
+        "retained": {
+          "unverifiable": 3,
+          "retained": 6,
+          "flagged": 1
+        },
+        "flagged": {
+          "flagged": 8,
+          "unverifiable": 1
+        },
+        "unverifiable": {
+          "unverifiable": 6
+        }
+      }
+    },
+    {
+      "suite": "clean",
+      "backend": "deterministic+nli",
+      "total": 25,
+      "correct": 24,
+      "accuracy": 0.96,
+      "dangerous_false_retained": 0,
+      "destructive_true_flagged": 1,
+      "overclaimed_unverifiable_retained": 0,
+      "confusion": {
+        "retained": {
+          "retained": 9,
+          "flagged": 1
+        },
+        "flagged": {
+          "flagged": 9
+        },
+        "unverifiable": {
+          "unverifiable": 6
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "baseline": {
+    "model": 0.8,
+    "agreement": 1.0,
+    "input_quality": 1.0,
+    "final": 0.9283
+  },
+  "movement_epsilon": 0.02,
+  "stressors": [
+    {
+      "stressor": "high_nodata",
+      "description": "94% of the scene is nodata",
+      "targets": "input_quality",
+      "components": {
+        "model": 0.8,
+        "agreement": 0.52,
+        "input_quality": 0.85,
+        "final": 0.7071
+      },
+      "deltas": {
+        "model": 0.0,
+        "agreement": -0.48,
+        "input_quality": -0.15,
+        "final": -0.2212
+      },
+      "sensitivity_ok": true,
+      "specificity_ok": true,
+      "unexpected_collateral": {},
+      "expected_collateral": {
+        "agreement": {
+          "delta": -0.48,
+          "why": "correct, not a leak: with 94% of the pixels missing the indices genuinely lose their bimodal split, so the physics really is less trustworthy. A stressor that degrades two dimensions should move two components."
+        }
+      },
+      "abstained": false,
+      "abstain_trigger": null,
+      "limiting_component": null
+    },
+    {
+      "stressor": "tiny_scene",
+      "description": "16x16 px, below the minimum dimension",
+      "targets": "input_quality",
+      "components": {
+        "model": 1.0,
+        "agreement": 1.0,
+        "input_quality": 0.5,
+        "final": 0.7937
+      },
+      "deltas": {
+        "model": 0.2,
+        "agreement": 0.0,
+        "input_quality": -0.5,
+        "final": -0.1346
+      },
+      "sensitivity_ok": true,
+      "specificity_ok": true,
+      "unexpected_collateral": {},
+      "expected_collateral": {
+        "model": {
+          "delta": 0.2,
+          "why": "a real wart, recorded rather than hidden: the blocking check short-circuits before any learned tool runs, so model_confidence keeps its initial 1.0 and the component goes UP under stress. 1.0 means 'no model ran', not 'the model was certain', and a neutral value of 1.0 inflates the geometric mean. physics_agreement documents the same choice deliberately; here it is an accident of the initialiser. The abstention fires on input_validation first, so nothing user-facing depends on it today."
+        }
+      },
+      "abstained": true,
+      "abstain_trigger": "input_validation",
+      "limiting_component": "input_quality"
+    },
+    {
+      "stressor": "flat_scene",
+      "description": "no bimodal split; every threshold is a fixed prior",
+      "targets": "agreement",
+      "components": {
+        "model": 0.8,
+        "agreement": 0.52,
+        "input_quality": 1.0,
+        "final": 0.7465
+      },
+      "deltas": {
+        "model": 0.0,
+        "agreement": -0.48,
+        "input_quality": 0.0,
+        "final": -0.1818
+      },
+      "sensitivity_ok": true,
+      "specificity_ok": true,
+      "unexpected_collateral": {},
+      "expected_collateral": {},
+      "abstained": false,
+      "abstain_trigger": null,
+      "limiting_component": null
+    },
+    {
+      "stressor": "gsd_mismatch",
+      "description": "paired scenes at 10 m and 120 m",
+      "targets": "input_quality",
+      "components": {
+        "model": 0.8,
+        "agreement": 1.0,
+        "input_quality": 0.7,
+        "final": 0.8243
+      },
+      "deltas": {
+        "model": 0.0,
+        "agreement": 0.0,
+        "input_quality": -0.3,
+        "final": -0.1041
+      },
+      "sensitivity_ok": true,
+      "specificity_ok": true,
+      "unexpected_collateral": {},
+      "expected_collateral": {},
+      "abstained": false,
+      "abstain_trigger": null,
+      "limiting_component": null
+    }
+  ],
+  "sensitivity_passed": 4,
+  "specificity_passed": 4,
+  "total": 4,
+  "note": "Specificity is the property that matters. Task 3.6's abstention messages name the LIMITING component, and that is only useful advice if the component that moved is the one the problem lives in. A breakdown where every stressor moves every component would look informative and be useless."
+}
