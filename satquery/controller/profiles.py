@@ -84,6 +84,27 @@ BUILTIN: dict[str, Profile] = {
             "The entailment gate still runs, on its deterministic backend.",
         ],
     ),
+    # The demo profile for a machine with no GPU and 16 GB of RAM. Unlike
+    # lite, nothing is shed: every learned tool with a checkpoint loads and
+    # runs on the CPU, the VQA model unquantised in bfloat16 (~7.5 GB). The
+    # price is time - a VQA answer takes tens of seconds - not capability.
+    "cpu": Profile(
+        name="cpu",
+        description=(
+            "No GPU, 16 GB RAM. Every learned tool with a checkpoint runs on "
+            "the CPU; answers are slower, not degraded."
+        ),
+        vram_budget_mb=None,
+        device="cpu",
+        enable_nli=True,
+        verifier_enabled=True,
+        max_tile_px=512,
+        notes=[
+            "rs_vqa_v1 loads unquantised (bfloat16, ~7.5 GB RAM); its answers "
+            "say they differ in precision from the benchmarked 4-bit build.",
+            "Expect tens of seconds per VQA answer; the small heads take seconds.",
+        ],
+    ),
 }
 
 

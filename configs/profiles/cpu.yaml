@@ -1,0 +1,24 @@
+# CPU runtime profile - the demo configuration without a GPU.
+#
+# Read by satquery/controller/profiles.py; values here override the builtin.
+#
+# Lite sheds every learned tool (budget 0) so a CPU box answers from the index
+# engine alone. This profile keeps them: a 16 GB machine can hold the VQA
+# model unquantised in bfloat16 (~7.5 GB) plus the small heads, and the only
+# cost is latency. Start it with scripts/run_demo_cpu.sh (or make demo-cpu).
+description: >
+  No GPU, 16 GB RAM. Every learned tool with a checkpoint runs on the CPU;
+  answers are slower, not degraded.
+
+# null: nothing is shed for resource reasons.
+vram_budget_mb: null
+device: cpu
+
+# The NLI gate model is small enough for a CPU; still opt-in via SATQUERY_NLI.
+enable_nli: true
+verifier_enabled: true
+max_tile_px: 512
+
+notes:
+  - rs_vqa_v1 loads unquantised (bfloat16, ~7.5 GB RAM); its answers say they differ in precision from the benchmarked 4-bit build.
+  - Expect tens of seconds per VQA answer; the small heads take seconds.

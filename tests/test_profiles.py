@@ -191,7 +191,28 @@ class TestProfileDataclass:
             load_profile("lite").vram_budget_mb = 4096  # type: ignore[misc]
 
     def test_builtin_profiles_are_complete(self):
-        assert set(BUILTIN) == {"full", "lite"}
+        assert set(BUILTIN) == {"full", "lite", "cpu"}
         for profile in BUILTIN.values():
             assert isinstance(profile, Profile)
             assert profile.description
+
+
+class TestCpuProfile:
+    """The no-GPU demo profile keeps the learned tools instead of shedding them."""
+
+    def test_nothing_is_shed(self):
+        profile = load_profile("cpu")
+        assert profile.vram_budget_mb is None
+        assert profile.is_cpu_only
+
+    def test_yaml_agrees_with_the_builtin_on_behaviour(self):
+        loaded, builtin = load_profile("cpu"), BUILTIN["cpu"]
+        for field in ("vram_budget_mb", "device", "enable_nli", "verifier_enabled", "max_tile_px"):
+            assert getattr(loaded, field) == getattr(builtin, field), field
+
+    def test_learned_steps_survive_routing(self, msi_6band):
+        from satquery.controller.pipeline import Controller
+
+        trace = Controller(profile="cpu").run([msi_6band], "Describe this image.")
+        tools = [s.tool for s in trace.execution]
+        assert "caption_v1" in tools and len(tools) > 1

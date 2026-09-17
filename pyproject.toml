@@ -51,6 +51,21 @@ dev = [
 # the runner.
 report = ["reportlab==5.0.1"]
 
+# Running the learned tools on a machine WITHOUT a GPU (scripts/run_demo_cpu.sh).
+# No bitsandbytes: its 4-bit kernels are CUDA-only, and rs_vqa_v1 loads
+# unquantised on the CPU instead. Lower bounds, like `train`; transformers
+# 4.49 is the first release with Qwen2.5-VL. On Linux, install torch from the
+# CPU wheel index first to avoid pulling ~2 GB of CUDA libraries:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+cpu = [
+    "torch>=2.5",
+    "torchvision>=0.20",
+    "transformers>=4.49",
+    "peft>=0.14",
+    "accelerate>=1.2",
+    "safetensors>=0.4",
+]
+
 # The training and evaluation stack. Every one of these was previously
 # undeclared: the scripts under training/ imported them and nothing recorded
 # what to install, so reproducing a run meant reading import statements.
