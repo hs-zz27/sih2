@@ -1,0 +1,14 @@
+{
+  "nli_deberta_mnli": {
+    "hf_repo": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+    "name": "DeBERTa-v3-base-mnli-fever-anli",
+    "note": "trust-on-first-use; not a publisher-provided digest",
+    "sha256": "3f17e9245ea2807a9e93e963f619c36b4d846e78d4ba999d47200332a99e5427"
+  },
+  "qwen25_vl_3b": {
+    "hf_repo": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "name": "Qwen2.5-VL-3B-Instruct",
+    "note": "trust-on-first-use; not a publisher-provided digest",
+    "sha256": "c5d2599f1d229be5877c8df72e4b655a61bdc277a0bacb222350c663bb3060b4"
+  }
+}
