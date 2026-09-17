@@ -40,6 +40,11 @@ place (`python scripts/demo_assets.py` lists them), then
 `python scripts/run_demo_cpu.py`. Every learned model runs on the CPU, slower.
 Recording guide: [`docs/demo-video.md`](docs/demo-video.md).
 
+**No checkpoints and no GPU?** [`docs/kaggle-retrain.md`](docs/kaggle-retrain.md)
+retrains the three demo-critical models unattended on Kaggle's free GPU quota:
+upload a notebook from `notebooks/kaggle/`, run it, download the output,
+`python scripts/install_retrained.py <output.zip>`.
+
 Learned tools fall back to clearly-labelled stubs when their checkpoints are absent,
 so everything above runs on a laptop CPU; the numbers in the table need the checkpoints.
 
