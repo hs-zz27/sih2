@@ -17,79 +17,77 @@
   },
   "selected_task_by_category": {
     "instruction_override": {
-      "SINGLE_GROUND": 34,
-      "SINGLE_CAPTION": 9,
+      "SINGLE_GROUND": 31,
+      "SINGLE_CAPTION": 12,
       "CLARIFY_OR_ABSTAIN": 12,
-      "SINGLE_VQA": 25,
-      "SINGLE_LANDCOVER": 4,
-      "XMODAL_JOINT_EXTRACT": 2,
-      "TEMPORAL_CHANGE_VQA": 3,
+      "SINGLE_VQA": 22,
+      "SINGLE_LANDCOVER": 3,
+      "XMODAL_JOINT_EXTRACT": 4,
+      "TEMPORAL_CHANGE_VQA": 5,
       "TEMPORAL_CHANGE_MAP": 1
     },
     "tool_coercion": {
-      "SINGLE_LANDCOVER": 4,
-      "SINGLE_GROUND": 19,
-      "CLARIFY_OR_ABSTAIN": 14,
-      "SINGLE_VQA": 28,
-      "SINGLE_CAPTION": 4,
-      "XMODAL_JOINT_EXTRACT": 3,
-      "TEMPORAL_CHANGE_MAP": 2,
+      "SINGLE_VQA": 32,
+      "SINGLE_GROUND": 15,
+      "CLARIFY_OR_ABSTAIN": 8,
+      "SINGLE_CAPTION": 7,
+      "SINGLE_LANDCOVER": 3,
+      "XMODAL_JOINT_EXTRACT": 9,
       "TEMPORAL_CHANGE_VQA": 1
     },
     "parameter_injection": {
-      "SINGLE_VQA": 27,
-      "CLARIFY_OR_ABSTAIN": 14,
+      "SINGLE_VQA": 26,
+      "CLARIFY_OR_ABSTAIN": 13,
       "SINGLE_CAPTION": 6,
-      "SINGLE_LANDCOVER": 3,
-      "SINGLE_GROUND": 8,
-      "XMODAL_JOINT_EXTRACT": 1,
+      "SINGLE_LANDCOVER": 4,
+      "SINGLE_GROUND": 5,
+      "XMODAL_JOINT_EXTRACT": 5,
       "TEMPORAL_CHANGE_VQA": 1
     },
     "config_impossible": {
       "SINGLE_LANDCOVER": 3,
-      "SINGLE_VQA": 33,
-      "CLARIFY_OR_ABSTAIN": 8,
-      "SINGLE_GROUND": 13,
-      "SINGLE_CAPTION": 9,
+      "SINGLE_VQA": 37,
+      "CLARIFY_OR_ABSTAIN": 7,
+      "SINGLE_GROUND": 11,
+      "SINGLE_CAPTION": 10,
       "XMODAL_JOINT_EXTRACT": 7,
       "TEMPORAL_CHANGE_MAP": 6,
-      "TEMPORAL_CHANGE_DESC": 4,
-      "TEMPORAL_CHANGE_VQA": 7
+      "TEMPORAL_CHANGE_DESC": 5,
+      "TEMPORAL_CHANGE_VQA": 4
     },
     "code_injection": {
-      "SINGLE_VQA": 19,
+      "SINGLE_VQA": 26,
       "SINGLE_CAPTION": 6,
       "SINGLE_LANDCOVER": 6,
-      "CLARIFY_OR_ABSTAIN": 12,
-      "XMODAL_JOINT_EXTRACT": 1,
-      "TEMPORAL_CHANGE_DESC": 1
+      "CLARIFY_OR_ABSTAIN": 6,
+      "XMODAL_JOINT_EXTRACT": 1
     },
     "degenerate": {
       "CLARIFY_OR_ABSTAIN": 54,
       "SINGLE_VQA": 6
     },
     "multi_task": {
-      "SINGLE_VQA": 21,
-      "SINGLE_LANDCOVER": 4,
+      "SINGLE_VQA": 19,
       "CLARIFY_OR_ABSTAIN": 9,
-      "SINGLE_GROUND": 6,
-      "XMODAL_JOINT_EXTRACT": 1,
+      "SINGLE_GROUND": 7,
+      "SINGLE_LANDCOVER": 4,
+      "XMODAL_JOINT_EXTRACT": 2,
       "TEMPORAL_CHANGE_DESC": 2,
       "TEMPORAL_CHANGE_MAP": 2
     },
     "out_of_scope": {
-      "SINGLE_VQA": 46,
+      "SINGLE_VQA": 42,
       "SINGLE_LANDCOVER": 3,
-      "SINGLE_CAPTION": 6,
-      "SINGLE_GROUND": 18,
+      "SINGLE_CAPTION": 9,
+      "SINGLE_GROUND": 19,
       "TEMPORAL_CHANGE_DESC": 2
     },
     "social_engineering": {
-      "SINGLE_VQA": 35,
-      "CLARIFY_OR_ABSTAIN": 15,
-      "SINGLE_GROUND": 6,
+      "SINGLE_VQA": 40,
+      "CLARIFY_OR_ABSTAIN": 13,
+      "SINGLE_GROUND": 4,
       "TEMPORAL_CHANGE_VQA": 2,
-      "TEMPORAL_CHANGE_DESC": 2
+      "TEMPORAL_CHANGE_DESC": 1
     }
   },
   "executed": 27,

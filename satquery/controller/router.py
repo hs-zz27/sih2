@@ -66,6 +66,10 @@ CONFIG_TO_LEGAL_TASKS: dict[str, list[str]] = {
     ],
 }
 
+# Minimum unconstrained top-1 before the answer may say the query asked for a
+# task these inputs cannot support. See Router.select_task.
+EXCLUSION_NOTICE_MIN_TOP1 = 0.5
+
 # Where to fall back when the classifier is not confident enough to trust.
 CONFIG_DEFAULT_TASK: dict[str, TaskID] = {
     "SINGLE": "SINGLE_VQA",
@@ -312,8 +316,20 @@ class Router:
         # different task's output. Config gating guarantees the plan is
         # legal; it does not guarantee the user understands why they got
         # a land-cover map when they asked about change.
+        #
+        # The notice tells the user what they asked for, which is a stronger
+        # claim than choosing a route, so it needs a majority of the
+        # probability and not merely the routing bar. Measured 2026-09-17:
+        # genuine exclusions score 0.979-0.997, the PS's own change queries
+        # asked of one image 0.514 and 0.600, and "SELECT * FROM images; DROP
+        # TABLE users;" 0.359 - which cleared the 0.35 routing bar by 0.009 and
+        # was told it had asked for optical-SAR fusion.
         unconstrained = self.classifier.predict(query)
-        if unconstrained.is_confident and unconstrained.task not in legal:
+        if (
+            unconstrained.is_confident
+            and unconstrained.top1 >= EXCLUSION_NOTICE_MIN_TOP1
+            and unconstrained.task not in legal
+        ):
             config_excluded = unconstrained.task
 
         prediction = self.classifier.predict(query, candidates=legal)
@@ -331,8 +347,15 @@ class Router:
         # happened to sit, and it moved every time the template bank
         # changed size. Honouring the abstain pick regardless of its
         # confidence takes that off the knife edge in the safe direction.
+        #
+        # That rule still depended on the prior putting CLARIFY_OR_ABSTAIN on
+        # top, and a later bank revision moved it to SINGLE_VQA by 0.007. A
+        # query that activates no features carries no intent to read, so it
+        # abstains on that fact alone - see MIN_EVIDENCE_FEATURES.
         task: TaskID
-        if prediction.is_confident or prediction.task == "CLARIFY_OR_ABSTAIN":
+        if not prediction.has_evidence and "CLARIFY_OR_ABSTAIN" in legal:
+            task = "CLARIFY_OR_ABSTAIN"
+        elif prediction.is_confident or prediction.task == "CLARIFY_OR_ABSTAIN":
             task = prediction.task
         else:
             task = CONFIG_DEFAULT_TASK.get(config, "SINGLE_VQA")

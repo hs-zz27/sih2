@@ -11,8 +11,11 @@ PROVENANCE MATTERS, so it is recorded here:
 * `TUNED_HOLDOUT` was used to diagnose weak spots, after which the template
   bank was broadened. Its score is therefore optimistic and must NOT be quoted
   as a generalisation estimate.
-* `CLEAN_HOLDOUT` was written afterwards and has never informed the templates.
-  It is the honest number.
+* `CLEAN_HOLDOUT` was written afterwards and did not inform the templates
+  until 2026-09-17, when its misroutes were used to diagnose the error
+  categories of that day's query-bank revision. **From that revision on it is
+  optimistic too.** The honest routing number is now the sealed set in
+  `holdout_sealed.py`, scored by `evaluation/routing_eval.py`.
 
 Neither set is large enough for a tight confidence interval. They are a smoke
 test against template overfitting, not a benchmark. The real evaluation is
@@ -57,7 +60,8 @@ TUNED_HOLDOUT: list[tuple[str, str]] = [
     ("just have a look and let me know", "CLARIFY_OR_ABSTAIN"),
 ]
 
-# Written after the templates were finalised. Never used for tuning.
+# Written after the templates were finalised. Used for diagnosis on
+# 2026-09-17 (see module docstring), so no longer an untuned estimate.
 CLEAN_HOLDOUT: list[tuple[str, str]] = [
     # SINGLE_VQA
     ("is that a power station in the corner", "SINGLE_VQA"),

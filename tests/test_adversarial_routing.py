@@ -219,3 +219,37 @@ def test_what_the_suite_does_not_prove(router, manifests):
         "update docs/phase1-status.md task 3.8, which currently records that "
         "they do not."
     )
+
+
+class TestExclusionNoticeNeedsAMajority:
+    """The notice says what the user asked for; weak evidence must not say it."""
+
+    def test_sql_is_not_told_it_asked_for_fusion(self, router, manifests):
+        decision = router.decide("SELECT * FROM images; DROP TABLE users;", manifests["SINGLE"])
+        assert decision.config_excluded is None
+
+    @pytest.mark.parametrize(
+        "query",
+        [
+            # PS representative queries 3 and 5, asked of a single image. Their
+            # unconstrained top-1 (0.51 and 0.60) is the lowest a genuine
+            # exclusion reaches, so they pin the bar from below.
+            "What changed between these two dates, and where did the change occur?",
+            "Has the built-up area increased, decreased, or remained unchanged?",
+        ],
+    )
+    def test_ps_change_queries_on_one_image_still_get_the_notice(self, router, manifests, query):
+        decision = router.decide(query, manifests["SINGLE"])
+        assert decision.config_excluded is not None
+        assert decision.config_excluded.startswith("TEMPORAL_")
+
+
+class TestContentlessQueriesCarryNoIntent:
+    @pytest.mark.parametrize("query", ["", "   ", "hmm", "asdfghjkl"])
+    @pytest.mark.parametrize("config", ["SINGLE", "CROSSMODAL", "BITEMPORAL"])
+    def test_abstains_in_every_configuration(self, router, manifests, query, config):
+        assert router.decide(query, manifests[config]).plan.tasks[0] == "CLARIFY_OR_ABSTAIN"
+
+    def test_real_short_utterances_have_evidence(self, router):
+        for query in ("ok", "hey", "caption"):
+            assert router.classifier.predict(query).has_evidence, query

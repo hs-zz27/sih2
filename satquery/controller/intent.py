@@ -35,6 +35,16 @@ LOW_CONFIDENCE_TOP1 = 0.35
 # Below this margin the top two classes are effectively tied.
 LOW_MARGIN = 0.10
 
+# At or below this many active TF-IDF features a query carries no evidence
+# about intent, and its prediction is just the class prior. Measured on the
+# 2026-09-17 bank: "", "   " and "hmm" have 0 active features and
+# "asdfghjkl" has 1, while the shortest real utterances have 4 or more
+# ("ok" 4, "hey" 7). The prior itself is not stable - it put
+# CLARIFY_OR_ABSTAIN on top at 0.353 before that revision and SINGLE_VQA on
+# top at 0.215 (margin 0.007) after it - so routing on it was a coin flip that
+# moved every time the template bank changed.
+MIN_EVIDENCE_FEATURES = 1
+
 
 @dataclass(frozen=True)
 class IntentPrediction:
@@ -42,10 +52,17 @@ class IntentPrediction:
     top1: float
     margin: float
     ranked: list[tuple[str, float]]
+    # Active features in the query's vector; -1 when not measured.
+    n_features: int = -1
 
     @property
     def is_confident(self) -> bool:
         return self.top1 >= LOW_CONFIDENCE_TOP1 and self.margin >= LOW_MARGIN
+
+    @property
+    def has_evidence(self) -> bool:
+        """False when the query activated (almost) no features at all."""
+        return self.n_features < 0 or self.n_features > MIN_EVIDENCE_FEATURES
 
 
 def build_pipeline() -> Pipeline:
@@ -110,7 +127,8 @@ class IntentClassifier:
         those classes, so top1 and margin remain interpretable rather than
         being diluted by tasks that were never possible for this input.
         """
-        probs = self.pipeline.predict_proba([query])[0]
+        features = self.pipeline.named_steps["features"].transform([query])
+        probs = self.pipeline.named_steps["clf"].predict_proba(features)[0]
         pairs = list(zip(self.classes_, probs, strict=True))
 
         if candidates:
@@ -132,6 +150,7 @@ class IntentClassifier:
             top1=round(top1, 6),
             margin=round(top1 - second, 6),
             ranked=[(c, round(float(p), 6)) for c, p in pairs],
+            n_features=int(features.nnz),
         )
 
     def evaluate(self, examples: list[QueryExample]) -> dict:

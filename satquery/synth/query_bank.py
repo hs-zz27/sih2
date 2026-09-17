@@ -39,6 +39,33 @@ LANDCOVER_CLASSES = [
     "land cover classes",
 ]
 
+# Revision 2026-09-17 slots. Each exists because a hand-written query used a
+# word for the same thing that no template contained, so the char and word
+# n-grams had nothing to match. See the note above TEMPLATES.
+FRAMES = [
+    "image", "scene", "frame", "tile", "photo", "picture", "shot", "snapshot",
+]
+
+POSITIONS = [
+    "corner", "top left corner", "bottom right corner", "north side",
+    "left edge", "centre", "upper half", "far right",
+]
+
+SAR_TERMS = [
+    "radar", "SAR", "SAR image", "backscatter", "microwave image",
+    "radar pass", "RISAT scene", "C-band image",
+]
+
+OPTICAL_TERMS = [
+    "optical", "optical image", "photo", "camera image", "multispectral image",
+    "Cartosat scene", "visible image",
+]
+
+CHANGE_VERBS = [
+    "cleared", "demolished", "built", "flooded", "removed", "planted",
+    "filled in", "paved over",
+]
+
 CHANGE_NOUNS = [
     "urban growth", "deforestation", "new construction", "water extent",
     "vegetation loss", "flooding", "land clearing", "built-up expansion",
@@ -71,6 +98,15 @@ _VQA = [
     "What share of this is {feature}?",
     "Give me a number for the {feature}.",
     "Whats the count of {feature}?",
+    # F - counting verbs other than "count"
+    "Tally up the {feature}.",
+    "Count up the {feature} for me.",
+    "Give me a headcount of the {feature}.",
+    # B - a question about something at a position in ONE image. Without
+    # these, positional words had only ever appeared in temporal templates.
+    "Is that {singular} in the {position}?",
+    "What is in the {position} of this {frame}?",
+    "Is there {singular} near the {position}?",
 ]
 
 # General natural-language visual questions (PS-26167).
@@ -169,6 +205,15 @@ _CAPTION = [
     "Sum up the imagery.",
     "In a sentence or two, describe this scene.",
     "Talk me through what this image shows.",
+    # A - the object is the image and a piece of writing is wanted back. Kept
+    # on the caption side of the boundary described above _GENERAL_VISUAL:
+    # conversational "what's going on" stays with VQA.
+    "Put this {frame} into words.",
+    "Write a short blurb about this {frame}.",
+    "Give me a written description of this {frame}.",
+    "Draft a caption for this {frame}.",
+    "Write a paragraph describing this {frame}.",
+    "Describe this {frame} for a report.",
 ]
 
 _GROUND = [
@@ -192,6 +237,10 @@ _GROUND = [
     "I want the pixel positions of the {feature}.",
     "Box the {feature}.",
     "Which part of the image has the {feature}?",
+    # B - asking WHERE in terms of a position, rather than asking about one
+    "Which {position} of the {frame} has {singular}?",
+    "Is {singular} in the {position} or somewhere else? Mark it.",
+    "Tell me which side of the {frame} the {feature} are on.",
 ]
 
 _LANDCOVER = [
@@ -210,6 +259,11 @@ _LANDCOVER = [
     "Run a {landcover} classification on this image.",
     "What fraction of each {landcover} class is present?",
     "Produce a thematic {landcover} map.",
+    # D - classification phrased as assigning or sharing out pixels
+    "Assign every pixel to a {landcover} class.",
+    "What share of each {landcover} category is in this {frame}?",
+    "Sort the pixels of this {frame} into {landcover}.",
+    "Give me the class breakdown for this {frame}.",
 ]
 
 _XMODAL = [
@@ -228,6 +282,12 @@ _XMODAL = [
     "Use optical and SAR jointly to map {feature}.",
     "Exploit both sensors to detect {feature}.",
     "Combine radar backscatter with optical reflectance for {feature}.",
+    # C - the two sensors named by physics or by product, not as optical/SAR
+    "What extra detail does the {sar} give over the {optical}?",
+    "Does the {sar} pick up anything the {optical} missed?",
+    "Check the {feature} using the {optical} and the {sar} together.",
+    "Put the {sar} and the {optical} side by side and assess {feature}.",
+    "Where clouds hide the {optical}, use the {sar} to find {feature}.",
 ]
 
 _CHANGE_DESC = [
@@ -322,6 +382,12 @@ _CHANGE_VQA = [
     "Did the {feature} shrink since the earlier image?",
     "How much {feature} was there before compared to now?",
     "Is there more {feature} now than previously?",
+    # E - a yes/no question about a specific change event. "Which areas were
+    # cleared?" asks where and stays with DESC; "were any X cleared?" asks
+    # whether, and has a yes/no answer.
+    "Were any {feature} {verb} between the two dates?",
+    "Did any {feature} get {verb} since the earlier image?",
+    "Were the {feature} {verb} between the passes?",
 ]
 
 _CHANGE_MAP = [
@@ -556,6 +622,15 @@ _CDVQA_TRAINED_TEMPLATES = [
 ]
 
 
+# Revision 2026-09-17 (templates marked A-F above, slots FRAMES..CHANGE_VERBS).
+#
+# Diagnosed from the misroutes of CLEAN_HOLDOUT and TUNED_HOLDOUT only, by
+# error CATEGORY, never by copying a query: counting verbs, positional words,
+# sensor synonyms, pixel-assignment phrasings of land cover, yes/no change
+# events, and requests for a written description. Using CLEAN_HOLDOUT this way
+# ends its "never tuned" status - see its note in holdout.py. The honest
+# number after this revision is the sealed set in holdout_sealed.py, which was
+# committed before these edits and not consulted for them.
 TEMPLATES: dict[TaskID, list[str]] = {
     "SINGLE_VQA": _VQA + _GENERAL_VISUAL,
     "SINGLE_CAPTION": _CAPTION,
@@ -592,6 +667,11 @@ def _fill(template: str, rng: random.Random) -> str:
         .replace("{change}", rng.choice(CHANGE_NOUNS))
         .replace("{scene2}", scene2)
         .replace("{scene}", scene)
+        .replace("{frame}", rng.choice(FRAMES))
+        .replace("{position}", rng.choice(POSITIONS))
+        .replace("{sar}", rng.choice(SAR_TERMS))
+        .replace("{optical}", rng.choice(OPTICAL_TERMS))
+        .replace("{verb}", rng.choice(CHANGE_VERBS))
     )
 
 

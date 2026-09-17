@@ -124,9 +124,9 @@
   "routing": {
     "capability_matrix_version": "cm-2026.11.02",
     "classifier": {
-      "margin": 0.4106,
+      "margin": 0.3245,
       "name": "tfidf_logreg_v1",
-      "top1": 0.5842
+      "top1": 0.5244
     },
     "config_excluded_task": "XMODAL_JOINT_EXTRACT",
     "legal_tasks": [

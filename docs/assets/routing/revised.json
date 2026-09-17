@@ -1,0 +1,404 @@
+{
+  "label": "revised: query bank revision 2026-09-17 (categories A-F) + no-evidence abstain + exclusion-notice majority",
+  "classifier": "tfidf_logreg_v1",
+  "gate": {
+    "top1": 0.35,
+    "margin": 0.1
+  },
+  "query_bank": {
+    "n": 3600,
+    "sha256_16": "1706d2ed4b07b7b0"
+  },
+  "scikit_learn": "1.8.0",
+  "holdouts": {
+    "sealed": {
+      "n": 63,
+      "raw_accuracy": 0.8095,
+      "raw_ci95": [
+        0.6959,
+        0.8875
+      ],
+      "system_accuracy": 0.8254,
+      "system_ci95": [
+        0.7138,
+        0.8996
+      ],
+      "gated_to_config_default": 1,
+      "per_task": {
+        "CLARIFY_OR_ABSTAIN": {
+          "n": 7,
+          "raw": 0.5714,
+          "system": 0.7143
+        },
+        "SINGLE_CAPTION": {
+          "n": 7,
+          "raw": 0.7143,
+          "system": 0.7143
+        },
+        "SINGLE_GROUND": {
+          "n": 7,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_LANDCOVER": {
+          "n": 7,
+          "raw": 0.7143,
+          "system": 0.7143
+        },
+        "SINGLE_VQA": {
+          "n": 7,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_DESC": {
+          "n": 7,
+          "raw": 0.8571,
+          "system": 0.8571
+        },
+        "TEMPORAL_CHANGE_MAP": {
+          "n": 7,
+          "raw": 0.8571,
+          "system": 0.8571
+        },
+        "TEMPORAL_CHANGE_VQA": {
+          "n": 7,
+          "raw": 0.5714,
+          "system": 0.5714
+        },
+        "XMODAL_JOINT_EXTRACT": {
+          "n": 7,
+          "raw": 1.0,
+          "system": 1.0
+        }
+      },
+      "misroutes": [
+        {
+          "query": "give me a one paragraph overview of the area",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.517921,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.679889,
+          "gated_to_default": false
+        },
+        {
+          "query": "narrate what's visible in this photo",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.552993,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.632172,
+          "gated_to_default": false
+        },
+        {
+          "query": "what is the percentage split between cropland, forest and built-up",
+          "config": "SINGLE",
+          "gold": "SINGLE_LANDCOVER",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.530487,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.926034,
+          "gated_to_default": false
+        },
+        {
+          "query": "label each region as water, vegetation, soil or urban",
+          "config": "SINGLE",
+          "gold": "SINGLE_LANDCOVER",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.310824,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.530661,
+          "gated_to_default": false
+        },
+        {
+          "query": "what's different in the second image compared to the first",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_DESC",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.56977,
+          "system": "TEMPORAL_CHANGE_VQA",
+          "constrained_top1": 0.590833,
+          "gated_to_default": false
+        },
+        {
+          "query": "how many new buildings came up",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.619789,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.633208,
+          "gated_to_default": false
+        },
+        {
+          "query": "has the lake grown or shrunk",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "SINGLE_GROUND",
+          "raw_top1": 0.766616,
+          "system": "SINGLE_GROUND",
+          "constrained_top1": 0.78377,
+          "gated_to_default": false
+        },
+        {
+          "query": "was the road widened between the dates",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "TEMPORAL_CHANGE_DESC",
+          "raw_top1": 0.45026,
+          "system": "TEMPORAL_CHANGE_DESC",
+          "constrained_top1": 0.46089,
+          "gated_to_default": false
+        },
+        {
+          "query": "mark all areas of change as polygons",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_MAP",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.508205,
+          "system": "TEMPORAL_CHANGE_VQA",
+          "constrained_top1": 0.510934,
+          "gated_to_default": false
+        },
+        {
+          "query": "?",
+          "config": "SINGLE",
+          "gold": "CLARIFY_OR_ABSTAIN",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.215236,
+          "system": "CLARIFY_OR_ABSTAIN",
+          "constrained_top1": 0.321293,
+          "gated_to_default": true
+        },
+        {
+          "query": "what's the weather in delhi tomorrow",
+          "config": "SINGLE",
+          "gold": "CLARIFY_OR_ABSTAIN",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.31058,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.606345,
+          "gated_to_default": false
+        },
+        {
+          "query": "tell me something",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "CLARIFY_OR_ABSTAIN",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.594278,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.605977,
+          "gated_to_default": false
+        }
+      ]
+    },
+    "clean": {
+      "n": 29,
+      "raw_accuracy": 0.8276,
+      "raw_ci95": [
+        0.6545,
+        0.924
+      ],
+      "system_accuracy": 0.8276,
+      "system_ci95": [
+        0.6545,
+        0.924
+      ],
+      "gated_to_config_default": 2,
+      "per_task": {
+        "CLARIFY_OR_ABSTAIN": {
+          "n": 4,
+          "raw": 0.75,
+          "system": 0.75
+        },
+        "SINGLE_CAPTION": {
+          "n": 3,
+          "raw": 0.6667,
+          "system": 0.6667
+        },
+        "SINGLE_GROUND": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_LANDCOVER": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_VQA": {
+          "n": 4,
+          "raw": 0.75,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_DESC": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 0.6667
+        },
+        "TEMPORAL_CHANGE_MAP": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_VQA": {
+          "n": 3,
+          "raw": 0.3333,
+          "system": 0.3333
+        },
+        "XMODAL_JOINT_EXTRACT": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        }
+      },
+      "misroutes": [
+        {
+          "query": "about how much of this is under water",
+          "config": "SINGLE",
+          "gold": "SINGLE_VQA",
+          "raw": "TEMPORAL_CHANGE_VQA",
+          "raw_top1": 0.48466,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.856347,
+          "gated_to_default": false
+        },
+        {
+          "query": "just tell me what im looking at",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.639851,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.746314,
+          "gated_to_default": false
+        },
+        {
+          "query": "in prose, how do the two dates differ",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_DESC",
+          "raw": "TEMPORAL_CHANGE_DESC",
+          "raw_top1": 0.294563,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.308394,
+          "gated_to_default": true
+        },
+        {
+          "query": "were any orchards cleared between the passes",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "TEMPORAL_CHANGE_DESC",
+          "raw_top1": 0.775989,
+          "system": "TEMPORAL_CHANGE_DESC",
+          "constrained_top1": 0.786357,
+          "gated_to_default": false
+        },
+        {
+          "query": "quantify the shoreline retreat",
+          "config": "BITEMPORAL_PAIR",
+          "gold": "TEMPORAL_CHANGE_VQA",
+          "raw": "SINGLE_GROUND",
+          "raw_top1": 0.290532,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.316384,
+          "gated_to_default": true
+        },
+        {
+          "query": "whats up with it",
+          "config": "SINGLE",
+          "gold": "CLARIFY_OR_ABSTAIN",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.350019,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.545915,
+          "gated_to_default": false
+        }
+      ]
+    },
+    "tuned": {
+      "n": 27,
+      "raw_accuracy": 0.9259,
+      "raw_ci95": [
+        0.7663,
+        0.9794
+      ],
+      "system_accuracy": 0.9259,
+      "system_ci95": [
+        0.7663,
+        0.9794
+      ],
+      "gated_to_config_default": 0,
+      "per_task": {
+        "CLARIFY_OR_ABSTAIN": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_CAPTION": {
+          "n": 3,
+          "raw": 0.3333,
+          "system": 0.3333
+        },
+        "SINGLE_GROUND": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_LANDCOVER": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "SINGLE_VQA": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_DESC": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_MAP": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "TEMPORAL_CHANGE_VQA": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        },
+        "XMODAL_JOINT_EXTRACT": {
+          "n": 3,
+          "raw": 1.0,
+          "system": 1.0
+        }
+      },
+      "misroutes": [
+        {
+          "query": "give me a rundown of this picture",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.869789,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.903652,
+          "gated_to_default": false
+        },
+        {
+          "query": "in a sentence or two, whats going on in this shot",
+          "config": "SINGLE",
+          "gold": "SINGLE_CAPTION",
+          "raw": "SINGLE_VQA",
+          "raw_top1": 0.63832,
+          "system": "SINGLE_VQA",
+          "constrained_top1": 0.698529,
+          "gated_to_default": false
+        }
+      ]
+    }
+  }
+}
