@@ -87,7 +87,7 @@ Judging uses VRSBench, RSVQA and CDVQA, plus a private ISRO/SAC set of co-regist
 | Cross-modal pair (I2) | PARTIAL | Footprint overlap gated (≥70%); sub-pixel co-registration unverified — the estimator reports ~38 px on identically-footprinted pairs, so it is not gated |
 | Bi-temporal pair (I3) | PARTIAL | Footprint overlap gated (≥80%); dates disclosed, not enforced (CDVQA ships undated PNGs) |
 | GeoTIFF / PNG rules (I4/I5) | VERIFIED | PNG admitted only in benchmark mode |
-| Interactive GUI + agentic backend | VERIFIED | Next.js + FastAPI/SSE, containerised; run page now shows execution warnings |
+| Interactive GUI + agentic backend | VERIFIED | Next.js + FastAPI/SSE, containerised; run page shows execution warnings and downloads the evidence pack; header shows whether each model is live. Runs without a GPU via `scripts/run_demo_cpu.py` |
 | Codes and models | PARTIAL | Code and tests public; `change_vqa_v1` weights unpublishable (SECOND has no licence) — see §9 |
 
 ---
@@ -193,6 +193,21 @@ setup-node v7) with pip caching.
 
 ---
 
+## 6a. Running without a GPU (added 17 September)
+
+The team has no GPU for the demo, so the stack now runs on a 16 GB CPU machine:
+
+- **`cpu` profile:** every learned tool with a checkpoint loads, unlike `lite`, which sheds them all.
+- **VQA model on CPU:** loads unquantised in bfloat16 (~7.5 GB) because the 4-bit kernels are CUDA-only. Every CPU answer warns that the published figures were measured on the 4-bit GPU build.
+- **Loading checkpoints no longer downloads ImageNet weights**, so the demo also works offline.
+- **`python scripts/run_demo_cpu.py`** starts the API and UI natively on Windows, macOS and Linux.
+- **`GET /readiness`** and a header chip show which models are live. `make preflight` gives GO / NO-GO before recording.
+- **`GET /runs/{id}/evidence.zip`** finally serves the evidence pack. Before this, the only thing calling it was its own test.
+
+**Not yet measured:** CPU answer latency, and whether bfloat16 answers match the 4-bit ones. Neither can be measured without the checkpoints.
+
+---
+
 ## 7. Limitations and risk register
 
 | Limitation | Evidence | Why it matters |
@@ -201,7 +216,7 @@ setup-node v7) with pip caching.
 | Grounding far below published results | Acc@0.5 0.1604 vs ~0.70–0.80 | The PS's only grounding query ("Highlight the water body…") routes correctly but localises weakly; lead with captioning in demos |
 | VRSBench VQA below the optimistic constant, and not re-measured on the deployed adapter | 0.2968 vs test-fitted constant 0.3463 (floor 0.2400), on `track_b_v3` | Weak transfer from RSVQA-LR to VRSBench's question types; the deployed Phase 5 adapter may score differently |
 | VRSBench caption and referring not yet measured | evaluator exists, needs val imagery + checkpoints | Two of VRSBench's three PS roles have no number yet |
-| Out-of-scope questions are answered, not refused | "what's the weather in delhi tomorrow" routes to VQA on the sealed holdout; image-conditional refusal 2/12 | A judge can probe this in seconds |
+| Out-of-scope refusal is partial | **Improved 17 Sep:** out-of-scope templates took the adversarial suite's out_of_scope abstentions from 0/75 to 15/75, with no sealed image question newly refused; one colloquial caption request ("just tell me what im looking at") now gets a rephrase request. Image-conditional refusal still 2/12 | A judge can still find off-topic phrasings that get answered |
 | Refusal not re-measured on the deployed adapter | refusal figures are pre-Phase-5 | Quote them as such or re-run `evaluation/track_b_eval.py` |
 | CDVQA not re-measured end to end with the v2 change-VQA head | 0.6061 is the v1 head | The deployed head's mIoU is higher (0.2933 vs 0.2636); the end-to-end number may move |
 | `change_vqa_v1` weights cannot be published | SECOND has no licence | "Codes and models" deliverable is partial — options in §9 |
@@ -235,11 +250,11 @@ The full dated register (L1–L37) is `docs/00-README-and-Requirement-Traceabili
 
 | Priority | Item | Why |
 |---|---|---|
-| P0 | Rehearse the demo on the actual presentation hardware | Environment drift caused L34 and L36 |
+| P0 | Rehearse the demo on the actual presentation hardware; measure warm CPU answer times | Environment drift caused L34 and L36; CPU latency is unmeasured |
 | P0 | Decide the fusion checkpoint: revert to v1 (fused 0.7714) or keep v2 and say so | The deployed v2 is measurably worse |
 | P1 | Run `evaluation/vrsbench_tasks.py` for caption and referring, and re-run `evaluation/vrsbench_eval.py` on the deployed adapter | Closes the remaining two VRSBench roles and updates the VQA figure |
 | P1 | Re-run CDVQA end to end with the deployed v2 change-VQA head | The quoted 0.6061 predates it |
-| P1 | Re-measure refusal on the deployed adapter; add out-of-scope refusal | Weakest judge-visible behaviour |
+| P1 | Re-measure refusal on the deployed adapter; widen out-of-scope refusal beyond 15/75 | Weakest judge-visible behaviour |
 | P2 | Resolve the SECOND licence for `change_vqa_v1` (options below) | Needed for "codes and models" |
 | P2 | Routing beyond templates (e.g. a small sentence-embedding classifier), measured on the sealed holdout once | Templates are at diminishing returns |
 | P3 | Confirm the RISAT product/mode for the private set | Narrowed to C-band (EOS-04), not confirmed |

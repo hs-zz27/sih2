@@ -60,19 +60,20 @@ trace confirms `n_images: 1`.
    a CLI warm-up still took 219.9 s, versus 131 s genuinely warm. It has to go
    through the API.
 
-### If you are on the CPU fallback
+### If you have no GPU
 
-```bash
-docker compose -f docker-compose.yml -f docker-compose.cpu.yml up -d
-```
+**Updated 2026-09-17 - both notes that stood here are superseded.**
 
-**Do not bother warming it** - the learned tools are stubs, nothing loads, and
-a full pass is already 104 s.
+* The learned tools no longer have to be stubs on a CPU. Run
+  `python scripts/run_demo_cpu.py` (profile `cpu`): every learned tool with a
+  checkpoint loads, the VQA model unquantised in bfloat16. **Do warm it** -
+  the first VQA question loads ~7.5 GB. Full guide: `docs/demo-video.md`.
+* `clouded_optical` **abstains** on every configuration since the
+  `cloud_cover` ingest check (2026-09-12), re-verified on the CPU/stub
+  configuration on 2026-09-17. The 4:50 abstention beat works again.
 
-**One change to the script there:** `clouded_optical` **answers instead of
-abstaining** on this config, so the 4:50 abstention beat does not demonstrate
-abstention. Close the live portion on `incompatible_pair` instead - it abstains
-in both configurations. See `docs/00` **L36** and the note on deck Slide 5.
+The Docker CPU override (`docker-compose.cpu.yml`, lite profile) still exists
+and still sheds every learned tool; use it only to rehearse layout.
 
 ### Sanity check, if there is time
 

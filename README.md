@@ -32,8 +32,13 @@ satquery matrix --validate              # capability matrix is well-formed
 python -m pytest tests/ -q              # ~1,370 tests; no GPU or checkpoints needed
 python evaluation/adversarial.py        # illegal-plan gate, must be 0 / 600
 python evaluation/routing_eval.py       # raw vs system routing accuracy
-docker-compose up api web               # UI + API (make dev)
+docker-compose up api web               # UI + API with a GPU (make dev)
 ```
+
+**No GPU?** Install `pip install -e ".[cpu,report]"`, put the checkpoints in
+place (`python scripts/demo_assets.py` lists them), then
+`python scripts/run_demo_cpu.py`. Every learned model runs on the CPU, slower.
+Recording guide: [`docs/demo-video.md`](docs/demo-video.md).
 
 Learned tools fall back to clearly-labelled stubs when their checkpoints are absent,
 so everything above runs on a laptop CPU; the numbers in the table need the checkpoints.
