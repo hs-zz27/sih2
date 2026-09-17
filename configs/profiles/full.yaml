@@ -1,0 +1,17 @@
+# Full runtime profile (plan task 3.10).
+#
+# Read by satquery/controller/profiles.py. Values here override the builtin
+# defaults; a missing or malformed file falls back to the builtin, so a
+# corrupted config on a demo laptop still boots in a known state.
+description: >
+  Everything loads. Assumes a CUDA GPU with at least 6 GB of VRAM.
+
+# null means no budget: the router never sheds a step for resource reasons.
+vram_budget_mb: null
+device: auto
+
+# The entailment gate's NLI backend is a 370 MB model (task 3.5). It is still
+# opt-in via SATQUERY_NLI even here; this only permits it.
+enable_nli: true
+verifier_enabled: true
+max_tile_px: 512

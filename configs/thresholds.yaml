@@ -1,0 +1,83 @@
+# Abstention thresholds (plan task 3.6).
+#
+# Read by satquery/controller/abstention.py. Absent or malformed keys fall
+# back to the defaults in AbstentionPolicy, so this file can be edited or
+# deleted without taking the system down.
+#
+# These are DELIBERATELY PERMISSIVE. A policy tuned to look good on a demo
+# set converts silent errors into silent refusals, and a system that abstains
+# on everything has a perfect risk-coverage curve and zero utility. Set them
+# from a real labelled run - `python evaluation/selective.py` reports the
+# coverage that holds risk under a target - not by eye.
+abstention:
+  # Below this combined confidence the system declines and names the
+  # limiting component rather than answering.
+  min_final_confidence: 0.25
+
+  # Input quality can abstain on its own even when the geometric mean
+  # survives: a bad input makes every downstream number suspect regardless
+  # of how confident the model was about it.
+  min_input_quality: 0.50
+
+  # If the entailment gate removed every sentence, decline rather than show
+  # a corrected-to-nothing answer.
+  abstain_when_all_sentences_flagged: true
+
+# Three-component confidence weights (plan task 3.4).
+#
+# These are EQUAL and that is deliberate, not an oversight. Fitting them needs
+# a labelled set of (components -> was the answer actually correct) pairs, and
+# none exists.
+#
+# Corrected 2026-08-30: this said "every learned tool is still a stub", which
+# stopped being true in Phase 2. The learned tools are real; what none of them
+# reports is a probability of CORRECTNESS, which is the quantity a weight
+# would have to be fitted against. `sharpness` measures decisiveness,
+# `logprob` measures fluency, `mean_asserted_probability` is an aggregate over
+# a threshold-selected subset, and `segmentation_derived` is a stated
+# constant. A weight fitted against any of those would be fitted to nothing.
+# The same gap is recorded under tasks 3.3 and 3.6.
+#
+# The mechanism is here so that fitting them later is a config change rather
+# than a code change. Set them from a real labelled run, not by intuition.
+confidence:
+  weights:
+    model: 1.0
+    agreement: 1.0
+    input_quality: 1.0
+
+# Land-cover selective-prediction thresholds (plan tasks 2.1, 3.6).
+#
+# NOT 0.5. Task 3.6 measured that at threshold 0.5 the Track A head errs 20.64%
+# per (patch, class) decision against 18.34% for always predicting negative -
+# it is worse than trivial. mAP 0.285 measures RANKING, and ranking is what
+# selective prediction consumes: assert the confident fraction, abstain on the
+# rest.
+#
+# THE FIRST VERSION OF THIS SECTION USED THE WRONG CURVE. It took 0.8440 from
+# the symmetric per-decision risk-coverage curve, where "coverage" counts every
+# decision including the confident NEGATIVES - and negatives are 82% of the
+# data. A tool that asserts classes needs the positive-side curve, which is a
+# completely different shape. Measured on the same 111,473 decisions:
+#
+#   threshold   assertions   precision   recall
+#     0.500          675       0.5452     0.0180
+#     0.600          186       0.7043     0.0064
+#     0.700           56       0.9107     0.0025
+#     0.844           13       1.0000     0.0006
+#
+# 0.70 is the default: when this head asserts a class it is right ~91% of the
+# time, which is worth showing. The cost is stated rather than buried - recall
+# is 0.25%, so it asserts almost nothing. That is the honest shape of a head
+# with mAP 0.285, and the narrative synthesiser still answers every query from
+# measured indices regardless, so the user is never left with nothing.
+landcover:
+  decision_confidence: 0.70
+  measured_precision: 0.9107
+  measured_recall: 0.0025
+  provenance: >
+    Positive-side precision/recall over 111,473 (patch, class) decisions on the
+    official BigEarthNet test shard, after the task 3.3 affine calibration.
+    Derived from artifacts/calibration/logits/landcover.npz; the symmetric
+    risk-coverage curve in docs/assets/abstention/selective.json answers a
+    DIFFERENT question and must not be used for an assertion threshold.

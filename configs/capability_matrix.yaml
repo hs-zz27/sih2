@@ -1,0 +1,134 @@
+version: cm-2026.11.02
+
+SINGLE_VQA:
+  description: "Question answering on one image"
+  requires:
+    config: [SINGLE, CROSSMODAL_PAIR, BITEMPORAL_PAIR]
+  tools: [rs_vqa_v1]
+  optional_tools: [grounding_v1]
+  forbidden_tools: [optsar_fusion_v1, change_mask_v1, change_caption_v1, change_vqa_v1]
+  permitted_params:
+    answer_mode: {enum: [classify, generate, template], default: template}
+  fallbacks: {}
+  degraded_if: []
+
+SINGLE_CAPTION:
+  description: "Scene / land-cover description"
+  requires:
+    config: [SINGLE, CROSSMODAL_PAIR, BITEMPORAL_PAIR]
+  tools: [index_engine_v1, landcover_v1, caption_v1]
+  optional_tools: []
+  forbidden_tools: [optsar_fusion_v1, change_mask_v1, change_caption_v1, change_vqa_v1]
+  permitted_params:
+    target_gsd_m: {type: number, min: 0.3, max: 30.0}
+  fallbacks:
+    landcover_v1: index_engine_v1
+  degraded_if: []
+
+SINGLE_GROUND:
+  description: "Text-referred localisation -> bbox (optional mask)"
+  requires:
+    config: [SINGLE, CROSSMODAL_PAIR, BITEMPORAL_PAIR]
+  tools: [grounding_v1]
+  optional_tools: []
+  forbidden_tools: [optsar_fusion_v1, change_mask_v1, change_caption_v1, change_vqa_v1]
+  permitted_params:
+    confidence_threshold: {type: number, min: 0.1, max: 0.99, default: 0.5}
+  fallbacks: {}
+  degraded_if: []
+
+SINGLE_LANDCOVER:
+  description: "Multi-label classification + segmentation"
+  requires:
+    config: [SINGLE, CROSSMODAL_PAIR, BITEMPORAL_PAIR]
+  tools: [index_engine_v1, landcover_v1]
+  optional_tools: []
+  forbidden_tools: [optsar_fusion_v1, change_mask_v1, change_caption_v1, change_vqa_v1]
+  permitted_params:
+    classes: {enum_subset: [built_up, water, vegetation, bare_soil], default: [built_up, water]}
+  fallbacks:
+    landcover_v1: index_engine_v1
+  degraded_if: []
+
+XMODAL_JOINT_EXTRACT:
+  description: "Extract complementary information from a co-registered optical/MSI + SAR pair"
+  requires:
+    config: CROSSMODAL_PAIR
+    min_overlap_pct: 70
+    max_coreg_shift_px: 2.0
+    min_bands_optical: 3
+  tools: [index_engine_v1, optsar_fusion_v1, rs_vqa_v1]
+  optional_tools: [grounding_v1]
+  forbidden_tools: [change_mask_v1, change_caption_v1, change_vqa_v1]
+  permitted_params:
+    fusion_mode: {enum: [concat, cross_attn], default: cross_attn}
+    target_gsd_m: {type: number, min: 0.3, max: 30.0}
+    classes: {enum_subset: [built_up, water, vegetation, bare_soil], default: [built_up, water]}
+    mode: {enum: [fused_only, triad], default: triad}
+    sar_threshold_method: {enum: [otsu, gmm, fixed_db], default: otsu}
+  fallbacks:
+    optsar_fusion_v1: index_engine_v1
+  degraded_if:
+    - {check: swir_available, equals: false, effect: "built_up uses sar_primary_texture_secondary path", confidence_penalty: 0.10}
+    - {check: cloud_pct, gt: 40, effect: "modality weight shifts to SAR", confidence_penalty: 0.15}
+
+TEMPORAL_CHANGE_DESC:
+  description: "Natural-language change description"
+  requires:
+    config: BITEMPORAL_PAIR
+    min_overlap_pct: 80
+    max_coreg_shift_px: 2.0
+    require_dates: true
+  tools: [index_engine_v1, change_mask_v1, change_caption_v1]
+  optional_tools: []
+  forbidden_tools: [optsar_fusion_v1]
+  permitted_params:
+    change_threshold: {type: number, min: 0.1, max: 0.9, default: 0.5}
+  fallbacks:
+    change_mask_v1: index_engine_v1
+  degraded_if:
+    - {check: modality_match, equals: false, effect: "cross-sensor change; radiometric comparison unreliable", confidence_penalty: 0.20}
+
+TEMPORAL_CHANGE_VQA:
+  description: "Answer a question about change between two co-registered dates"
+  requires:
+    config: BITEMPORAL_PAIR
+    min_overlap_pct: 80
+    max_coreg_shift_px: 2.0
+    require_dates: true
+  tools: [index_engine_v1, change_mask_v1, change_vqa_v1]
+  optional_tools: [change_caption_v1]
+  forbidden_tools: [optsar_fusion_v1]
+  permitted_params:
+    change_threshold: {type: number, min: 0.1, max: 0.9, default: 0.5}
+    min_object_area_px: {type: integer, min: 0, max: 10000, default: 50}
+    answer_mode: {enum: [classify, generate, template], default: template}
+    significance_pct: {type: number, min: 0.5, max: 20.0, default: 2.0}
+  fallbacks:
+    change_mask_v1: index_engine_v1
+  degraded_if:
+    - {check: modality_match, equals: false, effect: "cross-sensor change; radiometric comparison unreliable", confidence_penalty: 0.20}
+
+TEMPORAL_CHANGE_MAP:
+  description: "Binary / semantic change mask"
+  requires:
+    config: BITEMPORAL_PAIR
+  tools: [index_engine_v1, change_mask_v1]
+  optional_tools: []
+  forbidden_tools: [optsar_fusion_v1]
+  permitted_params:
+    change_threshold: {type: number, min: 0.1, max: 0.9, default: 0.5}
+  fallbacks:
+    change_mask_v1: index_engine_v1
+  degraded_if: []
+
+CLARIFY_OR_ABSTAIN:
+  description: "Insufficient / incompatible input, or ambiguous query"
+  requires:
+    config: any
+  tools: []
+  optional_tools: []
+  forbidden_tools: []
+  permitted_params: {}
+  fallbacks: {}
+  degraded_if: []

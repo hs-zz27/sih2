@@ -1,0 +1,35 @@
+# Lite runtime profile (plan task 3.10).
+#
+# "Every task answers in lite, degraded but never failing." Degradation is a
+# budget, not a switch: the router sums each plan's estimated peak VRAM and
+# drops steps above the budget, so lite keeps the deterministic index engine
+# (0 MB, pure numpy) and sheds the learned tools. The answer then comes from
+# satquery/synth/narrative.py, built from measured indices - quantitatively
+# grounded, but not open-ended language.
+#
+# A profile governs RESOURCES, never LEGALITY. The capability matrix decides
+# what is legal; letting a profile widen that would put a second, quieter
+# authority in front of the guarantee task 3.8 measures.
+description: >
+  CPU-only. Learned tools are shed by the VRAM budget; the deterministic
+  index engine and the narrative synthesiser still produce an answer.
+
+# 0 keeps only tools declaring no VRAM cost - today index_engine_v1 alone.
+# A deliberate floor, not a small positive number: 900 MB would admit the
+# land-cover head onto a CPU where it runs but takes minutes, and a demo that
+# appears to hang is worse than one that says it degraded.
+vram_budget_mb: 0
+device: cpu
+
+# No 370 MB NLI download on a lite machine; the gate's deterministic backend
+# needs neither GPU nor network.
+enable_nli: false
+
+# The verifier stays ON. It is cheap, it is the honesty mechanism, and a lite
+# answer that skipped verification would be the one most in need of it.
+verifier_enabled: true
+max_tile_px: 256
+
+notes:
+  - Answers come from measured indices, so they are grounded but terse.
+  - The entailment gate still runs, on its deterministic backend.
