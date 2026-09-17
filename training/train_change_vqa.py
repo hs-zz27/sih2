@@ -85,7 +85,9 @@ def build_pretrained_model(dim: int = 64):
     class PretrainedSemanticChangeNet(nn.Module):
         def __init__(self) -> None:
             super().__init__()
-            backbone = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+            from training.common.pretrained import imagenet_weights
+
+            backbone = resnet18(weights=imagenet_weights(ResNet18_Weights.IMAGENET1K_V1))
             self.stem = nn.Sequential(
                 backbone.conv1, backbone.bn1, backbone.relu, backbone.maxpool,
                 backbone.layer1,

@@ -299,7 +299,11 @@ class _SemanticHandle:
         # checkpoint rebuilds exactly as it always did.
         pretrained = payload.get("pretrained", extra.get("pretrained"))
         if pretrained:
-            model = build_pretrained_model(dim)
+            # Checkpoint weights replace ImageNet's; skip that download.
+            from training.common.pretrained import weights_from_checkpoint
+
+            with weights_from_checkpoint():
+                model = build_pretrained_model(dim)
         else:
             model = build_model(dim, arch=extra.get("arch", "v1"))
         model.load_state_dict(state)

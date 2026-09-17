@@ -197,7 +197,9 @@ def build_pretrained_backbone(cin: int = 3, weights: str = "IMAGENET1K_V2"):
     import torch.nn as nn
     import torchvision
 
-    net = torchvision.models.resnet50(weights=weights)
+    from training.common.pretrained import imagenet_weights
+
+    net = torchvision.models.resnet50(weights=imagenet_weights(weights))
 
     if cin != 3:
         # Keep the pretrained filters and adapt the channel count by averaging

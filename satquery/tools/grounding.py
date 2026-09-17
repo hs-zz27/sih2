@@ -154,8 +154,13 @@ class _Handle:
             pretrained = any(k.startswith("proj.") for k in state)
         self.arch = extra.get("arch", "v1")
         self.pretrained = bool(pretrained)
-        model = build_model(vocab_size=len(self.vocab), dim=dim,
-                            arch=self.arch, pretrained=pretrained)
+        # The checkpoint overwrites every weight, so do not download
+        # ImageNet ones first - see training/common/pretrained.py.
+        from training.common.pretrained import weights_from_checkpoint
+
+        with weights_from_checkpoint():
+            model = build_model(vocab_size=len(self.vocab), dim=dim,
+                                arch=self.arch, pretrained=pretrained)
         load_checkpoint(latest, model, map_location="cpu")
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
