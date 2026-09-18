@@ -52,8 +52,18 @@ def test_no_torch_or_dependency_install_in_the_wrapper_command():
     reinstall torch/torchvision, which would replace the image's CUDA build."""
     cmd = launch.build_command("vqa", smoke=False, fp32_compute=False, push_to="x/y")
     before_driver = cmd.split("retrain.py")[0]
-    assert "pip install" not in before_driver
     assert "torch" not in before_driver
+    # huggingface_hub is the one exception, and is required: see the test below.
+    installs = [ln for ln in before_driver.splitlines() if "pip install" in ln]
+    assert all("huggingface_hub" in ln for ln in installs), installs
+
+
+def test_huggingface_hub_is_installed_before_the_preflight_needs_it():
+    """The first smoke pass died exactly here: the preflight ran before any
+    install, and `from huggingface_hub import HfApi` is not satisfiable in the
+    base image. Both the preflight and the final push import it."""
+    cmd = launch.build_command("vqa", smoke=False, fp32_compute=False, push_to="x/y")
+    assert cmd.index("pip install") < cmd.index("preflight.py")
 
 
 @pytest.mark.parametrize("model", MODELS)

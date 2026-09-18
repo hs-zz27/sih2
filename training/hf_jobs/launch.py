@@ -151,6 +151,14 @@ def build_command(model: str, smoke: bool, fp32_compute: bool, push_to: str) -> 
         "apt-get update -qq && apt-get install -y -qq git > /dev/null || exit 1\n"
         f"git clone --depth 1 {REPO_URL} /workspace/sih2 || exit 1\n"
         "cd /workspace/sih2\n"
+        # The base image does not carry huggingface_hub, and retrain.py
+        # installs it only as its OWN first step - too late for the
+        # preflight below, and too late for the final push if retrain.py
+        # dies before reaching that step, which would lose the logs saying
+        # why. It pulls no torch, so the image's CUDA build is untouched.
+        "pip install -q \"huggingface_hub>=0.26\" || { echo '!! could not"
+        " install huggingface_hub - the job would have no way to hand back"
+        " its result, so stopping before any GPU time is billed'; exit 1; }\n"
         "cat > /tmp/preflight.py <<'PYEOF'\n"
         "import json, os, time\n"
         "from huggingface_hub import HfApi\n"
