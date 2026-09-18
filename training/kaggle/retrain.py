@@ -7,6 +7,11 @@ rebuilds the three models the demo video needs, one Kaggle session each:
     change_mask  change_mask_v1      ericyu/LEVIRCD_Cropped256 (7,120/1,024/2,048)
     caption      caption_v1          arampacha/rsicd (test n=1,093)
 
+and one evaluation, which is how a retrained adapter earns a quotable number:
+
+    eval_vqa     rs_vqa_v1 adapter   official RSVQA-LR test split (Zenodo
+                                     6344334): 10,004 questions, 100 images
+
 Every dataset id was checked against the HuggingFace API, and RSVQA-LR-2k was
 run through the prepare scripts end to end. The recipes are the Phase 5 ones
 from configs/campaign.yaml, adjusted for a T4 and a 12-hour session; each
@@ -87,6 +92,8 @@ class Plan:
     eval_cmd: list[str] | None  # re-evaluate a checkpoint if training was cut short
     deviations: list[str] = field(default_factory=list)
     smoke: bool = False
+    # Evaluation runs produce a JSON result instead of weights.
+    result_file: Path | None = None
 
 
 def py(*args: str) -> list[str]:
@@ -101,7 +108,37 @@ def download(repo: str, dest: Path, repo_type: str = "dataset") -> list[str]:
     return py("-c", code)
 
 
-def build_plan(model: str, work: Path, smoke: bool = False, fp32_compute: bool = False) -> Plan:
+ZENODO_RSVQA_LR = "https://zenodo.org/records/6344334/files"
+RSVQA_LR_FILES = [
+    "LR_split_test_questions.json", "LR_split_test_answers.json",
+    "LR_split_train_questions.json", "LR_split_train_answers.json",
+    "Images_LR.zip",
+]
+
+
+def fetch_and_unzip(base_url: str, names: list[str], dest: Path) -> list[str]:
+    """Download named files, unzipping any .zip, skipping what is already there."""
+    code = f"""
+import urllib.request, zipfile, pathlib
+dest = pathlib.Path({str(dest)!r}); dest.mkdir(parents=True, exist_ok=True)
+for name in {names!r}:
+    target = dest / name
+    if not target.exists():
+        print('downloading', name, flush=True)
+        urllib.request.urlretrieve(f'{base_url}/' + name + '?download=1', target)
+    if name.endswith('.zip'):
+        marker = dest / name[:-4]
+        if not marker.exists():
+            print('unzipping', name, flush=True)
+            with zipfile.ZipFile(target) as zf:
+                zf.extractall(dest)
+print('ready:', sorted(p.name for p in dest.iterdir())[:8], flush=True)
+"""
+    return py("-c", code)
+
+
+def build_plan(model: str, work: Path, smoke: bool = False, fp32_compute: bool = False,
+               adapter: Path | None = None) -> Plan:
     data = work / "data"
     # Smoke checkpoints live apart, so the real run's --resume cannot pick
     # up a 10-step smoke checkpoint and call it progress.
@@ -134,8 +171,9 @@ def build_plan(model: str, work: Path, smoke: bool = False, fp32_compute: bool =
             "ignores --batch-size in its loop, so this matches Phase 5's actual 8.",
             "fp32 4-bit compute (SATQUERY_BNB_COMPUTE_DTYPE=float32) - fallback after an "
             "fp16 NaN." if fp32_compute else "fp16 4-bit compute on a T4 (no bf16).",
-            "Official RSVQA-LR accuracy is NOT measured here; do not quote 0.8947 for "
-            "this adapter until it is re-measured.",
+            "Official RSVQA-LR accuracy is not measured by this run: score the adapter "
+            "with --model eval_vqa (the notebook's stage 3). Until then the adapter has "
+            "no quotable accuracy - 0.8947 belongs to the lost Phase 5 weights.",
         ]
         return Plan(
             model="vqa",
@@ -217,7 +255,46 @@ def build_plan(model: str, work: Path, smoke: bool = False, fp32_compute: bool =
             smoke=smoke,
         )
 
-    raise ValueError(f"unknown model {model!r}; choose vqa, change_mask or caption")
+    if model == "eval_vqa":
+        official = data / "rsvqa_lr_official"
+        base = work / "models" / "qwen25_vl_3b"
+        adapter_path = adapter or Path(
+            "/kaggle/working/retrained/checkpoints/v2/track_b_vqa/adapter_final")
+        result = work / "results" / "rsvqa_lr_official_test.json"
+        limit = ["--limit", "40"] if smoke else []
+        return Plan(
+            model="eval_vqa",
+            datasets={"rsvqa_lr_official": "Zenodo 10.5281/zenodo.6344334 (CC-BY-4.0)"},
+            deploy_path="",
+            steps=[
+                Step("download official RSVQA-LR",
+                     fetch_and_unzip(ZENODO_RSVQA_LR, RSVQA_LR_FILES, official)),
+                Step("resolve the official test split",
+                     py("training/prepare/rsvqa_official.py", "--src", str(official),
+                        "--out", str(official))),
+                Step("download base model",
+                     download("Qwen/Qwen2.5-VL-3B-Instruct", base, repo_type="model")),
+                Step("score the adapter on the official split",
+                     py("evaluation/rsvqa_official_eval.py", "--base", str(base),
+                        "--data", str(official), "--arms", f"retrained={adapter_path}",
+                        "--out", str(result), *limit),
+                     budgeted=True),
+            ],
+            ckpt_dir=result.parent,
+            package_from=[],
+            eval_cmd=None,
+            result_file=result,
+            deviations=[
+                "Scores whichever adapter --adapter names; by default the one this "
+                "session's vqa run packaged.",
+                "Published convention excludes count questions, as the literature does; "
+                "the report carries both conventions.",
+            ] + (["SMOKE: --limit 40 questions, not the 10,004-question split."] if smoke else []),
+            smoke=smoke,
+        )
+
+    raise ValueError(
+        f"unknown model {model!r}; choose vqa, change_mask, caption or eval_vqa")
 
 
 def run_step(step: Step, log, deadline: float | None) -> tuple[int, bool]:
@@ -286,6 +363,19 @@ def check_trained(plan: Plan) -> tuple[bool, str]:
     compares False against everything after it, so a NaN adapter can be saved
     as "adapter_best" and early-stop the run - which then looks complete.
     """
+    if plan.result_file is not None:
+        if not plan.result_file.exists():
+            return False, "the evaluator wrote no result file"
+        report = json.loads(plan.result_file.read_text(encoding="utf-8"))
+        arms = report.get("arms") or {}
+        if not arms:
+            return False, "the result file has no scored arm"
+        if not _all_finite(arms):
+            return False, "the result file holds a non-finite score"
+        first = next(iter(arms.values()))
+        accuracy = (first.get("published_convention") or {}).get("micro_accuracy")
+        return True, f"scored: published-convention accuracy {accuracy}"
+
     if plan.model == "vqa":
         history_path = plan.ckpt_dir / "val_history.json"
         if not history_path.exists():
@@ -315,7 +405,13 @@ def check_trained(plan: Plan) -> tuple[bool, str]:
 
 
 def package(plan: Plan, out: Path) -> str | None:
-    """Copy the deployable weights to <out>/checkpoints/<deploy_path>."""
+    """Copy the deployable weights - or an evaluation's result - into <out>."""
+    if plan.result_file is not None:
+        target = out / "results" / plan.result_file.name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(plan.result_file, target)
+        return plan.result_file.name
+
     target = out / "checkpoints" / plan.deploy_path
     for candidate in plan.package_from:
         source = plan.ckpt_dir / candidate if candidate != "." else plan.ckpt_dir
@@ -339,7 +435,10 @@ def envcheck_report(output: str) -> dict | None:
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    p.add_argument("--model", required=True, choices=["vqa", "change_mask", "caption"])
+    p.add_argument("--model", required=True,
+                   choices=["vqa", "change_mask", "caption", "eval_vqa"])
+    p.add_argument("--adapter", type=Path,
+                   help="eval_vqa: adapter to score (default: this session's vqa output)")
     p.add_argument("--work", type=Path, default=Path("/kaggle/tmp/satquery"))
     p.add_argument("--out", type=Path, help="default /kaggle/working/retrained[_smoke]")
     p.add_argument("--smoke", action="store_true",
@@ -355,7 +454,8 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true", help="print the plan and exit")
     args = p.parse_args()
 
-    plan = build_plan(args.model, args.work, smoke=args.smoke, fp32_compute=args.fp32_compute)
+    plan = build_plan(args.model, args.work, smoke=args.smoke,
+                      fp32_compute=args.fp32_compute, adapter=args.adapter)
     out = args.out or Path("/kaggle/working/retrained_smoke" if args.smoke
                            else "/kaggle/working/retrained")
     budget = args.budget_hours or (SMOKE_BUDGET_HOURS if args.smoke else DEFAULT_BUDGET_HOURS)
@@ -440,8 +540,10 @@ def main() -> int:
         return 1
     status = "stopped by budget - packaged last good weights" if stopped_by_budget else "complete"
     save(f"smoke {status}" if plan.smoke else status)
-    print(f"\nDONE: {plan.model}{' (smoke)' if plan.smoke else ''} -> "
-          f"{out / 'checkpoints' / plan.deploy_path}\nmanifest: {manifest_path}")
+    landed = (out / "results" / plan.result_file.name) if plan.result_file is not None \
+        else (out / "checkpoints" / plan.deploy_path)
+    print(f"\nDONE: {plan.model}{' (smoke)' if plan.smoke else ''} -> {landed}"
+          f"\nmanifest: {manifest_path}")
     return 0
 
 

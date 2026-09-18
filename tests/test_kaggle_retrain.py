@@ -307,3 +307,47 @@ def test_notebook_runs_smoke_before_the_real_run(model):
     real = source.index("--session-start {SESSION_START}")
     assert smoke < real
     assert "github.com/hs-zz27/sih2" in source
+
+
+# --- the official evaluation -----------------------------------------------
+
+def test_eval_plan_scores_an_adapter_and_produces_a_result(tmp_path):
+    plan = retrain.build_plan("eval_vqa", tmp_path, adapter=tmp_path / "ad")
+    assert plan.result_file is not None and plan.result_file.name.endswith(".json")
+    names = [s.name for s in plan.steps]
+    assert "resolve the official test split" in names
+    scoring = train_step(plan)
+    assert f"retrained={tmp_path / 'ad'}" in scoring.cmd
+    assert "--limit" not in scoring.cmd        # full 10,004-question split
+
+
+def test_eval_smoke_limits_the_question_count(tmp_path):
+    cmd = train_step(retrain.build_plan("eval_vqa", tmp_path, smoke=True)).cmd
+    assert flag(cmd, "--limit") == "40"
+
+
+def test_eval_result_is_checked_and_packaged(tmp_path):
+    plan = retrain.build_plan("eval_vqa", tmp_path / "work")
+    plan.result_file.parent.mkdir(parents=True)
+    plan.result_file.write_text(json.dumps(
+        {"arms": {"retrained": {"published_convention": {"micro_accuracy": 0.87}}}}))
+    ok, reason = retrain.check_trained(plan)
+    assert ok and "0.87" in reason
+    out = tmp_path / "out"
+    assert retrain.package(plan, out) == plan.result_file.name
+    assert (out / "results" / plan.result_file.name).exists()
+
+
+def test_eval_without_a_scored_arm_is_refused(tmp_path):
+    plan = retrain.build_plan("eval_vqa", tmp_path / "work")
+    plan.result_file.parent.mkdir(parents=True)
+    plan.result_file.write_text(json.dumps({"arms": {}}))
+    assert retrain.check_trained(plan)[0] is False
+
+
+def test_eval_with_a_non_finite_score_is_refused(tmp_path):
+    plan = retrain.build_plan("eval_vqa", tmp_path / "work")
+    plan.result_file.parent.mkdir(parents=True)
+    plan.result_file.write_text('{"arms": {"retrained": {"published_convention": '
+                                '{"micro_accuracy": NaN}}}}')
+    assert retrain.check_trained(plan)[0] is False

@@ -19,6 +19,20 @@ Phase 5 (see `deviations` below).
 | `rs_vqa_v1` (VQA) | `checkpoints/v2/track_b_vqa/adapter_final` | `dmarsili/RSVQA-LR-2k` | 2,000 |
 | `change_mask_v1` | `checkpoints/v2/change_mask` | `ericyu/LEVIRCD_Cropped256` | 7,120 / 1,024 / 2,048 (matches the official split recorded in `docs/storage-audit.md`) |
 | `caption_v1` | `checkpoints/v2/caption_pre` | `arampacha/rsicd` | 8,734 / 1,094 / 1,093 |
+| *(evaluation)* `eval_vqa` | `retrained/results/rsvqa_lr_official_test.json` | official RSVQA-LR (Zenodo 6344334) | 10,004 questions / 100 images |
+
+Plus one evaluation, `eval_vqa`, which scores the retrained adapter on the
+**official RSVQA-LR test split** (Zenodo 10.5281/zenodo.6344334, CC-BY-4.0:
+10,004 questions over 100 images). It runs as stage 3 of the VQA notebook.
+Without it the retrained adapter has no accuracy anyone may quote - 0.8947
+belongs to the lost weights.
+
+`evaluation/rsvqa_official_eval.py` needs `test_resolved.json` and
+`train_majority.json`, and the script that built them was never committed, so
+the headline number could not be reproduced from the repository at all.
+`training/prepare/rsvqa_official.py` now builds both from the published
+release; run against the real files on 2026-09-18 it resolved **10,004
+questions over 100 images**, matching the published split exactly.
 
 These are the demo's headline beats: single-image VQA, change detection, and
 the cheap-to-retrain caption fallback. Grounding, fusion and the semantic
@@ -142,7 +156,9 @@ record until pre-flight says **GO** with **MODELS n/8 LIVE**.
 | VQA | fp16 4-bit compute, 8 examples per step (`--batch-size 1 --grad-accum 8`) | A T4 has no bf16; the trainer's loop ignores `--batch-size`, so 8 is what Phase 5 actually used |
 | Change mask | 30 epochs, not 60 | Fits one T4 session; re-run with more epochs if quota allows |
 | Caption | pretrained ResNet-50 downloaded at train start | Matches the deployed `caption_pre` recipe; needs internet on, which the notebook already requires |
-| All three | No official benchmark re-measurement | RSVQA-LR official split, LEVIR-CD F1, RSICD BLEU-4 all need the dedicated evaluators (`evaluation/rsvqa_official_eval.py`, etc.), which are a separate, deliberate next step — do not quote Phase 5 numbers for these weights until that is run |
+| VQA | Official accuracy comes from stage 3 (`eval_vqa`), not the training run | Scoring 10,004 questions takes about an hour of its own |
+| change_mask, caption | Their trainers' own test metrics only (LEVIR-CD F1, RSICD BLEU-4), written to `metrics.json` | Those trainers evaluate at the end of training, so no separate step is needed |
+| All | Phase 5 numbers do not transfer | Different data, epochs and GPU — quote only what the manifests and the stage-3 result report |
 
 ## Files
 
