@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from dataclasses import dataclass
@@ -352,6 +353,14 @@ def build_parser() -> argparse.ArgumentParser:
              "(0 = never stop early). The v2 run overfit for 2,000 steps "
              "past its optimum; --patience 3 would have stopped it.",
     )
+    p.add_argument(
+        "--nan-patience", type=int, default=3,
+        help="abort after this many consecutive optimiser steps with a "
+             "non-finite loss (0 = never abort). fp16 4-bit compute on a T4 "
+             "overflows occasionally, so one spike is skipped rather than "
+             "fatal; a run that keeps diverging is billing GPU hours to "
+             "produce an adapter that packaging will refuse anyway.",
+    )
     p.add_argument("--resume", action="store_true")
     p.add_argument("--lora-r", type=int, default=16)
     p.add_argument("--lora-alpha", type=int, default=32)
@@ -506,6 +515,10 @@ def main() -> int:
 
     val_history: list[dict] = []
     stop_early = False
+    # Consecutive optimiser steps whose loss was not finite, and the reason
+    # string that ends the run once there have been too many in a row.
+    nonfinite_streak = 0
+    nan_abort = ""
 
     model.train()
     step = state.step
@@ -525,6 +538,33 @@ def main() -> int:
             loss = model(**batch).loss / args.grad_accum
             loss.backward()
             total_loss += loss.item()
+
+        # A non-finite loss must never reach the optimiser. Once NaN weights
+        # are written every later step is NaN too, and the run keeps billing
+        # GPU hours to produce an adapter that check_trained() will refuse to
+        # package - the most expensive way this job can fail. A single spike
+        # is survivable, because fp16 4-bit compute on a T4 overflows now and
+        # then, so the step is skipped and the schedule still advances. A
+        # streak means the recipe is wrong (the fix is --fp32-compute) and
+        # the run stops while the credits are still unspent.
+        if not math.isfinite(total_loss):
+            nonfinite_streak += 1
+            optimizer.zero_grad(set_to_none=True)
+            print(
+                f"!! non-finite train loss at step {step + 1} "
+                f"({nonfinite_streak}/{args.nan_patience}) - optimiser step skipped",
+                flush=True,
+            )
+            if args.nan_patience and nonfinite_streak >= args.nan_patience:
+                nan_abort = (
+                    f"{nonfinite_streak} consecutive non-finite training losses "
+                    f"by step {step + 1}; re-run with --fp32-compute"
+                )
+                break
+            scheduler.step()
+            step += 1
+            continue
+        nonfinite_streak = 0
 
         torch.nn.utils.clip_grad_norm_(
             [p for p in model.parameters() if p.requires_grad], 1.0
@@ -550,6 +590,26 @@ def main() -> int:
                  "val_loss": round(val_loss, 6), "lr": lr_now,
                  "n_val": len(val_examples)}
             )
+            if not math.isfinite(val_loss):
+                # NaN compares False against everything, so min() can hand
+                # back the NaN row as "best" and save a poisoned
+                # adapter_best that then early-stops the run and looks
+                # complete. The validation set is identical every time, so a
+                # non-finite value on it is a broken model rather than a
+                # transient spike: stop now.
+                args.ckpt_dir.mkdir(parents=True, exist_ok=True)
+                (args.ckpt_dir / "val_history.json").write_text(
+                    json.dumps({"history": val_history}, indent=2),
+                    encoding="utf-8",
+                )
+                print(
+                    f"\n!! non-finite validation loss at step {step}. Stopping "
+                    "rather than billing the rest of the budget; re-run with "
+                    "--fp32-compute.",
+                    flush=True,
+                )
+                return 2
+
             best = min(val_history, key=lambda r: r["val_loss"])
             marker = "  <-- best so far" if best["step"] == step else (
                 f"  (best {best['val_loss']:.4f} @ step {best['step']})"
@@ -610,6 +670,15 @@ def main() -> int:
 
         if stop_early:
             break
+
+    if nan_abort:
+        # adapter_final is deliberately NOT written here: the weights in
+        # memory are the diverged ones, and writing them would hand
+        # packaging something that looks deployable. An adapter_best from an
+        # earlier finite validation is already on disk and is what a rescue
+        # would use.
+        print(f"\n!! Training aborted: {nan_abort}", flush=True)
+        return 2
 
     final = args.ckpt_dir / "adapter_final"
     model.save_pretrained(str(final))

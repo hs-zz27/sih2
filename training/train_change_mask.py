@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 import time
 from pathlib import Path
@@ -164,6 +165,13 @@ def main() -> int:
     )
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--save-every", type=int, default=100)
+    p.add_argument(
+        "--nan-patience", type=int, default=3,
+        help="abort after this many consecutive batches with a non-finite "
+             "loss (0 = never abort). A diverged run otherwise trains to "
+             "the end of its budget and only fails the finite-metrics "
+             "check at packaging time, having spent the whole GPU budget.",
+    )
     p.add_argument("--resume", action="store_true")
     add_eval_only_args(p)
     args = p.parse_args()
@@ -213,6 +221,7 @@ def main() -> int:
     rng = np.random.default_rng(args.seed)
     step = state.step
     started = time.time()
+    nonfinite_streak = 0
 
     for epoch in range(state.epoch, epochs_for(args)):
         model.train()
@@ -222,10 +231,34 @@ def main() -> int:
             bb = torch.from_numpy(b).to(device)
             mb = torch.from_numpy(m).to(device)
             loss = criterion(model(ab, bb), mb)
+            value = loss.item()
+            # Same reasoning as the VQA trainer: a diverged run that keeps
+            # going spends the entire budget and only then fails the
+            # finite-metrics check in retrain.py, packaging nothing.
+            # Catching it in the first minutes is the difference between a
+            # wasted afternoon of GPU credit and a cheap, legible failure.
+            if not math.isfinite(value):
+                nonfinite_streak += 1
+                optimizer.zero_grad(set_to_none=True)
+                print(
+                    f"!! non-finite loss at step {step + 1} "
+                    f"({nonfinite_streak}/{args.nan_patience}) - batch skipped",
+                    flush=True,
+                )
+                if args.nan_patience and nonfinite_streak >= args.nan_patience:
+                    print(
+                        f"\n!! Training aborted: {nonfinite_streak} consecutive "
+                        "non-finite losses. Lower --lr and re-run.",
+                        flush=True,
+                    )
+                    return 2
+                step += 1
+                continue
+            nonfinite_streak = 0
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             optimizer.step()
-            running += loss.item() * a.shape[0]
+            running += value * a.shape[0]
             seen += a.shape[0]
             step += 1
             if step % args.save_every == 0:

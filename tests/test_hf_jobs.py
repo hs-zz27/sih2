@@ -134,7 +134,7 @@ def test_submission_passes_the_token_as_a_secret(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["launch.py", "--model", "change_mask"])
     assert launch.main() == 0
     assert seen["secrets"] == {"HF_TOKEN": "hf_secret"}
-    assert seen["flavor"] == "t4-small" and seen["timeout"] == "9h"
+    assert seen["flavor"] == "t4-small" and seen["timeout"] == "8h"
     out = capsys.readouterr().out
     assert "hf_secret" not in out            # never printed
     assert "friend/satquery-retrain-change_mask" in out
@@ -169,10 +169,113 @@ def test_failed_scoring_cannot_block_the_push():
     assert cmd.index("official scoring failed") < cmd.index("upload_folder")
 
 
-def test_generated_script_is_valid_bash(tmp_path):
+@pytest.mark.parametrize("smoke", [False, True])
+@pytest.mark.parametrize("model", MODELS)
+def test_generated_script_is_valid_bash(model, smoke):
+    """Piped to bash on stdin rather than written to a path: a Windows tmp
+    path is not resolvable by the Git-Bash child, which used to fail this test
+    for a reason unrelated to the script."""
     import subprocess
-    for model in MODELS:
-        script = tmp_path / f"{model}.sh"
-        script.write_text(launch.build_command(model, True, True, "x/y"))
-        result = subprocess.run(["bash", "-n", str(script)], capture_output=True, text=True)
-        assert result.returncode == 0, (model, result.stderr)
+    script = launch.build_command(model, smoke, True, "x/y")
+    # Bytes, not text: in text mode on Windows, Python rewrites the line
+    # endings on the way to stdin and bash then rejects the stray carriage
+    # returns. The real script reaches the API as the str built here.
+    result = subprocess.run(["bash", "-n"], input=script.encode(), capture_output=True)
+    assert result.returncode == 0, (model, smoke, result.stderr.decode())
+
+
+# --- bounding what a failure can cost ---------------------------------------
+
+@pytest.mark.parametrize("smoke", [False, True])
+@pytest.mark.parametrize("model", MODELS)
+def test_the_driver_budget_always_fits_inside_the_job_timeout(model, smoke):
+    """The regression this exists for: change_mask ran with retrain.py's
+    default 10.5 h budget under a 9 h job timeout, so the budget could never
+    fire. The container was killed first and the push - the only way the
+    result leaves an ephemeral job - never ran."""
+    prof = launch.PROFILE[(model, smoke)]
+    cap = launch.hours(prof["timeout"])
+    assert cap is not None
+    assert prof["budget"] <= prof["deadline"], "training may not outlast the shared deadline"
+    assert prof["deadline"] < cap, "the deadline must fall inside the billable window"
+    assert prof["hard"] < cap, "the backstop must fire before HF kills the container"
+    assert cap - prof["deadline"] >= 0.5, "leave at least 30 min to push the result"
+
+
+@pytest.mark.parametrize("model", MODELS)
+def test_push_is_preflighted_before_any_gpu_time_is_spent(model):
+    """Repo-write used to be exercised for the first time at the very end, so
+    a token that could not write turned hours of paid training into nothing."""
+    cmd = launch.build_command(model, False, False, "x/y")
+    assert cmd.index("preflight.py") < cmd.index("retrain.py")
+    assert "job_started.json" in cmd
+    assert "aborting now, before any GPU time is billed" in cmd
+
+
+def test_training_and_scoring_share_one_deadline_from_job_start():
+    cmd = launch.build_command("vqa", False, False, "x/y")
+    prof = launch.PROFILE[("vqa", False)]
+    assert cmd.count("--session-start $START") == 2
+    assert f"--budget-hours {prof['budget']}" in cmd
+    assert f"--budget-hours {prof['deadline']}" in cmd
+
+
+def test_scoring_is_skipped_when_the_deadline_is_nearly_spent():
+    """An adapter pushed unscored beats a container killed mid-upload."""
+    cmd = launch.build_command("vqa", False, False, "x/y")
+    assert 'if [ "$LEFT" -gt 600 ]' in cmd
+    assert "no time left in the budget for official scoring" in cmd
+    assert cmd.index("LEFT=") < cmd.index("upload_folder")
+
+
+@pytest.mark.parametrize("model", MODELS)
+def test_every_driver_call_has_a_hard_time_limit(model):
+    """retrain.py budgets only the training step, so a stalled dataset or
+    base-model download is the one hang it cannot interrupt by itself."""
+    cmd = launch.build_command(model, False, False, "x/y")
+    hard = int(launch.PROFILE[(model, False)]["hard"] * 3600)
+    assert f"timeout --signal=TERM --kill-after=300 {hard}s" in cmd
+    assert f"{hard}s python training/kaggle/retrain.py --model {model}" in cmd
+
+
+@pytest.mark.parametrize("model", MODELS)
+def test_push_is_retried(model):
+    cmd = launch.build_command(model, False, False, "x/y")
+    assert "for attempt in 1 2 3; do" in cmd
+
+
+def test_hours_parses_the_timeout_strings_it_prices():
+    assert launch.hours("12h") == 12.0
+    assert launch.hours("90m") == 1.5
+    assert launch.hours("2d") is None      # unpriced unit -> no false confidence
+
+
+def _fake_hub(monkeypatch, submitted):
+    import huggingface_hub
+
+    class FakeApi:
+        def whoami(self):
+            return {"name": "me"}
+
+    monkeypatch.setattr(huggingface_hub, "HfApi", FakeApi)
+    monkeypatch.setattr(huggingface_hub, "get_token", lambda: "tok")
+    monkeypatch.setattr(huggingface_hub, "run_job",
+                        lambda **k: submitted.append(k) or type("J", (), {"url": "u", "id": "i"}))
+
+
+def test_credit_guard_refuses_a_job_it_cannot_afford(monkeypatch, capsys):
+    submitted = []
+    _fake_hub(monkeypatch, submitted)
+    monkeypatch.setattr(sys, "argv", ["launch.py", "--model", "vqa", "--credits", "3.00"])
+    assert launch.main() == 1
+    assert submitted == [], "nothing may be submitted once the guard trips"
+    assert "REFUSING TO SUBMIT" in capsys.readouterr().out
+
+
+def test_credit_guard_allows_a_job_that_fits(monkeypatch, capsys):
+    submitted = []
+    _fake_hub(monkeypatch, submitted)
+    monkeypatch.setattr(sys, "argv", ["launch.py", "--model", "vqa", "--credits", "11.62"])
+    assert launch.main() == 0
+    assert len(submitted) == 1
+    assert "$4.80" in capsys.readouterr().out
