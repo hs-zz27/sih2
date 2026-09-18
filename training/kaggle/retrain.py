@@ -67,6 +67,17 @@ PIP_PACKAGES = [
     "pyarrow>=18.0",
 ]
 
+# Scoring an adapter imports evaluation.track_b_eval for its SYSTEM_PROMPT,
+# which executes satquery/tools/__init__.py, which imports the index engine and
+# therefore rasterio and scikit-image. None of that is needed to TRAIN, so it
+# is installed only for the evaluation plan. Deliberately unpinned, and
+# deliberately not `-r requirements.txt`: that file pins numpy and pillow, and
+# replacing the ones a CUDA torch build was compiled against is how a working
+# GPU environment gets broken minutes before it is needed.
+EVAL_PIP_PACKAGES = [
+    "rasterio", "scikit-image", "scipy", "scikit-learn", "pydantic", "pyyaml",
+]
+
 # Kaggle stops a session at 12 h, counting from notebook start.
 DEFAULT_BUDGET_HOURS = 10.5
 SMOKE_BUDGET_HOURS = 1.0
@@ -92,6 +103,10 @@ class Plan:
     eval_cmd: list[str] | None  # re-evaluate a checkpoint if training was cut short
     deviations: list[str] = field(default_factory=list)
     smoke: bool = False
+    # Installed before this plan's steps even under --skip-install: that flag
+    # means "the training stack is already in this container", which says
+    # nothing about the evaluation stack.
+    pip_extra: list[str] = field(default_factory=list)
     # Evaluation runs produce a JSON result instead of weights.
     result_file: Path | None = None
 
@@ -284,6 +299,7 @@ def build_plan(model: str, work: Path, smoke: bool = False, fp32_compute: bool =
             package_from=[],
             eval_cmd=None,
             result_file=result,
+            pip_extra=EVAL_PIP_PACKAGES,
             deviations=[
                 "Scores whichever adapter --adapter names; by default the one this "
                 "session's vqa run packaged.",
@@ -523,6 +539,10 @@ def main() -> int:
         if not args.skip_install:
             pre.append(Step("install training packages",
                             py("-m", "pip", "install", "-q", *PIP_PACKAGES)))
+        # Not gated on --skip-install: see Plan.pip_extra.
+        if plan.pip_extra:
+            pre.append(Step("install evaluation packages",
+                            py("-m", "pip", "install", "-q", *plan.pip_extra)))
         pre.append(Step("environment check",
                         py("training/kaggle/envcheck.py", "--model", plan.model,
                            "--work", str(args.work))))

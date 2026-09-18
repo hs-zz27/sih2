@@ -24,13 +24,24 @@ from pathlib import Path
 
 # GB of free disk each model needs under --work (downloads + extraction +
 # working checkpoints). The VQA base model alone is ~7.5 GB.
-DISK_NEEDED_GB = {"vqa": 30, "change_mask": 8, "caption": 6}
+# eval_vqa re-uses the base model the vqa run already downloaded, so its
+# real need is the official split plus working room - but it is given the same
+# headroom as vqa because it may also be run in a fresh session.
+DISK_NEEDED_GB = {"vqa": 30, "change_mask": 8, "caption": 6, "eval_vqa": 20}
 
 IMPORTS = {
     "vqa": ["torch", "torchvision", "transformers", "peft", "bitsandbytes",
             "accelerate", "pyarrow", "huggingface_hub", "PIL"],
     "change_mask": ["torch", "torchvision", "pyarrow", "huggingface_hub", "PIL", "numpy"],
     "caption": ["torch", "torchvision", "pyarrow", "huggingface_hub", "PIL", "numpy"],
+    # Scoring imports evaluation.track_b_eval, which reaches satquery.tools -
+    # and that package's __init__ pulls in the index engine, so rasterio,
+    # scikit-image, scipy, scikit-learn, pydantic and yaml are all on the path
+    # to a single SYSTEM_PROMPT constant. Checked here so a missing one fails
+    # in minute one rather than after the model has loaded.
+    "eval_vqa": ["torch", "torchvision", "transformers", "peft", "bitsandbytes",
+                 "huggingface_hub", "PIL", "numpy", "rasterio", "skimage",
+                 "scipy", "sklearn", "pydantic", "yaml"],
 }
 
 

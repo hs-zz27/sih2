@@ -412,3 +412,35 @@ def test_run_step_keeps_a_failing_step_exit_code(tmp_path):
 
     assert code == 3 and stopped is False
     assert "nope" in log_path.read_text(encoding="utf-8")
+
+
+# --- the scoring step has to be runnable ------------------------------------
+
+ALL_MODELS = ["vqa", "change_mask", "caption", "eval_vqa"]
+
+
+@pytest.mark.parametrize("model", ALL_MODELS)
+def test_envcheck_accepts_every_model_the_driver_can_plan(model):
+    """The regression: retrain.py ran `envcheck.py --model eval_vqa`, which
+    argparse rejected as an invalid choice (exit 2). The official RSVQA-LR
+    score could therefore never be produced - on HF Jobs or on Kaggle - and
+    that score is the only quotable accuracy a retrained adapter has."""
+    assert model in envcheck.IMPORTS
+    assert model in envcheck.DISK_NEEDED_GB
+
+
+def test_eval_plan_installs_what_the_evaluator_imports(tmp_path):
+    """Scoring reaches satquery.tools, whose __init__ imports the index engine
+    and so rasterio and scikit-image. Training needs none of it."""
+    plan = retrain.build_plan("eval_vqa", tmp_path)
+    assert "rasterio" in plan.pip_extra and "scikit-image" in plan.pip_extra
+    for model in ("vqa", "change_mask", "caption"):
+        assert retrain.build_plan(model, tmp_path).pip_extra == []
+
+
+def test_eval_extras_do_not_touch_the_images_torch_stack():
+    """Pinning numpy or pillow would replace the builds a CUDA torch was
+    compiled against, minutes before the GPU is needed."""
+    for package in retrain.EVAL_PIP_PACKAGES:
+        assert not package.startswith(("torch", "numpy", "pillow", "Pillow"))
+        assert "==" not in package
