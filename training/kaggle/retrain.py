@@ -297,6 +297,27 @@ def build_plan(model: str, work: Path, smoke: bool = False, fp32_compute: bool =
         f"unknown model {model!r}; choose vqa, change_mask, caption or eval_vqa")
 
 
+def _read(stream, method: str) -> str:
+    """Read from a NON-BLOCKING text stream, tolerating "no data right now".
+
+    `os.set_blocking(fd, False)` below makes the underlying raw read return
+    None whenever the pipe happens to be empty. TextIOWrapper does not pass
+    that through: it raises from inside its decoder ("can't concat NoneType to
+    bytes"), which is why the `or ""` that used to guard the drain could never
+    catch it.
+
+    Measured on a Hugging Face Job (2026-09-18): this killed a vqa run at the
+    end of its environment-check step, fourteen seconds in, while the
+    identical change_mask run survived all five of its steps. It is a race, so
+    it fails intermittently - and on a paid GPU it would fail just as happily
+    after seven hours of training as after fourteen seconds, losing the run.
+    """
+    try:
+        return getattr(stream, method)() or ""
+    except (TypeError, ValueError):
+        return ""
+
+
 def run_step(step: Step, log, deadline: float | None) -> tuple[int, bool]:
     """Run one step, teeing output to the log. Returns (exit code, stopped_by_budget)."""
     log.write(f"\n=== {step.name}\n$ {' '.join(step.cmd)}\n")
@@ -317,13 +338,24 @@ def run_step(step: Step, log, deadline: float | None) -> tuple[int, bool]:
     assert proc.stdout is not None
     os.set_blocking(proc.stdout.fileno(), False)
     while True:
-        line = proc.stdout.readline()
+        line = _read(proc.stdout, "readline")
         if line:
             sys.stdout.write(line)
             log.write(line)
             continue
         if proc.poll() is not None:
-            rest = proc.stdout.read() or ""
+            # The child has exited; drain the tail. Retried, because a
+            # non-blocking pipe can report "nothing yet" a moment before the
+            # last bytes land - and that tail is usually the error message
+            # explaining why the step failed.
+            rest, empty = "", 0
+            while empty < 3:
+                chunk = _read(proc.stdout, "read")
+                if chunk:
+                    rest, empty = rest + chunk, 0
+                else:
+                    empty += 1
+                    time.sleep(0.05)
             sys.stdout.write(rest)
             log.write(rest)
             break

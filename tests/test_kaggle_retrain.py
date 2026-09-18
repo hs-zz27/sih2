@@ -351,3 +351,64 @@ def test_eval_with_a_non_finite_score_is_refused(tmp_path):
     plan.result_file.write_text('{"arms": {"retrained": {"published_convention": '
                                 '{"micro_accuracy": NaN}}}}')
     assert retrain.check_trained(plan)[0] is False
+
+
+# --- a non-blocking pipe that has no data yet --------------------------------
+
+class _Raises:
+    """What a non-blocking TextIOWrapper does when the pipe is empty: it does
+    not return None, it raises from inside its decoder."""
+
+    def read(self):
+        raise TypeError("can't concat NoneType to bytes")
+
+    def readline(self):
+        raise TypeError("can't concat NoneType to bytes")
+
+
+class _Returns:
+    def __init__(self, value):
+        self.value = value
+
+    def read(self):
+        return self.value
+
+    def readline(self):
+        return self.value
+
+
+@pytest.mark.parametrize("method", ["read", "readline"])
+def test_reading_an_empty_nonblocking_stream_yields_no_output(method):
+    """The regression: an HF Job died here fourteen seconds in, and the same
+    race would have killed a seven-hour run just as easily."""
+    assert retrain._read(_Raises(), method) == ""
+    assert retrain._read(_Returns(None), method) == ""
+
+
+@pytest.mark.parametrize("method", ["read", "readline"])
+def test_reading_a_nonblocking_stream_still_returns_real_output(method):
+    assert retrain._read(_Returns("tail\n"), method) == "tail\n"
+
+
+def test_run_step_captures_every_line_and_the_exit_code(tmp_path):
+    """Drives the real subprocess path, which is where the race lives."""
+    log_path = tmp_path / "step.log"
+    step = retrain.Step("chatty", [sys.executable, "-c",
+                                   "for i in range(500): print('line', i)"])
+    with open(log_path, "w", encoding="utf-8") as log:
+        code, stopped = retrain.run_step(step, log, None)
+
+    assert (code, stopped) == (0, False)
+    text = log_path.read_text(encoding="utf-8")
+    assert "line 0" in text and "line 499" in text
+
+
+def test_run_step_keeps_a_failing_step_exit_code(tmp_path):
+    log_path = tmp_path / "step.log"
+    step = retrain.Step("doomed", [sys.executable, "-c",
+                                   "import sys; print('nope'); sys.exit(3)"])
+    with open(log_path, "w", encoding="utf-8") as log:
+        code, stopped = retrain.run_step(step, log, None)
+
+    assert code == 3 and stopped is False
+    assert "nope" in log_path.read_text(encoding="utf-8")
