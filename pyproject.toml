@@ -42,6 +42,10 @@ dev = [
     "pytest==9.1.1",
     "httpx==0.28.1",  # required by fastapi.testclient
     "reportlab==5.0.1",  # so CI actually exercises tests/test_report_pages.py
+    # tests/test_hf_jobs.py and scripts/install_retrained.py --hf-repo import
+    # this lazily at call time, which is exactly why CI missed it locally: it
+    # was already installed on the machine the tests were first run on.
+    "huggingface_hub>=0.26",
 ]
 
 # PDF report generation (task 3.12). Optional because `satquery.report` is not
