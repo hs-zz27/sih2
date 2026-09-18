@@ -43,7 +43,9 @@ Recording guide: [`docs/demo-video.md`](docs/demo-video.md).
 **No checkpoints and no GPU?** [`docs/kaggle-retrain.md`](docs/kaggle-retrain.md)
 retrains the three demo-critical models unattended on Kaggle's free GPU quota:
 upload a notebook from `notebooks/kaggle/`, run it, download the output,
-`python scripts/install_retrained.py <output.zip>`.
+`python scripts/install_retrained.py <output.zip>`. Or run the same retrain as a
+Hugging Face Job with no browser or session limit (billed to the logged-in
+account): [`docs/hf-jobs-retrain.md`](docs/hf-jobs-retrain.md).
 
 Learned tools fall back to clearly-labelled stubs when their checkpoints are absent,
 so everything above runs on a laptop CPU; the numbers in the table need the checkpoints.
